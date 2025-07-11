@@ -28,6 +28,17 @@ function smoothPoints(points, iterations = 1) {
   return result;
 }
 
+function resampleCatmullRom(points, subdivisions = 5) {
+  const curve = new THREE.CatmullRomCurve3(points);
+  const totalSegments = (points.length - 1) * subdivisions;
+  const resampled = [];
+  for (let i = 0; i <= totalSegments; i++) {
+    const t = i / totalSegments;
+    resampled.push(curve.getPoint(t));
+  }
+  return resampled;
+}
+
 export async function curve3D(url) {
   const res = await fetch(url);
   if (!res.ok) {
@@ -53,6 +64,7 @@ export async function curve3D(url) {
   });
 
   const smooth = smoothPoints(points, 2);
+  const resampled = resampleCatmullRom(smooth, 5);
 
-  return new THREE.CatmullRomCurve3(smooth);
+  return new THREE.CatmullRomCurve3(resampled);
 }
