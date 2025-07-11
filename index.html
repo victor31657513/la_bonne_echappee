@@ -21,8 +21,11 @@ canvas { width:100vw; height:100vh; display:block; }
 <script type="module">
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import { curve3D } from './js/gpxLoader.js?v=20240401';
-import { CyclistSim } from './js/physics.js?v=20240401';
+
+const params = new URLSearchParams(location.search);
+const version = params.has('dev') ? `?v=${Date.now()}` : '';
+const { curve3D } = await import(`./js/gpxLoader.js${version}`);
+const { CyclistSim } = await import(`./js/physics.js${version}`);
 
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 10000);
