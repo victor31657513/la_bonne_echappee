@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta http-equiv="Cache-Control" content="no-store">
 <title>La bonne échappée</title>
 <style>
 body { margin:0; overflow:hidden; }
@@ -12,8 +13,8 @@ canvas { width:100vw; height:100vh; display:block; }
 <script type="module">
 import * as THREE from 'https://unpkg.com/three@0.163.0/build/three.module.js';
 import { OrbitControls } from 'https://unpkg.com/three@0.163.0/examples/jsm/controls/OrbitControls.js';
-import { curve3D } from './js/gpxLoader.js';
-import { CyclistSim } from './js/physics.js';
+import { curve3D } from './js/gpxLoader.js?v=20240401';
+import { CyclistSim } from './js/physics.js?v=20240401';
 
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 10000);
