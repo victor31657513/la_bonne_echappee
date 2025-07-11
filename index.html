@@ -8,6 +8,14 @@
 <style>
 body { margin:0; overflow:hidden; }
 canvas { width:100vw; height:100vh; display:block; }
+#speed {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  color: #fff;
+  font: 20px sans-serif;
+  text-shadow: 0 0 5px #000;
+}
 </style>
 <script type="importmap">
 {
@@ -19,6 +27,7 @@ canvas { width:100vw; height:100vh; display:block; }
 </script>
 </head>
 <body>
+<div id="speed">0 km/h</div>
 <script type="module">
 import * as THREE from 'three';
 
@@ -85,6 +94,7 @@ const cyclist = new THREE.Mesh(boxGeo, boxMat);
 scene.add(cyclist);
 
 const sim = new CyclistSim(track);
+const speedEl = document.getElementById('speed');
 
 const cameraOffset = new THREE.Vector3(0, 3, -10);
 const smoothedOffset = cameraOffset.clone();
@@ -142,6 +152,7 @@ function animate() {
   const dt = (now - last) / 1000;
   last = now;
   sim.update(dt, cyclist);
+  speedEl.textContent = `${(sim.speed * 3.6).toFixed(1)} km/h`;
   updateCamera(dt);
   renderer.render(scene, camera);
 }
