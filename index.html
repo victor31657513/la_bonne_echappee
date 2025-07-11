@@ -49,8 +49,10 @@ const indices = [];
 for (let i = 0; i <= segments; i++) {
   const u = i / segments;
   const p = track.getPointAt(u);
-  const side = frames.binormals[i]
-    .clone()
+  const tangent = frames.tangents[i];
+  const side = new THREE.Vector3()
+    .crossVectors(new THREE.Vector3(0, 1, 0), tangent)
+    .normalize()
     .multiplyScalar(roadWidth / 2);
   positions.push(p.x + side.x, p.y + side.y, p.z + side.z);
   positions.push(p.x - side.x, p.y - side.y, p.z - side.z);
