@@ -1,6 +1,6 @@
 import * as THREE from 'three';
-// Load togeojson directly from a CDN
-import { gpx } from 'https://cdn.jsdelivr.net/npm/@tmcw/togeojson@0.16.0/+esm';
+// Use a local copy of togeojson to avoid CDN issues
+import { gpx } from './togeojson.esm.js';
 
 const R = 6371000;
 const RAD = Math.PI / 180;
