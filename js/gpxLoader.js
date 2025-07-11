@@ -44,7 +44,7 @@ export async function curve3D(url) {
     return new THREE.Vector3(x, y, z);
   });
 
-  const smooth = smoothPoints(points, 1);
+  const smooth = smoothPoints(points, 2);
 
   return new THREE.CatmullRomCurve3(smooth);
 }
