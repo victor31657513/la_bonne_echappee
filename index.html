@@ -90,11 +90,13 @@ const keys = {
 
 window.addEventListener('keydown', (e) => {
   if (e.code in keys) {
+    e.preventDefault();
     keys[e.code] = true;
   }
 });
 window.addEventListener('keyup', (e) => {
   if (e.code in keys) {
+    e.preventDefault();
     keys[e.code] = false;
   }
 });
