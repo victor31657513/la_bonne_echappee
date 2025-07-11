@@ -64,7 +64,8 @@ const roadGeo = new THREE.BufferGeometry();
 roadGeo.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
 roadGeo.setIndex(indices);
 roadGeo.computeVertexNormals();
-const roadMat = new THREE.MeshPhongMaterial({ color: 0x333333, side: THREE.DoubleSide });
+// Lighten the road surface so it stands out
+const roadMat = new THREE.MeshPhongMaterial({ color: 0xcccccc, side: THREE.DoubleSide });
 const road = new THREE.Mesh(roadGeo, roadMat);
 scene.add(road);
 
