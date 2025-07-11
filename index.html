@@ -98,6 +98,7 @@ const speedEl = document.getElementById('speed');
 
 const cameraOffset = new THREE.Vector3(0, 3, -10);
 const smoothedOffset = cameraOffset.clone();
+const CAMERA_SMOOTHING = 0.05;
 let yaw = 0;
 let pitch = 0;
 const keys = {
@@ -131,7 +132,7 @@ function updateCamera(dt) {
     .applyAxisAngle(new THREE.Vector3(1, 0, 0), pitch)
     .applyAxisAngle(new THREE.Vector3(0, 1, 0), yaw)
     .applyQuaternion(cyclist.quaternion);
-  smoothedOffset.lerp(targetOffset, 0.1);
+  smoothedOffset.lerp(targetOffset, CAMERA_SMOOTHING);
   camera.position.copy(cyclist.position).add(smoothedOffset);
   if (camera.position.y < cyclist.position.y) {
     camera.position.y = cyclist.position.y;
