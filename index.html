@@ -77,6 +77,7 @@ scene.add(cyclist);
 const sim = new CyclistSim(track);
 
 const cameraOffset = new THREE.Vector3(0, 3, -10);
+const smoothedOffset = cameraOffset.clone();
 let yaw = 0;
 let pitch = 0;
 const keys = {
@@ -97,18 +98,19 @@ window.addEventListener('keyup', (e) => {
   }
 });
 
-function updateCamera() {
+function updateCamera(dt) {
   if (keys.ArrowLeft) yaw += 0.02;
   if (keys.ArrowRight) yaw -= 0.02;
   if (keys.ArrowUp) pitch = Math.min(pitch + 0.02, Math.PI / 3);
   if (keys.ArrowDown) pitch = Math.max(pitch - 0.02, -Math.PI / 3);
 
-  const offset = cameraOffset
+  const targetOffset = cameraOffset
     .clone()
     .applyAxisAngle(new THREE.Vector3(1, 0, 0), pitch)
     .applyAxisAngle(new THREE.Vector3(0, 1, 0), yaw)
     .applyQuaternion(cyclist.quaternion);
-  camera.position.copy(cyclist.position).add(offset);
+  smoothedOffset.lerp(targetOffset, 0.1);
+  camera.position.copy(cyclist.position).add(smoothedOffset);
   camera.lookAt(cyclist.position);
 }
 
@@ -125,7 +127,7 @@ function animate() {
   const dt = (now - last) / 1000;
   last = now;
   sim.update(dt, cyclist);
-  updateCamera();
+  updateCamera(dt);
   renderer.render(scene, camera);
 }
 
