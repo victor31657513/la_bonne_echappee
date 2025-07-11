@@ -8,11 +8,19 @@
 body { margin:0; overflow:hidden; }
 canvas { width:100vw; height:100vh; display:block; }
 </style>
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.163.0/build/three.module.js",
+    "three/examples/jsm/": "https://unpkg.com/three@0.163.0/examples/jsm/"
+  }
+}
+</script>
 </head>
 <body>
 <script type="module">
-import * as THREE from 'https://unpkg.com/three@0.163.0/build/three.module.js';
-import { OrbitControls } from 'https://unpkg.com/three@0.163.0/examples/jsm/controls/OrbitControls.js';
+import * as THREE from 'three';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { curve3D } from './js/gpxLoader.js?v=20240401';
 import { CyclistSim } from './js/physics.js?v=20240401';
 
