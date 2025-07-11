@@ -69,6 +69,7 @@ const road = new THREE.Mesh(roadGeo, roadMat);
 scene.add(road);
 
 const boxGeo = new THREE.BoxGeometry(1, 2, 4);
+boxGeo.translate(0, 1, 0);
 const boxMat = new THREE.MeshPhongMaterial({ color: 0x0000ff });
 const cyclist = new THREE.Mesh(boxGeo, boxMat);
 scene.add(cyclist);
