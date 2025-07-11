@@ -30,9 +30,17 @@ function smoothPoints(points, iterations = 1) {
 
 export async function curve3D(url) {
   const res = await fetch(url);
-  const text = await res.text();
-  const xml = new DOMParser().parseFromString(text, 'application/xml');
-  const geojson = gpx(xml);
+  if (!res.ok) {
+    throw new Error(`Failed to load GPX \"${url}\": ${res.status} ${res.statusText}`);
+  }
+  let geojson;
+  try {
+    const text = await res.text();
+    const xml = new DOMParser().parseFromString(text, 'application/xml');
+    geojson = gpx(xml);
+  } catch (err) {
+    throw new Error(`Malformed GPX data: ${err.message}`);
+  }
   const coords = geojson.features[0].geometry.coordinates;
   const baseLat = coords[0][1];
   const baseLon = coords[0][0];

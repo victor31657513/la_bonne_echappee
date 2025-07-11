@@ -40,7 +40,14 @@ light.position.set(50, 50, 50);
 scene.add(light);
 scene.add(new THREE.AmbientLight(0x666666));
 
-const track = await curve3D('assets/parcours.gpx');
+let track;
+try {
+  track = await curve3D('assets/parcours.gpx');
+} catch (err) {
+  console.error('Failed to load GPX track', err);
+  alert(err.message);
+  throw err;
+}
 const roadWidth = 12;
 const segments = 500;
 const frames = track.computeFrenetFrames(segments);
