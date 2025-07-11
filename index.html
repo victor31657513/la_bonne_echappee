@@ -43,10 +43,11 @@ scene.add(light);
 scene.add(new THREE.AmbientLight(0x666666));
 
 const track = await curve3D('assets/parcours.gpx');
-const lineGeo = new THREE.BufferGeometry().setFromPoints(track.getPoints(500));
-const lineMat = new THREE.LineBasicMaterial({ color: 0xff0000 });
-const line = new THREE.Line(lineGeo, lineMat);
-scene.add(line);
+const roadWidth = 4;
+const roadGeo = new THREE.TubeGeometry(track, 500, roadWidth / 2, 8, false);
+const roadMat = new THREE.MeshPhongMaterial({ color: 0x333333 });
+const road = new THREE.Mesh(roadGeo, roadMat);
+scene.add(road);
 
 const boxGeo = new THREE.BoxGeometry(1, 2, 4);
 const boxMat = new THREE.MeshPhongMaterial({ color: 0x0000ff });
