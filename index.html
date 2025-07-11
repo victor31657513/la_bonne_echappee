@@ -74,7 +74,7 @@ const boxMat = new THREE.MeshPhongMaterial({ color: 0x0000ff });
 const cyclist = new THREE.Mesh(boxGeo, boxMat);
 scene.add(cyclist);
 
-const sim = new CyclistSim(track, frames);
+const sim = new CyclistSim(track);
 
 const cameraOffset = new THREE.Vector3(0, 3, -10);
 const smoothedOffset = cameraOffset.clone();
