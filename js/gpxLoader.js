@@ -1,6 +1,6 @@
 import * as THREE from 'https://unpkg.com/three@0.163.0/build/three.module.js';
 // Load togeojson directly from a CDN
-import { gpx } from 'https://cdn.jsdelivr.net/npm/togeojson@0.16.0/dist/togeojson.esm.js';
+import { gpx } from 'https://cdn.jsdelivr.net/npm/togeojson@0.16.0/+esm';
 
 const R = 6371000;
 const RAD = Math.PI / 180;
