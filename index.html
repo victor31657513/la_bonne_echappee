@@ -111,6 +111,9 @@ function updateCamera(dt) {
     .applyQuaternion(cyclist.quaternion);
   smoothedOffset.lerp(targetOffset, 0.1);
   camera.position.copy(cyclist.position).add(smoothedOffset);
+  if (camera.position.y < cyclist.position.y) {
+    camera.position.y = cyclist.position.y;
+  }
   camera.lookAt(cyclist.position);
 }
 
