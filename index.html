@@ -21,7 +21,6 @@ canvas { width:100vw; height:100vh; display:block; }
 <body>
 <script type="module">
 import * as THREE from 'three';
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 
 const params = new URLSearchParams(location.search);
 const version = params.has('dev') ? `?v=${Date.now()}` : '';
@@ -35,7 +34,6 @@ const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
-const controls = new OrbitControls(camera, renderer.domElement);
 
 const light = new THREE.DirectionalLight(0xffffff, 1);
 light.position.set(50, 50, 50);
@@ -44,8 +42,29 @@ scene.add(new THREE.AmbientLight(0x666666));
 
 const track = await curve3D('assets/parcours.gpx');
 const roadWidth = 4;
-const roadGeo = new THREE.TubeGeometry(track, 500, roadWidth / 2, 8, false);
-const roadMat = new THREE.MeshPhongMaterial({ color: 0x333333 });
+const segments = 500;
+const positions = [];
+const indices = [];
+for (let i = 0; i <= segments; i++) {
+  const u = i / segments;
+  const p = track.getPointAt(u);
+  const t = track.getTangentAt(u);
+  const side = new THREE.Vector3().crossVectors(t, new THREE.Vector3(0, 1, 0))
+    .normalize()
+    .multiplyScalar(roadWidth / 2);
+  positions.push(p.x + side.x, p.y, p.z + side.z);
+  positions.push(p.x - side.x, p.y, p.z - side.z);
+  if (i < segments) {
+    const base = i * 2;
+    indices.push(base, base + 1, base + 2);
+    indices.push(base + 1, base + 3, base + 2);
+  }
+}
+const roadGeo = new THREE.BufferGeometry();
+roadGeo.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+roadGeo.setIndex(indices);
+roadGeo.computeVertexNormals();
+const roadMat = new THREE.MeshPhongMaterial({ color: 0x333333, side: THREE.DoubleSide });
 const road = new THREE.Mesh(roadGeo, roadMat);
 scene.add(road);
 
@@ -55,6 +74,42 @@ const cyclist = new THREE.Mesh(boxGeo, boxMat);
 scene.add(cyclist);
 
 const sim = new CyclistSim(track);
+
+const cameraOffset = new THREE.Vector3(0, 3, -10);
+let yaw = 0;
+let pitch = 0;
+const keys = {
+  ArrowLeft: false,
+  ArrowRight: false,
+  ArrowUp: false,
+  ArrowDown: false,
+};
+
+window.addEventListener('keydown', (e) => {
+  if (e.code in keys) {
+    keys[e.code] = true;
+  }
+});
+window.addEventListener('keyup', (e) => {
+  if (e.code in keys) {
+    keys[e.code] = false;
+  }
+});
+
+function updateCamera() {
+  if (keys.ArrowLeft) yaw += 0.02;
+  if (keys.ArrowRight) yaw -= 0.02;
+  if (keys.ArrowUp) pitch = Math.min(pitch + 0.02, Math.PI / 3);
+  if (keys.ArrowDown) pitch = Math.max(pitch - 0.02, -Math.PI / 3);
+
+  const offset = cameraOffset
+    .clone()
+    .applyAxisAngle(new THREE.Vector3(1, 0, 0), pitch)
+    .applyAxisAngle(new THREE.Vector3(0, 1, 0), yaw)
+    .applyQuaternion(cyclist.quaternion);
+  camera.position.copy(cyclist.position).add(offset);
+  camera.lookAt(cyclist.position);
+}
 
 window.addEventListener('resize', () => {
   camera.aspect = window.innerWidth / window.innerHeight;
@@ -69,7 +124,7 @@ function animate() {
   const dt = (now - last) / 1000;
   last = now;
   sim.update(dt, cyclist);
-  controls.update();
+  updateCamera();
   renderer.render(scene, camera);
 }
 
