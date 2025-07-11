@@ -1,5 +1,6 @@
 import * as THREE from 'https://unpkg.com/three@0.163.0/build/three.module.js';
-import { gpx } from 'https://unpkg.com/@tmcw/togeojson@5/dist/togeojson.esm.js';
+// Import a local copy of togeojson to avoid cross-origin issues
+import { gpx } from './togeojson.esm.js';
 
 const R = 6371000;
 const RAD = Math.PI / 180;
