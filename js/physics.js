@@ -20,14 +20,9 @@ export class CyclistSim {
     this.u += distance / this.length;
     this.u = Math.min(Math.max(this.u, 0), 1);
     const pos = this.curve.getPointAt(this.u);
-    const lookAtPoint = this.curve.getPointAt(Math.min(this.u + 0.001, 1));
-    const side = new THREE.Vector3().crossVectors(tangent, new THREE.Vector3(0, 1, 0));
-    if (side.lengthSq() > 0) {
-      side.normalize();
-      const up = new THREE.Vector3().crossVectors(side, tangent).normalize();
-      mesh.up.copy(up);
-    }
+    const dir = this.curve.getTangentAt(this.u);
+    const yaw = Math.atan2(dir.x, dir.z);
     mesh.position.copy(pos);
-    mesh.lookAt(lookAtPoint);
+    mesh.rotation.set(0, yaw, 0);
   }
 }
