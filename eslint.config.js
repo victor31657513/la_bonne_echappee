@@ -1,6 +1,6 @@
 export default [
   {
-    ignores: ['js/togeojson.esm.js'],
+    ignores: ['src/lib/togeojson.esm.js'],
   },
   {
     files: ['**/*.js'],

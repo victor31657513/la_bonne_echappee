@@ -4,6 +4,7 @@ This project displays a 3D visualization of a cycling route using Three.js. All
 third‑party libraries are now loaded from public CDNs. The **togeojson** library
 is fetched from jsDelivr, so no local copy is required.
 
+All JavaScript source files now reside in the `src/` directory for easier maintenance.
 The cyclist simulation now caps speed at 50&nbsp;km/h on flat terrain and
 automatically brakes before sharp turns.
 
