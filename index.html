@@ -94,7 +94,6 @@ const cyclist = new THREE.Mesh(boxGeo, boxMat);
 scene.add(cyclist);
 
 const sim = new CyclistSim(track);
-const startAltitude = track.getPointAt(0).y;
 const speedEl = document.getElementById('speed');
 
 const cameraOffset = new THREE.Vector3(0, 3, -10);
@@ -184,8 +183,10 @@ function animate() {
   const dt = (now - last) / 1000;
   last = now;
   sim.update(dt, cyclist);
-  const elevation = cyclist.position.y - startAltitude;
-  speedEl.textContent = `${(sim.speed * 3.6).toFixed(1)} km/h | ${elevation.toFixed(1)} m`;
+  const tangent = track.getTangentAt(sim.u);
+  const horiz = Math.hypot(tangent.x, tangent.z);
+  const slope = horiz > 0 ? (tangent.y / horiz) * 100 : 0;
+  speedEl.textContent = `${(sim.speed * 3.6).toFixed(1)} km/h | ${slope.toFixed(1)}%`;
   updateCamera(dt);
   renderer.render(scene, camera);
 }
