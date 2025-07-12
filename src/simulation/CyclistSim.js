@@ -1,11 +1,14 @@
 
 import * as THREE from 'three';
 
-const MAX_SPEED = 50 / 3.6; // 50 km/h in m/s
+const MASS = 80; // rider + bike mass in kg
+const MAX_POWER = 300; // watts produced at full intensity
+const ATTACK_POWER = 200; // additional watts when attacking
+const AIR_DENSITY = 1.225; // kg/m^3
+const CDA = 0.3; // aerodynamic drag area
+const ROLLING_C = 0.005; // coefficient of rolling resistance
 const BRAKE_LOOKAHEAD = 20; // meters
 const BRAKING_FACTOR = 5; // tune braking strength
-const PEDAL_ACCEL = 2; // m/s^2 at full intensity
-const ATTACK_ACCEL = 5; // additional boost when attacking
 const ATTACK_DECAY = 40; // attack energy units per second
 const ATTACK_RECHARGE = 10; // energy units recharged per second
 const ATTACK_ENERGY_MULT = 2; // global energy drains faster when attacking
@@ -52,11 +55,8 @@ export class CyclistSim {
     const slope = this.getSlopeFactor(tangent);
     const energyFactor = this.getEnergyFactor();
 
-    let accel = -9.8 * slope;
-
     let effort = this.intensity;
     if (this.attackActive) {
-      accel += ATTACK_ACCEL;
       this.attackDuration -= dt;
       this.attackEnergy = Math.max(this.attackEnergy - ATTACK_DECAY * dt, 0);
       if (this.attackDuration <= 0 || this.attackEnergy === 0 || this.energy === 0) {
@@ -67,9 +67,17 @@ export class CyclistSim {
       this.attackEnergy = Math.min(this.attackEnergy + ATTACK_RECHARGE * dt, 100);
     }
 
-    if (effort > 0 && energyFactor > 0) {
-      accel += PEDAL_ACCEL * effort * energyFactor;
+    let power = MAX_POWER * effort * energyFactor;
+    if (this.attackActive) {
+      power += ATTACK_POWER * effort;
     }
+
+    const drag = 0.5 * AIR_DENSITY * CDA * this.speed * this.speed;
+    const rolling = MASS * 9.8 * ROLLING_C;
+    const slopeForce = MASS * 9.8 * slope;
+    const pedalForce = power / Math.max(this.speed, 0.1);
+    const totalForce = pedalForce - drag - rolling - slopeForce;
+    const accel = totalForce / MASS;
 
     this.speed += accel * dt;
 
@@ -80,8 +88,7 @@ export class CyclistSim {
     const futureTangent = this.curve.getTangentAt(lookAheadU);
     const angle = tangent.angleTo(futureTangent);
     this.speed -= BRAKING_FACTOR * angle * dt;
-
-    this.speed = Math.min(Math.max(this.speed, 0), MAX_SPEED);
+    this.speed = Math.max(this.speed, 0);
 
     const distance = this.speed * dt;
     if (this.energy > 0 && effort > 0) {
