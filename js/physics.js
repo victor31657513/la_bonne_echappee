@@ -8,6 +8,7 @@ const PEDAL_ACCEL = 2; // m/s^2 at full intensity
 const ATTACK_ACCEL = 5; // additional boost when attacking
 const ATTACK_DECAY = 40; // attack energy units per second
 const ATTACK_RECHARGE = 10; // energy units recharged per second
+const ATTACK_ENERGY_MULT = 2; // global energy drains faster when attacking
 
 export class CyclistSim {
   constructor(curve) {
@@ -19,6 +20,8 @@ export class CyclistSim {
     this.attackEnergy = 100; // energy available for attack
     this.intensity = 0; // [0,1]
     this.attackActive = false;
+    this.attackDuration = 0;
+    this.attackEffort = 0;
   }
 
 
@@ -27,8 +30,10 @@ export class CyclistSim {
   }
 
   startAttack() {
-    if (this.attackEnergy > 0) {
+    if (this.attackEnergy > 0 && !this.attackActive) {
       this.attackActive = true;
+      this.attackDuration = this.attackEnergy / ATTACK_DECAY;
+      this.attackEffort = Math.min(this.intensity * 1.2, 1);
     }
   }
 
@@ -50,13 +55,14 @@ export class CyclistSim {
     let accel = -9.8 * slope;
 
     let effort = this.intensity;
-    if (this.attackActive && this.attackEnergy > 0) {
+    if (this.attackActive) {
       accel += ATTACK_ACCEL;
+      this.attackDuration -= dt;
       this.attackEnergy = Math.max(this.attackEnergy - ATTACK_DECAY * dt, 0);
-      if (this.attackEnergy === 0) {
+      if (this.attackDuration <= 0 || this.attackEnergy === 0 || this.energy === 0) {
         this.attackActive = false;
       }
-      effort = 1; // full intensity during attack
+      effort = this.attackEffort;
     } else {
       this.attackEnergy = Math.min(this.attackEnergy + ATTACK_RECHARGE * dt, 100);
     }
@@ -79,7 +85,10 @@ export class CyclistSim {
 
     const distance = this.speed * dt;
     if (this.energy > 0 && effort > 0) {
-      const energyUse = (distance / this.length) * 100 * effort;
+      let energyUse = (distance / this.length) * 100 * effort;
+      if (this.attackActive) {
+        energyUse *= ATTACK_ENERGY_MULT;
+      }
       this.energy = Math.max(this.energy - energyUse, 0);
     }
     this.u += distance / this.length;
