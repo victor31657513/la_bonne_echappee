@@ -5,7 +5,6 @@ const MAX_SPEED = 50 / 3.6; // 50 km/h in m/s
 const BRAKE_LOOKAHEAD = 20; // meters
 const BRAKING_FACTOR = 5; // tune braking strength
 const PEDAL_ACCEL = 2; // m/s^2 at full intensity
-const ENERGY_DECAY = 10; // energy units per second at full intensity
 const ATTACK_ACCEL = 5; // additional boost when attacking
 const ATTACK_DECAY = 40; // attack energy units per second
 const ATTACK_RECHARGE = 10; // energy units recharged per second
@@ -34,10 +33,19 @@ export class CyclistSim {
   }
 
   
+  getSlopeFactor(tangent) {
+    const horiz = Math.hypot(tangent.x, tangent.z);
+    return horiz > 0 ? tangent.y / horiz : 0;
+  }
+
+  getEnergyFactor() {
+    return this.energy / 100;
+  }
+
   update(dt, mesh) {
     const tangent = this.curve.getTangentAt(this.u);
-    const horiz = Math.hypot(tangent.x, tangent.z);
-    const slope = horiz > 0 ? tangent.y / horiz : 0;
+    const slope = this.getSlopeFactor(tangent);
+    const energyFactor = this.getEnergyFactor();
 
     let accel = -9.8 * slope;
 
@@ -53,18 +61,8 @@ export class CyclistSim {
       this.attackEnergy = Math.min(this.attackEnergy + ATTACK_RECHARGE * dt, 100);
     }
 
-    if (this.energy > 0 && effort > 0) {
-      accel += PEDAL_ACCEL * effort;
-      const stepDist = this.speed * dt;
-      const remaining = Math.max(this.length * (1 - this.u), stepDist);
-      if (effort === 1) {
-        const energyUse = (this.energy * stepDist) / remaining;
-        this.energy = Math.max(this.energy - energyUse, 0);
-      } else {
-        this.energy = Math.max(this.energy - ENERGY_DECAY * effort * dt, 0);
-      }
-    } else if (this.energy === 0) {
-      effort = 0;
+    if (effort > 0 && energyFactor > 0) {
+      accel += PEDAL_ACCEL * effort * energyFactor;
     }
 
     this.speed += accel * dt;
@@ -80,6 +78,10 @@ export class CyclistSim {
     this.speed = Math.min(Math.max(this.speed, 0), MAX_SPEED);
 
     const distance = this.speed * dt;
+    if (this.energy > 0 && effort > 0) {
+      const energyUse = (distance / this.length) * 100 * effort;
+      this.energy = Math.max(this.energy - energyUse, 0);
+    }
     this.u += distance / this.length;
     this.u = Math.min(Math.max(this.u, 0), 1);
     const pos = this.curve.getPointAt(this.u);
