@@ -7,7 +7,7 @@
 <link rel="icon" href="assets/favicon.ico" sizes="any">
 <style>
 body { margin:0; overflow:hidden; }
-canvas { width:100vw; height:100vh; display:block; }
+canvas { width:100vw; height:100vh; display:block; touch-action:none; }
 #speed {
   position: absolute;
   top: 10px;
@@ -121,6 +121,36 @@ window.addEventListener('keyup', (e) => {
     keys[e.code] = false;
   }
 });
+
+// Enable swipe gestures on touch devices to rotate the camera
+if (matchMedia('(pointer: coarse)').matches) {
+  let dragging = false;
+  let lastX = 0;
+  let lastY = 0;
+  const SENSITIVITY = 0.005;
+
+  const onPointerDown = (e) => {
+    dragging = true;
+    lastX = e.clientX;
+    lastY = e.clientY;
+  };
+  const onPointerMove = (e) => {
+    if (!dragging) return;
+    const dx = e.clientX - lastX;
+    const dy = e.clientY - lastY;
+    lastX = e.clientX;
+    lastY = e.clientY;
+    yaw += dx * SENSITIVITY;
+    pitch = Math.min(Math.max(pitch + dy * SENSITIVITY, -Math.PI / 3), Math.PI / 3);
+  };
+  const onPointerUp = () => {
+    dragging = false;
+  };
+  renderer.domElement.addEventListener('pointerdown', onPointerDown);
+  window.addEventListener('pointermove', onPointerMove);
+  window.addEventListener('pointerup', onPointerUp);
+  window.addEventListener('pointercancel', onPointerUp);
+}
 
 function updateCamera(dt) {
   if (keys.ArrowLeft) yaw += 0.02;
