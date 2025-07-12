@@ -1,7 +1,8 @@
 
 import * as THREE from 'three';
 
-const MAX_SPEED = 50 / 3.6; // 50 km/h in m/s
+const GRAVITY = 9.8; // m/s^2
+const DRAG_COEFF = 0.05; // aerodynamic drag coefficient
 const BRAKE_LOOKAHEAD = 20; // meters
 const BRAKING_FACTOR = 5; // tune braking strength
 const PEDAL_ACCEL = 2; // m/s^2 at full intensity
@@ -64,13 +65,15 @@ export class CyclistSim {
       this.attackEnergy = Math.min(this.attackEnergy + ATTACK_RECHARGE * dt, 100);
     }
 
-    const slopeMult = Math.max(0, 1 - slope);
-    let targetSpeed = MAX_SPEED * effort * energyFactor * slopeMult;
+    let accel = -GRAVITY * slope - DRAG_COEFF * this.speed * this.speed;
+    if (effort > 0 && energyFactor > 0) {
+      accel += PEDAL_ACCEL * effort * energyFactor;
+    }
     if (this.attackActive) {
-      targetSpeed += ATTACK_ACCEL * effort;
+      accel += ATTACK_ACCEL * effort;
     }
 
-    this.speed += (targetSpeed - this.speed) * dt;
+    this.speed += accel * dt;
 
     const lookAheadU = Math.min(
       this.u + BRAKE_LOOKAHEAD / this.length,
@@ -80,7 +83,7 @@ export class CyclistSim {
     const angle = tangent.angleTo(futureTangent);
     this.speed -= BRAKING_FACTOR * angle * dt;
 
-    this.speed = Math.min(Math.max(this.speed, 0), MAX_SPEED);
+    this.speed = Math.max(this.speed, 0);
 
     const distance = this.speed * dt;
     if (this.energy > 0 && effort > 0) {
