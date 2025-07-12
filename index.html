@@ -27,7 +27,7 @@ canvas { width:100vw; height:100vh; display:block; }
 </script>
 </head>
 <body>
-<div id="speed">0 km/h</div>
+<div id="speed">0 km/h | 0 m</div>
 <script type="module">
 import * as THREE from 'three';
 
@@ -94,6 +94,7 @@ const cyclist = new THREE.Mesh(boxGeo, boxMat);
 scene.add(cyclist);
 
 const sim = new CyclistSim(track);
+const startAltitude = track.getPointAt(0).y;
 const speedEl = document.getElementById('speed');
 
 const cameraOffset = new THREE.Vector3(0, 3, -10);
@@ -153,7 +154,8 @@ function animate() {
   const dt = (now - last) / 1000;
   last = now;
   sim.update(dt, cyclist);
-  speedEl.textContent = `${(sim.speed * 3.6).toFixed(1)} km/h`;
+  const elevation = cyclist.position.y - startAltitude;
+  speedEl.textContent = `${(sim.speed * 3.6).toFixed(1)} km/h | ${elevation.toFixed(1)} m`;
   updateCamera(dt);
   renderer.render(scene, camera);
 }
