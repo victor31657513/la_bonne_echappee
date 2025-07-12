@@ -16,6 +16,26 @@ canvas { width:100vw; height:100vh; display:block; touch-action:none; }
   font: 20px sans-serif;
   text-shadow: 0 0 5px #000;
 }
+#hud {
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  color: #fff;
+  font: 14px sans-serif;
+  text-shadow: 0 0 5px #000;
+}
+.bar {
+  width: 200px;
+  height: 10px;
+  background: #444;
+  margin: 2px 0;
+}
+.bar > div {
+  height: 100%;
+  background: #0f0;
+  width: 100%;
+}
+#attackFill { background: #f00; }
 </style>
 <script type="importmap">
 {
@@ -28,6 +48,14 @@ canvas { width:100vw; height:100vh; display:block; touch-action:none; }
 </head>
 <body>
 <div id="speed">0 km/h | 0 m</div>
+<div id="hud">
+  <div>Énergie</div>
+  <div class="bar"><div id="energyFill"></div></div>
+  <div>Attaque</div>
+  <div class="bar"><div id="attackFill"></div></div>
+  <label>Intensité <input type="range" id="intensity" min="0" max="100" value="0"></label>
+  <button id="attackBtn">Attaquer</button>
+</div>
 <script type="module">
 import * as THREE from 'three';
 
@@ -95,6 +123,18 @@ scene.add(cyclist);
 
 const sim = new CyclistSim(track);
 const speedEl = document.getElementById('speed');
+const energyFill = document.getElementById('energyFill');
+const attackFill = document.getElementById('attackFill');
+const intensitySlider = document.getElementById('intensity');
+const attackBtn = document.getElementById('attackBtn');
+
+intensitySlider.addEventListener('input', () => {
+  sim.setIntensity(parseFloat(intensitySlider.value));
+});
+
+attackBtn.addEventListener('click', () => {
+  sim.startAttack();
+});
 
 const cameraOffset = new THREE.Vector3(0, 3, -10);
 const smoothedOffset = cameraOffset.clone();
@@ -187,6 +227,8 @@ function animate() {
   const horiz = Math.hypot(tangent.x, tangent.z);
   const slope = horiz > 0 ? (tangent.y / horiz) * 100 : 0;
   speedEl.textContent = `${(sim.speed * 3.6).toFixed(1)} km/h | ${slope.toFixed(1)}%`;
+  energyFill.style.width = `${sim.getEnergy()}%`;
+  attackFill.style.width = `${sim.getAttackEnergy()}%`;
   updateCamera(dt);
   renderer.render(scene, camera);
 }
