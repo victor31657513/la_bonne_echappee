@@ -9,6 +9,8 @@ const ENERGY_DECAY = 10; // energy units per second at full intensity
 const ATTACK_ACCEL = 5; // additional boost when attacking
 const ATTACK_DECAY = 40; // attack energy units per second
 const ATTACK_RECHARGE = 10; // energy units recharged per second
+const ATTACK_INTENSITY_BOOST = 1.2; // intensity multiplier during attack
+const ATTACK_ENERGY_FACTOR = 2; // how much faster global energy depletes
 
 export class CyclistSim {
   constructor(curve) {
@@ -20,6 +22,8 @@ export class CyclistSim {
     this.attackEnergy = 100; // energy available for attack
     this.intensity = 0; // [0,1]
     this.attackActive = false;
+    this.attackTimeRemaining = 0;
+    this.attackBoost = 0;
   }
 
 
@@ -28,8 +32,12 @@ export class CyclistSim {
   }
 
   startAttack() {
-    if (this.attackEnergy > 0) {
+    if (this.attackEnergy > 0 && this.energy > 0 && !this.attackActive) {
       this.attackActive = true;
+      this.attackBoost = Math.min(this.intensity * ATTACK_INTENSITY_BOOST, 1);
+      const energyLimit = this.energy / (ENERGY_DECAY * this.attackBoost * ATTACK_ENERGY_FACTOR);
+      const attackLimit = this.attackEnergy / ATTACK_DECAY;
+      this.attackTimeRemaining = Math.min(energyLimit, attackLimit);
     }
   }
 
@@ -42,26 +50,33 @@ export class CyclistSim {
     let accel = -9.8 * slope;
 
     let effort = this.intensity;
-    if (this.attackActive && this.attackEnergy > 0) {
+    if (this.attackActive) {
+      const boosted = this.attackBoost;
       accel += ATTACK_ACCEL;
+      effort = boosted;
       this.attackEnergy = Math.max(this.attackEnergy - ATTACK_DECAY * dt, 0);
-      if (this.attackEnergy === 0) {
+      this.energy = Math.max(this.energy - ENERGY_DECAY * boosted * ATTACK_ENERGY_FACTOR * dt, 0);
+      this.attackTimeRemaining -= dt;
+      if (this.attackTimeRemaining <= 0 || this.attackEnergy === 0 || this.energy === 0) {
         this.attackActive = false;
+        this.attackBoost = 0;
+        this.attackTimeRemaining = 0;
       }
-      effort = 1; // full intensity during attack
     } else {
       this.attackEnergy = Math.min(this.attackEnergy + ATTACK_RECHARGE * dt, 100);
     }
 
     if (this.energy > 0 && effort > 0) {
       accel += PEDAL_ACCEL * effort;
-      const stepDist = this.speed * dt;
-      const remaining = Math.max(this.length * (1 - this.u), stepDist);
-      if (effort === 1) {
-        const energyUse = (this.energy * stepDist) / remaining;
-        this.energy = Math.max(this.energy - energyUse, 0);
-      } else {
-        this.energy = Math.max(this.energy - ENERGY_DECAY * effort * dt, 0);
+      if (!this.attackActive) {
+        const stepDist = this.speed * dt;
+        const remaining = Math.max(this.length * (1 - this.u), stepDist);
+        if (effort === 1) {
+          const energyUse = (this.energy * stepDist) / remaining;
+          this.energy = Math.max(this.energy - energyUse, 0);
+        } else {
+          this.energy = Math.max(this.energy - ENERGY_DECAY * effort * dt, 0);
+        }
       }
     } else if (this.energy === 0) {
       effort = 0;
@@ -95,5 +110,9 @@ export class CyclistSim {
 
   getAttackEnergy() {
     return this.attackEnergy;
+  }
+
+  isAttacking() {
+    return this.attackActive;
   }
 }

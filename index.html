@@ -229,6 +229,8 @@ function animate() {
   speedEl.textContent = `${(sim.speed * 3.6).toFixed(1)} km/h | ${slope.toFixed(1)}%`;
   energyFill.style.width = `${sim.getEnergy()}%`;
   attackFill.style.width = `${sim.getAttackEnergy()}%`;
+  attackBtn.disabled = sim.isAttacking() || sim.getAttackEnergy() === 0 || sim.getEnergy() === 0;
+  attackBtn.textContent = sim.isAttacking() ? 'Attaque !' : 'Attaquer';
   updateCamera(dt);
   renderer.render(scene, camera);
 }
