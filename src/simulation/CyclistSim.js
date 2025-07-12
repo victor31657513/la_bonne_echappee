@@ -52,11 +52,8 @@ export class CyclistSim {
     const slope = this.getSlopeFactor(tangent);
     const energyFactor = this.getEnergyFactor();
 
-    let accel = -9.8 * slope;
-
     let effort = this.intensity;
     if (this.attackActive) {
-      accel += ATTACK_ACCEL;
       this.attackDuration -= dt;
       this.attackEnergy = Math.max(this.attackEnergy - ATTACK_DECAY * dt, 0);
       if (this.attackDuration <= 0 || this.attackEnergy === 0 || this.energy === 0) {
@@ -67,11 +64,13 @@ export class CyclistSim {
       this.attackEnergy = Math.min(this.attackEnergy + ATTACK_RECHARGE * dt, 100);
     }
 
-    if (effort > 0 && energyFactor > 0) {
-      accel += PEDAL_ACCEL * effort * energyFactor;
+    const slopeMult = Math.max(0, 1 - slope);
+    let targetSpeed = MAX_SPEED * effort * energyFactor * slopeMult;
+    if (this.attackActive) {
+      targetSpeed += ATTACK_ACCEL * effort;
     }
 
-    this.speed += accel * dt;
+    this.speed += (targetSpeed - this.speed) * dt;
 
     const lookAheadU = Math.min(
       this.u + BRAKE_LOOKAHEAD / this.length,
