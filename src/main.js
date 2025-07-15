@@ -1,6 +1,8 @@
-import * as THREE from "three";
-import * as YUKA from "yuka";
-import * as CANNON from "cannon-es";
+// Use relative paths so the application can run without a bundler.
+// These paths point to the ES module builds inside `node_modules`.
+import * as THREE from "../node_modules/three/build/three.module.js";
+import * as YUKA from "../node_modules/yuka/build/yuka.module.js";
+import * as CANNON from "../node_modules/cannon-es/dist/cannon-es.js";
 
 import { closestIdx } from "./utils.js";
 // — Scène & Caméra
