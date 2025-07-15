@@ -144,7 +144,7 @@ world.step(dt);
 vehicles.forEach((v, i) => {
 const b = bodies[i];
 // 3a) trouver tangent
-const idx = closestIdx(b.position);
+const idx = closestIdx(b.position, pathPts);
 const curr = pathPts[idx];
 const next = pathPts[(idx + 1) % pathPts.length];
 const tan = next.clone().sub(curr).normalize();
