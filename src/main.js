@@ -4,6 +4,8 @@ import * as CANNON from "../libs/cannon-es.js";
 
 import { closestIdx } from "./utils.js";
 
+console.log('Simulation démarrée');
+
 // — Scène & Caméra
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x333333);
