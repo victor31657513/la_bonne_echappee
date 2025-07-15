@@ -24,6 +24,12 @@
   </head>
   <body>
     <div id="hud">Vitesse leader: <span id="speed">–</span> km/h</div>
+    <script>
+      if (location.protocol === 'file:') {
+        document.body.innerHTML =
+          'Veuillez lancer un petit serveur local (par exemple <code>npx http-server</code>) pour exécuter la simulation.'
+      }
+    </script>
     <script type="module" src="./src/main.js"></script>
   </body>
 </html>
