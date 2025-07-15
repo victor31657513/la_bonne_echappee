@@ -6,23 +6,15 @@ Simulation de peloton de cyclisme en 3D utilisant **three.js** pour le rendu, **
 
 Le fichier `index.html` charge `src/main.js` qui instancie une scène Three.js et crée une route circulaire plate. Une trentaine d'agents sont générés et suivent cette trajectoire grâce aux comportements YUKA (suivi de chemin, séparation et cohésion). Les mouvements sont synchronisés avec un moteur physique Cannon pour gérer les collisions et les contraintes.
 
-Les dépendances (Three.js, YUKA, cannon-es) sont résolues par **Vite**. Lancez donc l'application avec `npm run dev` pour servir correctement les modules. Un simple serveur statique renverrait des erreurs 404 car le dossier `node_modules` n'est pas exposé.
+Les dépendances (Three.js, YUKA, cannon-es) sont désormais chargées directement depuis des CDN. Il suffit donc d'ouvrir `index.html` dans un navigateur, sans passer par Vite ni installer les modules Node.
 
 Une interface minimale affiche la vitesse du leader pendant la simulation.
 
 ## Utilisation
 
-- Installation des dépendances :
-
-```bash
-npm install
-```
-
-- Démarrage en mode développement :
-
-```bash
-npm run dev
-```
+Ouvrez simplement `index.html` dans votre navigateur pour lancer la simulation.
+Les scripts npm restent disponibles pour les tests et la construction si
+besoin :
 
 - Lancement des tests :
 
