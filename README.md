@@ -9,6 +9,7 @@ Le fichier `index.html` charge `src/main.js` qui instancie une scène Three.js e
 Les dépendances (Three.js, YUKA, cannon-es) sont désormais chargées directement depuis des CDN. Il suffit donc d'ouvrir `index.html` dans un navigateur, sans passer par Vite ni installer les modules Node.
 
 Une interface minimale affiche la vitesse du leader pendant la simulation.
+Un effet d'aspiration simplifié accélère les coureurs placés juste derrière un autre.
 
 ## Utilisation
 

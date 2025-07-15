@@ -166,9 +166,22 @@ const newPos = curr.clone()
 .add(right.clone().multiplyScalar(latDist));
 b.position.set(newPos.x, 0, newPos.z);
 
-// 3d) vitesse uniquement le long du tangent
-const speed = v.velocity.length();
-b.velocity.set(tan.x * speed, 0, tan.z * speed);
+  // 3d) vitesse uniquement le long du tangent avec effet d'aspiration
+  const speed = v.velocity.length();
+  let boost = 1;
+  for (let j = 0; j < bodies.length; j++) {
+    if (j === i) continue;
+    const other = bodies[j];
+    const delta = new THREE.Vector3().subVectors(other.position, b.position);
+    const forward = delta.dot(tan);
+    const lateral = Math.abs(delta.dot(right));
+    if (forward > 0 && forward < 3 && lateral < 1) {
+      boost = 1.2 - (forward / 15); // boost diminue avec la distance
+      break;
+    }
+  }
+  const finalSpeed = speed * boost;
+  b.velocity.set(tan.x * finalSpeed, 0, tan.z * finalSpeed);
 
 // 3e) synchroniser Yuka + mesh
 v.position.copy(b.position);
