@@ -24,6 +24,23 @@
   </head>
   <body>
     <div id="hud">Vitesse leader: <span id="speed">–</span> km/h</div>
-    <script type="module" src="./src/main.js"></script>
+    <script type="module">
+      if (location.protocol === 'file:') {
+        const msg = document.createElement('div');
+        msg.textContent =
+          'Ce projet doit être servi par un petit serveur local (ex. "npx http-server").';
+        msg.style.position = 'absolute';
+        msg.style.top = '50%';
+        msg.style.left = '50%';
+        msg.style.transform = 'translate(-50%, -50%)';
+        msg.style.padding = '20px';
+        msg.style.background = '#fff';
+        msg.style.color = '#000';
+        msg.style.borderRadius = '4px';
+        document.body.appendChild(msg);
+      } else {
+        import('./src/main.js');
+      }
+    </script>
   </body>
 </html>
