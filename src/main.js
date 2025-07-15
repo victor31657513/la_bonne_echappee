@@ -1,7 +1,8 @@
-// Import modules via bare specifiers so Vite resolves them correctly.
-import * as THREE from "three";
-import * as YUKA from "yuka";
-import * as CANNON from "cannon-es";
+// Import modules directement depuis des CDN afin de pouvoir ouvrir
+// `index.html` sans passer par Vite.
+import * as THREE from "https://unpkg.com/three@0.178.0/build/three.module.js";
+import * as YUKA from "https://unpkg.com/yuka@0.7.8/build/yuka.module.js";
+import * as CANNON from "https://cdn.jsdelivr.net/npm/cannon-es@0.20.0/dist/cannon-es.js";
 
 import { closestIdx } from "./utils.js";
 // — Scène & Caméra
