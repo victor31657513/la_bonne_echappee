@@ -73,6 +73,8 @@ pathPts.forEach(p => yukaPath.add(new YUKA.Vector3(p.x, p.y, p.z)));
 yukaPath.loop = true;
 
 const N = 30;
+const ridersPerRow = Math.floor(roadWidth / 0.7);
+const rowSpacing = 2;
 const vehicles = [];
 const bodies = [];
 
@@ -84,24 +86,27 @@ scene.add(inst);
 
 // Création des agents
 for (let i = 0; i < N; i++) {
-// 1) calcul de u le long de la courbe
-const u = i / N;
+// 1) calcul de u le long de la courbe (point de départ commun)
+const u = 0;
 // 2) tangent et normale à la route au point u
 const base = curve.getPointAt(u);
 const tangent = curve.getTangentAt(u).normalize();
 const normal = new THREE.Vector3().crossVectors(tangent, new THREE.Vector3(0, 1, 0)).normalize();
 
-// 3) sideOffset uniforme pour occuper toute la largeur
+// 3) ligne et colonne pour répartir le peloton
+const row = Math.floor(i / ridersPerRow);
+const col = i % ridersPerRow;
 const maxLat = roadWidth / 2 - 0.6 / 2;               // demi-largeur route moins demi-largeur du vélo
-const sideOffset = (i / (N - 1)) * 2 * maxLat - maxLat;
+const sideOffset = (col / (ridersPerRow - 1)) * 2 * maxLat - maxLat;
+const forwardOffset = row * rowSpacing;
 
-// 4) position initiale avec offset latéral
+// 4) position initiale avec offsets latéral et longitudinal
 const v = new YUKA.Vehicle();
 v.maxSpeed = 6; v.maxForce = 8;
 v.position.set(
-base.x + normal.x * sideOffset,
+base.x - tangent.x * forwardOffset + normal.x * sideOffset,
 0,
-base.z + normal.z * sideOffset
+base.z - tangent.z * forwardOffset + normal.z * sideOffset
 );
 
 // 5) comportements YUKA
