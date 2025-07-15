@@ -1,23 +1,25 @@
-name: PR Auto Merge
+name: PR Auto Merge on Checks Completion
 
 on:
-  pull_request_target:
-    types: [opened, synchronize, reopened, ready_for_review]
+  check_suite:
+    types: [completed]
 
 permissions:
   pull-requests: write
-  contents: write
+  contents:       write
 
 jobs:
   automerge:
     runs-on: ubuntu-latest
-    # Limit auto-merge to pull requests originating from the same repository
-    # (i.e. trusted contributors with push access).
+    # Ne traiter que les check_suites liées à une PR du repo
     if: >
-      github.event.pull_request.mergeable_state == 'clean' &&
-      github.event.pull_request.head.repo.full_name == github.repository
+      github.event.check_suite.conclusion == 'success' &&
+      github.event.check_suite.pull_requests &&
+      github.event.check_suite.pull_requests[0].head.repo.full_name == github.repository
+
     steps:
-      - uses: peter-evans/enable-pull-request-automerge@v3
+      - name: Activer l’auto-merge
+        uses: peter-evans/enable-pull-request-automerge@v3
         with:
-          pull-request-number: ${{ github.event.pull_request.number }}
+          pull-request-number: ${{ github.event.check_suite.pull_requests[0].number }}
           merge-method: squash
