@@ -11,7 +11,11 @@ permissions:
 jobs:
   automerge:
     runs-on: ubuntu-latest
-    if: github.event.pull_request.mergeable_state == 'clean'
+    # Limit auto-merge to pull requests originating from the same repository
+    # (i.e. trusted contributors with push access).
+    if: >
+      github.event.pull_request.mergeable_state == 'clean' &&
+      github.event.pull_request.head.repo.full_name == github.repository
     steps:
       - uses: peter-evans/enable-pull-request-automerge@v3
         with:
