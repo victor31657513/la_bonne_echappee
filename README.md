@@ -12,6 +12,12 @@ Une interface minimale affiche la vitesse du leader pendant la simulation.
 
 ## Utilisation
 
+- Installation des dépendances :
+
+```bash
+npm install
+```
+
 - Démarrage en mode développement :
 
 ```bash
