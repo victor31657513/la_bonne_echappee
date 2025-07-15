@@ -23,3 +23,5 @@ python -m http.server
 ```
 Ne lancez pas `src/main.js` directement avec Node.
 
+Si la page reste vide, assurez-vous de ne pas ouvrir `index.html` directement via `file://` : le chargement des modules serait bloqué par le navigateur. Utilisez toujours un petit serveur local.
+
