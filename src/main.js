@@ -1,10 +1,9 @@
-// Import modules directement depuis des CDN afin de pouvoir ouvrir
-// `index.html` sans passer par Vite.
-import * as THREE from "https://unpkg.com/three@0.178.0/build/three.module.js";
-import * as YUKA from "https://unpkg.com/yuka@0.7.8/build/yuka.module.js";
-import * as CANNON from "https://cdn.jsdelivr.net/npm/cannon-es@0.20.0/dist/cannon-es.js";
+import * as THREE from "../libs/three.module.js";
+import * as YUKA from "../libs/yuka.module.js";
+import * as CANNON from "../libs/cannon-es.js";
 
 import { closestIdx } from "./utils.js";
+
 // — Scène & Caméra
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x333333);
