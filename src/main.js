@@ -1,6 +1,6 @@
-import * as THREE from "../libs/three.module.js";
-import * as YUKA from "../libs/yuka.module.js";
-import * as CANNON from "../libs/cannon-es.js";
+import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.178.0/build/three.module.js";
+import * as YUKA from "https://cdn.jsdelivr.net/npm/yuka@0.7.8/build/yuka.module.js";
+import * as CANNON from "https://cdn.jsdelivr.net/npm/cannon-es@0.20.0/dist/cannon-es.js";
 
 import { closestIdx } from "./utils.js";
 
