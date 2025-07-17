@@ -18,6 +18,8 @@ const teamColors = Array.from({ length: NUM_TEAMS }, (_, i) => {
   return c;
 });
 const riderGeom = new THREE.BoxGeometry(1.7, 1.5, 0.5);
+// Collision shape radius for Cannon.js bodies
+const RIDER_COLLISION_RADIUS = 0.6;
 
 const riders = [];
 
@@ -47,7 +49,7 @@ for (let team = 0; team < NUM_TEAMS; team++) {
     scene.add(mesh);
 
     const body = new CANNON.Body({ mass: 1 });
-    body.addShape(new CANNON.Sphere(0.25));
+    body.addShape(new CANNON.Sphere(RIDER_COLLISION_RADIUS));
     body.position.set(x0, 0, z0);
     world.addBody(body);
 
