@@ -18,14 +18,16 @@ const teamColors = Array.from({ length: NUM_TEAMS }, (_, i) => {
   return c;
 });
 const riderGeom = new THREE.BoxGeometry(1.7, 1.5, 0.5);
+const RIDER_WIDTH = 1.7; // match geometry width
+const MIN_LATERAL_GAP = 0.5;
+// Collision shape radius for Cannon.js bodies
+const RIDER_COLLISION_RADIUS = 1.0;
 
 const riders = [];
 
 for (let team = 0; team < NUM_TEAMS; team++) {
   const mat = new THREE.MeshLambertMaterial({ color: teamColors[team] });
   for (let i = 0; i < RIDERS_PER_TEAM; i++) {
-    const RIDER_WIDTH = 1.3;
-    const MIN_LATERAL_GAP = 0.3;
     const spacing = RIDER_WIDTH + MIN_LATERAL_GAP;
     const ridersPerRow = Math.max(1, Math.floor(ROAD_WIDTH / spacing));
     const idx = team * RIDERS_PER_TEAM + i;
@@ -47,7 +49,7 @@ for (let team = 0; team < NUM_TEAMS; team++) {
     scene.add(mesh);
 
     const body = new CANNON.Body({ mass: 1 });
-    body.addShape(new CANNON.Sphere(0.25));
+    body.addShape(new CANNON.Sphere(RIDER_COLLISION_RADIUS));
     body.position.set(x0, 0, z0);
     world.addBody(body);
 
