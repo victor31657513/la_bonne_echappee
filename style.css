@@ -1,0 +1,41 @@
+/* style.css */
+body {
+    margin: 0;
+    background-color: #000;
+    /* black background as required */
+    color: #eee;
+    font-family: sans-serif;
+}
+
+#controls {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background: rgba(20, 20, 20, 0.8);
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 14px;
+}
+
+#controls label,
+#controls select {
+    margin: 5px 0;
+    display: block;
+}
+
+#teamControls {
+    margin-top: 8px;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+/* Each rider control row style */
+.rider-control {
+    margin: 4px 0;
+    padding: 4px;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.rider-control label {
+    margin-right: 10px;
+}
