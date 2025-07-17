@@ -1,5 +1,6 @@
 import { THREE, camera, renderer, scene } from './setupScene.js';
 import { riders, teamColors, riderGeom } from './riders.js';
+import { TRACK_WRAP } from './track.js';
 
 let selectedIndex = null;
 const raycaster = new THREE.Raycaster();
@@ -73,10 +74,37 @@ renderer.domElement.addEventListener('click', event => {
   }
 });
 
+function findRelativeRider(currentIdx, direction) {
+  const currentDist = riders[currentIdx].trackDist;
+  let bestIdx = currentIdx;
+  let bestDelta = TRACK_WRAP;
+  riders.forEach((r, idx) => {
+    if (idx === currentIdx) return;
+    let delta;
+    if (direction === 'next') {
+      delta = r.trackDist - currentDist;
+      if (delta <= 0) delta += TRACK_WRAP;
+    } else {
+      delta = currentDist - r.trackDist;
+      if (delta <= 0) delta += TRACK_WRAP;
+    }
+    if (delta < bestDelta) {
+      bestDelta = delta;
+      bestIdx = idx;
+    }
+  });
+  return bestIdx;
+}
+
 window.addEventListener('keydown', event => {
-  if (selectedIndex === null || (event.key !== 'ArrowUp' && event.key !== 'ArrowDown')) return;
-  if (event.key === 'ArrowUp') selectedIndex = (selectedIndex - 1 + riders.length) % riders.length;
-  if (event.key === 'ArrowDown') selectedIndex = (selectedIndex + 1) % riders.length;
+  if (event.key !== 'ArrowUp' && event.key !== 'ArrowDown') return;
+  if (selectedIndex === null) {
+    selectedIndex = 0;
+  } else if (event.key === 'ArrowDown') {
+    selectedIndex = findRelativeRider(selectedIndex, 'next');
+  } else if (event.key === 'ArrowUp') {
+    selectedIndex = findRelativeRider(selectedIndex, 'prev');
+  }
   updateSelectionHelper();
 });
 
