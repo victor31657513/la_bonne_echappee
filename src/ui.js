@@ -100,9 +100,9 @@ window.addEventListener('keydown', event => {
   if (event.key !== 'ArrowUp' && event.key !== 'ArrowDown') return;
   if (selectedIndex === null) {
     selectedIndex = 0;
-  } else if (event.key === 'ArrowDown') {
-    selectedIndex = findRelativeRider(selectedIndex, 'next');
   } else if (event.key === 'ArrowUp') {
+    selectedIndex = findRelativeRider(selectedIndex, 'next');
+  } else if (event.key === 'ArrowDown') {
     selectedIndex = findRelativeRider(selectedIndex, 'prev');
   }
   updateSelectionHelper();
