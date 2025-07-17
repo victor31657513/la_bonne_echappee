@@ -11,25 +11,10 @@ permissions:
 jobs:
   automerge:
     runs-on: ubuntu-latest
-    # On ne filtre plus ici sur mergeable_state
     if: github.event.pull_request.head.repo.full_name == github.repository
 
     steps:
-      - name: Récupérer le mergeable_state
-        id: pr
-        uses: actions/github-script@v6
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            const pr = await github.rest.pulls.get({
-              owner: context.repo.owner,
-              repo:  context.repo.repo,
-              pull_number: context.payload.pull_request.number
-            });
-            core.setOutput('mergeable_state', pr.data.mergeable_state);
-
-      - name: Activer l’auto-merge si possible
-        if: steps.pr.outputs.mergeable_state == 'clean'
+      - name: Enable auto-merge
         uses: peter-evans/enable-pull-request-automerge@v3
         with:
           pull-request-number: ${{ github.event.pull_request.number }}

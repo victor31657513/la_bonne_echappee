@@ -21,6 +21,19 @@ for (let a = 0; a <= Math.PI * 2; a += 0.1) {
 }
 const centerSpline = new THREE.CatmullRomCurve3(trackPoints, true);
 
+// Central dashed line (ligne de dissuasion)
+const centerLineGeometry = new THREE.BufferGeometry().setFromPoints(
+  centerSpline.getPoints(500)
+);
+const centerLineMaterial = new THREE.LineDashedMaterial({
+  color: 0xffffff,
+  dashSize: 5,
+  gapSize: 3
+});
+const centerLine = new THREE.Line(centerLineGeometry, centerLineMaterial);
+centerLine.computeLineDistances();
+scene.add(centerLine);
+
 function offsetSpline(spline, dist) {
   const pts = spline.getPoints(200).map((p, i, arr) => {
     const u = i / (arr.length - 1);
@@ -45,6 +58,7 @@ export {
   ROW_SPACING,
   road,
   centerSpline,
+  centerLine,
   outerSpline,
   innerSpline
 };
