@@ -53,7 +53,8 @@
       fetch('package.json')
         .then(r => r.json())
         .then(pkg => {
-          document.getElementById('version').textContent = 'v' + pkg.version;
+          const major = pkg.version.split('.')[0];
+          document.getElementById('version').textContent = 'v' + major;
         });
     </script>
 </body>
