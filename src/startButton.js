@@ -18,6 +18,8 @@ if (startBtn) {
       r.body.velocity.set(vx, 0, vz);
       r.mesh.position.copy(r.body.position);
       r.trackDist = polarToDist(r.body.position.x, r.body.position.z);
+      r.prevDist = r.trackDist;
+      r.lap = 0;
     });
     startBtn.disabled = true;
   });
