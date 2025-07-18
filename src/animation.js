@@ -1,3 +1,5 @@
+// Animation du peloton et logique de comportement des coureurs
+
 import { THREE, scene, camera, renderer } from './setupScene.js';
 import { CANNON } from './physicsWorld.js';
 import {
@@ -37,6 +39,7 @@ const forwardVec = new THREE.Vector3();
 const lookAtPt = new THREE.Vector3();
 let lastTime = performance.now();
 
+// Redirige les coureurs pour rester sur la piste
 function clampAndRedirect() {
   const minR = INNER_R + 0.1;
   const maxR = OUTER_R - 0.1;
@@ -60,6 +63,7 @@ function clampAndRedirect() {
   });
 }
 
+// Calcule l'étirement du peloton en fonction de la vitesse
 function computeStretch() {
   if (!started || riders.length === 0) return 0;
   let minDist = riders[0].trackDist;
@@ -84,6 +88,7 @@ function computeStretch() {
   return stretch;
 }
 
+// Met à jour la position latérale des coureurs
 function updateLaneOffsets(dt) {
   riders.forEach((r, idx) => {
     let bestDelta = TRACK_WRAP;
@@ -109,6 +114,7 @@ function updateLaneOffsets(dt) {
   });
 }
 
+// Logique de relais entre coureurs d'une même équipe
 function updateRelays(dt) {
   for (let t = 0; t < teamRelayState.length; t++) {
     const state = teamRelayState[t];
@@ -144,6 +150,7 @@ function updateRelays(dt) {
   });
 }
 
+// Applique les forces physiques sur chaque coureur
 function applyForces(dt) {
   const stretch = computeStretch();
   riders.forEach(r => {
@@ -216,6 +223,7 @@ function applyForces(dt) {
   });
 }
 
+// Évite que les coureurs se superposent
 function resolveOverlaps() {
   const minDist = RIDER_WIDTH + MIN_LATERAL_GAP;
   for (let i = 0; i < riders.length; i++) {
@@ -241,6 +249,7 @@ function resolveOverlaps() {
   }
 }
 
+// Ajuste la caméra en fonction du coureur sélectionné
 function updateCamera() {
   let tx, tz, ang;
   if (selectedIndex !== null) {
@@ -268,6 +277,7 @@ function updateCamera() {
   camera.lookAt(lookAtPt);
 }
 
+// Boucle principale d'animation
 function animate() {
   requestAnimationFrame(animate);
 

@@ -1,3 +1,5 @@
+// Initialise les coureurs et leur logique de regroupement
+
 import { THREE, scene } from './setupScene.js';
 import { CANNON, world } from './physicsWorld.js';
 import { System as BoidSystem, Boid, behaviors } from 'https://esm.sh/bird-oid@0.2.1';
@@ -35,6 +37,7 @@ const teamRelayState = Array.from({ length: NUM_TEAMS }, () => ({
   side: 1
 }));
 
+// Création des coureurs pour chaque équipe
 for (let team = 0; team < NUM_TEAMS; team++) {
   const mat = new THREE.MeshLambertMaterial({ color: teamColors[team] });
   for (let i = 0; i < RIDERS_PER_TEAM; i++) {

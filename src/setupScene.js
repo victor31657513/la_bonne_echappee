@@ -1,3 +1,5 @@
+// Prépare la scène Three.js, la caméra et le renderer
+
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.153.0/build/three.module.js';
 
 const scene = new THREE.Scene();

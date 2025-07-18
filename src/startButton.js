@@ -1,3 +1,5 @@
+// Gère le bouton de démarrage pour lancer la simulation
+
 import { riders } from './riders.js';
 import { polarToDist } from './utils.js';
 

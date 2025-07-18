@@ -1,3 +1,5 @@
+// Point d'entrée de l'application: charge les modules et démarre l'animation
+
 import './setupScene.js';
 import './physicsWorld.js';
 import './track.js';

@@ -1,3 +1,5 @@
+// Définit la géométrie de la piste et les courbes auxiliaires
+
 import { THREE, scene } from './setupScene.js';
 
 const TRACK_LENGTH = 1000;
@@ -45,6 +47,7 @@ startLine.rotation.x = -Math.PI / 2;
 startLine.position.set(BASE_RADIUS, 0.01, 0);
 scene.add(startLine);
 
+// Crée une courbe décalée de la spline centrale
 function offsetSpline(spline, dist) {
   const pts = spline.getPoints(200).map((p, i, arr) => {
     const u = i / (arr.length - 1);

@@ -1,3 +1,5 @@
+// Initialise le monde physique Cannon.js et gère le pas de simulation
+
 import * as CANNON from 'https://cdn.jsdelivr.net/npm/cannon-es@0.20.0/dist/cannon-es.js';
 
 const world = new CANNON.World();
@@ -13,6 +15,7 @@ world.defaultContactMaterial = contactMaterial;
 
 let physicsAccumulator = 0;
 const fixedTimeStep = 1 / 60;
+// Avance la simulation physique par pas fixes
 
 function stepPhysics(dt) {
   physicsAccumulator += dt;
