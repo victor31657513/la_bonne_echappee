@@ -67,6 +67,8 @@ for (let team = 0; team < NUM_TEAMS; team++) {
     );
     body.addShape(new CANNON.Box(halfExtents));
     body.position.set(x0, 0, z0);
+    body.linearDamping = 0.2;
+    body.angularDamping = 0.2;
     world.addBody(body);
 
     const boid = new Boid(boidBehaviors);
