@@ -268,10 +268,10 @@ function animate() {
   const dt = Math.min((now - lastTime) / 1000, 0.1);
   lastTime = now;
 
-  stepPhysics(dt);
+  if (started) {
+    stepPhysics(dt);
 
-  riders.forEach(r => {
-    if (started) {
+    riders.forEach(r => {
       const theta = ((r.trackDist % TRACK_WRAP) / TRACK_WRAP) * 2 * Math.PI;
       const forward = new CANNON.Vec3(-Math.sin(theta), 0, Math.cos(theta));
       const currentSpeed = r.body.velocity.length();
@@ -280,15 +280,16 @@ function animate() {
       const accel = speedDiff * SPEED_GAIN;
       const accelForce = forward.scale(r.body.mass * accel);
       r.body.applyForce(accelForce, r.body.position);
-    }
-  });
+    });
 
-  clampAndRedirect();
-  updateLaneOffsets(dt);
-  updateRelays(dt);
-  applyForces(dt);
-  resolveOverlaps();
-  boidSystem.update(dt);
+    clampAndRedirect();
+    updateLaneOffsets(dt);
+    updateRelays(dt);
+    applyForces(dt);
+    resolveOverlaps();
+    boidSystem.update(dt);
+  }
+
 
   riders.forEach(r => {
     const bodyPos = new THREE.Vector3().copy(r.body.position);
