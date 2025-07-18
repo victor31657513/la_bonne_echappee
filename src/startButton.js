@@ -10,6 +10,9 @@ if (startBtn) {
     riders.forEach(r => {
       r.currentBoost = 0;
       r.body.velocity.set(0, 0, 0);
+      r.body.angularVelocity.set(0, 0, 0);
+      r.body.force.set(0, 0, 0);
+      r.body.torque.set(0, 0, 0);
       r.mesh.position.copy(r.body.position);
       r.trackDist = polarToDist(r.body.position.x, r.body.position.z);
       r.prevDist = r.trackDist;
