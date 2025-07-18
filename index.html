@@ -51,7 +51,7 @@
 
     <div id="version-container">Version: <span id="version"></span></div>
     <script>
-      fetch('version.json')
+      fetch('version.json', { cache: 'no-store' })
         .then(r => r.json())
         .then(data => {
           document.getElementById('version').textContent = 'v' + data.version;
