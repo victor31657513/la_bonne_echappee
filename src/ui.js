@@ -2,7 +2,8 @@ import { THREE, camera, renderer, scene } from './setupScene.js';
 import { riders, teamColors, riderGeom } from './riders.js';
 import { TRACK_WRAP } from './track.js';
 
-let selectedIndex = null;
+// Start focused on a rider roughly in the middle of the peloton
+let selectedIndex = Math.floor(riders.length / 2);
 const raycaster = new THREE.Raycaster();
 const mouse = new THREE.Vector2();
 
@@ -118,5 +119,8 @@ function updateSelectionHelper() {
     selectionMarker.visible = false;
   }
 }
+
+// Ensure selection marker is visible on load
+updateSelectionHelper();
 
 export { selectedIndex, updateSelectionHelper };
