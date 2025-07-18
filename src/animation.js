@@ -1,6 +1,12 @@
 import { THREE, scene, camera, renderer } from './setupScene.js';
 import { CANNON } from './physicsWorld.js';
-import { riders, boidSystem, teamRelayState } from './riders.js';
+import {
+  riders,
+  boidSystem,
+  teamRelayState,
+  RIDER_WIDTH,
+  MIN_LATERAL_GAP
+} from './riders.js';
 import {
   outerSpline,
   innerSpline,
@@ -203,6 +209,31 @@ function applyForces(dt) {
   });
 }
 
+function resolveOverlaps() {
+  const minDist = RIDER_WIDTH + MIN_LATERAL_GAP;
+  for (let i = 0; i < riders.length; i++) {
+    const a = riders[i];
+    for (let j = i + 1; j < riders.length; j++) {
+      const b = riders[j];
+      const dx = a.body.position.x - b.body.position.x;
+      const dz = a.body.position.z - b.body.position.z;
+      const distSq = dx * dx + dz * dz;
+      if (distSq < minDist * minDist && distSq > 1e-6) {
+        const dist = Math.sqrt(distSq);
+        const overlap = minDist - dist;
+        const nx = dx / dist;
+        const nz = dz / dist;
+        const pushX = nx * (overlap / 2);
+        const pushZ = nz * (overlap / 2);
+        a.body.position.x += pushX;
+        a.body.position.z += pushZ;
+        b.body.position.x -= pushX;
+        b.body.position.z -= pushZ;
+      }
+    }
+  }
+}
+
 function updateCamera() {
   let tx, tz, ang;
   if (selectedIndex !== null) {
@@ -256,6 +287,7 @@ function animate() {
   updateLaneOffsets(dt);
   updateRelays(dt);
   applyForces(dt);
+  resolveOverlaps();
   boidSystem.update(dt);
 
   riders.forEach(r => {

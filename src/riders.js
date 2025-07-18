@@ -97,4 +97,12 @@ for (let team = 0; team < NUM_TEAMS; team++) {
   }
 }
 
-export { boidSystem, riders, teamColors, riderGeom, teamRelayState };
+export {
+  boidSystem,
+  riders,
+  teamColors,
+  riderGeom,
+  teamRelayState,
+  RIDER_WIDTH,
+  MIN_LATERAL_GAP
+};
