@@ -39,3 +39,7 @@ body {
 .rider-control label {
     margin-right: 10px;
 }
+
+input[type='range'] {
+    width: 80px;
+}
