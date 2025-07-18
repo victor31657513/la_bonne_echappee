@@ -1,3 +1,5 @@
+// Interface utilisateur: sélection et contrôles des coureurs
+
 import { THREE, camera, renderer, scene } from './setupScene.js';
 import { riders, teamColors, riderGeom } from './riders.js';
 import { TRACK_WRAP } from './track.js';
@@ -24,6 +26,7 @@ teamColorsCss.forEach((col, t) => {
   }
 });
 
+// Affiche les contrôles pour l'équipe sélectionnée
 function showTeamControls(tid) {
   teamControlsDiv.innerHTML = '';
   const relayLabel = document.createElement('label');
@@ -77,6 +80,7 @@ renderer.domElement.addEventListener('click', event => {
   }
 });
 
+// Trouve le coureur précédent ou suivant selon la piste
 function findRelativeRider(currentIdx, direction) {
   const currentDist = riders[currentIdx].trackDist;
   let bestIdx = currentIdx;
@@ -111,6 +115,7 @@ window.addEventListener('keydown', event => {
   updateSelectionHelper();
 });
 
+// Met à jour le marqueur de sélection autour du coureur actif
 function updateSelectionHelper() {
   if (selectedIndex !== null) {
     const rider = riders[selectedIndex];
