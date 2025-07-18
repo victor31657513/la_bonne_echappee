@@ -29,6 +29,7 @@ const SPEED_GAIN = 0.3;
 const IDEAL_MIX = 0.8;
 const RELAY_SPEED_BOOST = 0.5;
 const LATERAL_FORCE = 5;
+const MAX_SPEED = BASE_SPEED * 2;
 const MAX_LANE_OFFSET = ROAD_WIDTH / 2 - 0.85;
 const LANE_CHANGE_SPEED = 2;
 const RELAY_INTERVAL = 5;
@@ -38,6 +39,18 @@ const PULL_OFFSET = 1.5;
 const forwardVec = new THREE.Vector3();
 const lookAtPt = new THREE.Vector3();
 let lastTime = performance.now();
+
+// Limite la vitesse maximale des coureurs pour éviter des accélérations
+// excessives pouvant déstabiliser la simulation
+function limitRiderSpeed() {
+  riders.forEach(r => {
+    const v = r.body.velocity;
+    const speed = v.length();
+    if (speed > MAX_SPEED) {
+      v.scale(MAX_SPEED / speed, v);
+    }
+  });
+}
 
 // Redirige les coureurs pour rester sur la piste
 function clampAndRedirect() {
@@ -287,6 +300,7 @@ function animate() {
 
   if (started) {
     stepPhysics(dt);
+    limitRiderSpeed();
 
     riders.forEach(r => {
       const theta = ((r.trackDist % TRACK_WRAP) / TRACK_WRAP) * 2 * Math.PI;
