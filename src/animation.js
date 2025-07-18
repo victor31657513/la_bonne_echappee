@@ -73,8 +73,13 @@ function computeStretch() {
       leader = r;
     }
   });
-  const intensity = leader.relayIntensity || 0;
-  return Math.min(1, 0.2 + 0.2 * intensity);
+
+  // Stretch the peloton according to the speed of the leading rider.
+  // A faster leader narrows the width of the group.
+  const leaderSpeed = leader.body.velocity.length();
+  const speedFactor = leaderSpeed / BASE_SPEED;
+  const stretch = Math.min(1, 0.1 + 0.5 * Math.max(0, speedFactor - 1));
+  return stretch;
 }
 
 function updateLaneOffsets(dt) {
