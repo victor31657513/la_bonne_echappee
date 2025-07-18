@@ -88,4 +88,11 @@ for (let team = 0; team < NUM_TEAMS; team++) {
   }
 }
 
-export { boidSystem, riders, teamColors, riderGeom };
+export {
+  boidSystem,
+  riders,
+  teamColors,
+  riderGeom,
+  RIDER_WIDTH,
+  MIN_LATERAL_GAP
+};
