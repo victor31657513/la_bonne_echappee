@@ -15,12 +15,12 @@ scene.add(selectionMarker);
 const teamSelect = document.getElementById('teamSelect');
 const teamControlsDiv = document.getElementById('teamControls');
 const teamColorsCss = teamColors.map(c => `#${c.getHexString()}`);
-teamSelect.innerHTML = '';
 teamColorsCss.forEach((col, t) => {
-  const opt = new Option(`Team ${t + 1}`, t);
-  opt.style.backgroundColor = col;
-  opt.style.color = '#fff';
-  teamSelect.append(opt);
+  const opt = teamSelect.options[t];
+  if (opt) {
+    opt.style.backgroundColor = col;
+    opt.style.color = '#fff';
+  }
 });
 
 function showTeamControls(tid) {

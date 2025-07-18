@@ -6,15 +6,8 @@ const BASE_SPEED = 8;
 
 let started = false;
 
-(function () {
-  const startBtn = document.createElement('button');
-  startBtn.textContent = 'Démarrer la simulation';
-  startBtn.style.position = 'absolute';
-  startBtn.style.bottom = '10px';
-  startBtn.style.right = '10px';
-  startBtn.style.padding = '8px 12px';
-  startBtn.style.zIndex = 100;
-  document.body.appendChild(startBtn);
+const startBtn = document.getElementById('startBtn');
+if (startBtn) {
   startBtn.addEventListener('click', () => {
     started = true;
     riders.forEach(r => {
@@ -28,6 +21,6 @@ let started = false;
     });
     startBtn.disabled = true;
   });
-})();
+}
 
 export { started };
