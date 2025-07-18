@@ -8,7 +8,8 @@ import {
   INNER_R,
   OUTER_R,
   TRACK_WRAP,
-  BASE_RADIUS
+  BASE_RADIUS,
+  ROAD_WIDTH
 } from './track.js';
 import { stepPhysics } from './physicsWorld.js';
 import { updateSelectionHelper, selectedIndex } from './ui.js';
@@ -73,6 +74,55 @@ function applyForces(dt) {
       r.currentBoost !== undefined
         ? THREE.MathUtils.lerp(r.currentBoost, r.relayIntensity * RELAY_SPEED_BOOST, dt * 2)
         : r.relayIntensity * RELAY_SPEED_BOOST;
+
+    // Determine if this rider is blocked by another rider directly ahead
+    if (r.relayIntensity > 0) {
+      const SAFE_DIST = 4;
+      const LANE_GAP = 1.2;
+      let blocked = false;
+      for (const other of riders) {
+        if (other === r) continue;
+        let dist = other.trackDist - r.trackDist;
+        if (dist < 0) dist += TRACK_WRAP;
+        if (dist > 0 && dist < SAFE_DIST) {
+          if (Math.abs(other.laneOffset - r.laneOffset) < LANE_GAP) {
+            blocked = true;
+            break;
+          }
+        }
+      }
+
+      if (blocked) {
+        const SHIFT = 1.5;
+        const maxOffset = ROAD_WIDTH / 2 - 1;
+        let chosen = r.laneOffset;
+        for (const dir of [-1, 1]) {
+          const cand = THREE.MathUtils.clamp(r.laneOffset + dir * SHIFT, -maxOffset, maxOffset);
+          let collide = false;
+          for (const other of riders) {
+            if (other === r) continue;
+            let d = Math.abs(other.trackDist - r.trackDist);
+            if (d > TRACK_WRAP / 2) d = TRACK_WRAP - d;
+            if (d < SAFE_DIST && Math.abs(other.laneOffset - cand) < LANE_GAP) {
+              collide = true;
+              break;
+            }
+          }
+          if (!collide) {
+            chosen = cand;
+            break;
+          }
+        }
+        r.laneTarget = chosen;
+      } else {
+        r.laneTarget = 0;
+      }
+    } else {
+      r.laneTarget = 0;
+    }
+
+    // Smoothly steer towards the desired lateral position
+    r.laneOffset = THREE.MathUtils.lerp(r.laneOffset, r.laneTarget, dt * 2);
 
     const bodyPos = r.body.position;
     const angle = (polarToDist(bodyPos.x, bodyPos.z) / TRACK_WRAP) * 2 * Math.PI;

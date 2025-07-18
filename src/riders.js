@@ -64,6 +64,7 @@ for (let team = 0; team < NUM_TEAMS; team++) {
       isLeader: i === 0,
       trackDist: trackDist0,
       laneOffset: off,
+      laneTarget: off,
       speed: 0,
       energy: 100,
       relayIntensity: 0,
