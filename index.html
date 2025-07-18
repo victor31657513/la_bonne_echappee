@@ -50,11 +50,10 @@
 
     <div id="version-container">Version: <span id="version"></span></div>
     <script>
-      fetch('package.json')
+      fetch('version.json')
         .then(r => r.json())
-        .then(pkg => {
-          const major = pkg.version.split('.')[0];
-          document.getElementById('version').textContent = 'v' + major;
+        .then(data => {
+          document.getElementById('version').textContent = 'v' + data.version;
         });
     </script>
 </body>

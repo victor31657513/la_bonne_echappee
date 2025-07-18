@@ -23,5 +23,16 @@ jobs:
         run: |
           git config user.name "github-actions"
           git config user.email "actions@github.com"
-          npm version patch -m "chore: bump version to %s [skip ci]"
-          git push --follow-tags origin HEAD:${{ github.event.pull_request.base.ref }}
+          version=$(node - <<'NODE'
+          const fs = require('fs');
+          const path = 'version.json';
+          const data = JSON.parse(fs.readFileSync(path, 'utf8'));
+          const next = (parseInt(data.version, 10) + 1).toString();
+          data.version = next;
+          fs.writeFileSync(path, JSON.stringify(data, null, 2));
+          console.log(next);
+          NODE
+          )
+          git add version.json
+          git commit -m "chore: bump version to v${version} [skip ci]"
+          git push origin HEAD:${{ github.event.pull_request.base.ref }}
