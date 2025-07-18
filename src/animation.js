@@ -244,6 +244,12 @@ function animate() {
     const lookAtPoint = new THREE.Vector3(r.mesh.position.x + dx, 0, r.mesh.position.z + dz);
     r.mesh.lookAt(lookAtPoint);
     r.mesh.rotateY(-Math.PI / 2);
+    r.body.quaternion.set(
+      r.mesh.quaternion.x,
+      r.mesh.quaternion.y,
+      r.mesh.quaternion.z,
+      r.mesh.quaternion.w
+    );
   });
 
   updateSelectionHelper();
