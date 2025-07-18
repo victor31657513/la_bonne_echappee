@@ -47,6 +47,15 @@
 
     <!-- Ton script principal en module (importe Three.js, Cannon‑ES, bird‑oid/Boids, etc.) -->
     <script type="module" src="src/main.js"></script>
+
+    <div id="version-container">Version: <span id="version"></span></div>
+    <script>
+      fetch('package.json')
+        .then(r => r.json())
+        .then(pkg => {
+          document.getElementById('version').textContent = 'v' + pkg.version;
+        });
+    </script>
 </body>
 
 </html>

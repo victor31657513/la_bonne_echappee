@@ -43,3 +43,12 @@ body {
 input[type='range'] {
     width: 80px;
 }
+
+#version-container {
+    position: fixed;
+    bottom: 5px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.8em;
+    color: #ccc;
+}
