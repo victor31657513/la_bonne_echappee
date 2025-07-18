@@ -30,6 +30,8 @@ const IDEAL_MIX = 0.8;
 const RELAY_SPEED_BOOST = 0.5;
 const LATERAL_FORCE = 5;
 const MAX_SPEED = BASE_SPEED * 2;
+// Limit side movement so riders don't slide across the road too quickly
+const MAX_LATERAL_SPEED = 4;
 const MAX_LANE_OFFSET = ROAD_WIDTH / 2 - 0.85;
 const LANE_CHANGE_SPEED = 2;
 const RELAY_INTERVAL = 5;
@@ -48,6 +50,20 @@ function limitRiderSpeed() {
     const speed = v.length();
     if (speed > MAX_SPEED) {
       v.scale(MAX_SPEED / speed, v);
+    }
+  });
+}
+
+// Keep sideways motion reasonable to help collision handling
+function limitLateralSpeed() {
+  riders.forEach(r => {
+    const theta = ((r.trackDist % TRACK_WRAP) / TRACK_WRAP) * 2 * Math.PI;
+    const right = new CANNON.Vec3(Math.cos(theta), 0, Math.sin(theta));
+    const latSpeed = r.body.velocity.dot(right);
+    if (Math.abs(latSpeed) > MAX_LATERAL_SPEED) {
+      const excess = latSpeed - Math.sign(latSpeed) * MAX_LATERAL_SPEED;
+      r.body.velocity.x -= excess * right.x;
+      r.body.velocity.z -= excess * right.z;
     }
   });
 }
@@ -257,6 +273,17 @@ function resolveOverlaps() {
         a.body.position.z += pushZ;
         b.body.position.x -= pushX;
         b.body.position.z -= pushZ;
+
+        const relVX = a.body.velocity.x - b.body.velocity.x;
+        const relVZ = a.body.velocity.z - b.body.velocity.z;
+        const relVN = relVX * nx + relVZ * nz;
+        if (relVN < 0) {
+          const impulse = relVN / 2;
+          a.body.velocity.x -= impulse * nx;
+          a.body.velocity.z -= impulse * nz;
+          b.body.velocity.x += impulse * nx;
+          b.body.velocity.z += impulse * nz;
+        }
       }
     }
   }
@@ -301,6 +328,7 @@ function animate() {
   if (started) {
     stepPhysics(dt);
     limitRiderSpeed();
+    limitLateralSpeed();
 
     riders.forEach(r => {
       const theta = ((r.trackDist % TRACK_WRAP) / TRACK_WRAP) * 2 * Math.PI;
