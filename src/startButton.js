@@ -14,6 +14,10 @@ if (startBtn) {
       r.trackDist = polarToDist(r.body.position.x, r.body.position.z);
       r.prevDist = r.trackDist;
       r.lap = 0;
+      if (r.boid) {
+        r.boid.position = [r.body.position.x, r.body.position.z];
+        r.boid.velocity = [0, 0];
+      }
     });
     startBtn.disabled = true;
   });
