@@ -1,7 +1,15 @@
 import { THREE, scene, camera, renderer } from './setupScene.js';
 import { CANNON } from './physicsWorld.js';
 import { riders, boidSystem } from './riders.js';
-import { outerSpline, innerSpline, centerSpline, INNER_R, OUTER_R, TRACK_WRAP } from './track.js';
+import {
+  outerSpline,
+  innerSpline,
+  centerSpline,
+  INNER_R,
+  OUTER_R,
+  TRACK_WRAP,
+  BASE_RADIUS
+} from './track.js';
 import { stepPhysics } from './physicsWorld.js';
 import { updateSelectionHelper, selectedIndex } from './ui.js';
 import { started } from './startButton.js';
@@ -38,7 +46,28 @@ function clampAndRedirect() {
   });
 }
 
+function computeStretch() {
+  if (!started || riders.length === 0) return 0;
+  let minDist = riders[0].trackDist;
+  riders.forEach(r => {
+    if (r.trackDist < minDist) minDist = r.trackDist;
+  });
+  let leader = riders[0];
+  let maxOffset = 0;
+  riders.forEach(r => {
+    let offset = r.trackDist - minDist;
+    if (offset < 0) offset += TRACK_WRAP;
+    if (offset > maxOffset) {
+      maxOffset = offset;
+      leader = r;
+    }
+  });
+  const intensity = leader.relayIntensity || 0;
+  return Math.min(1, 0.2 + 0.2 * intensity);
+}
+
 function applyForces(dt) {
+  const stretch = computeStretch();
   riders.forEach(r => {
     r.currentBoost =
       r.currentBoost !== undefined
@@ -46,9 +75,11 @@ function applyForces(dt) {
         : r.relayIntensity * RELAY_SPEED_BOOST;
 
     const bodyPos = r.body.position;
-    const u = (polarToDist(bodyPos.x, bodyPos.z) % TRACK_WRAP) / TRACK_WRAP;
-    const ideal = centerSpline.getPointAt(u);
-    const lateralVec = new CANNON.Vec3(ideal.x - bodyPos.x, 0, ideal.z - bodyPos.z);
+    const angle = (polarToDist(bodyPos.x, bodyPos.z) / TRACK_WRAP) * 2 * Math.PI;
+    const targetRadius = BASE_RADIUS + r.laneOffset * (1 - stretch);
+    const targetX = targetRadius * Math.cos(angle);
+    const targetZ = targetRadius * Math.sin(angle);
+    const lateralVec = new CANNON.Vec3(targetX - bodyPos.x, 0, targetZ - bodyPos.z);
     const lateralForce = lateralVec.scale(LATERAL_FORCE);
 
     const theta = (polarToDist(bodyPos.x, bodyPos.z) / TRACK_WRAP) * 2 * Math.PI;
