@@ -28,6 +28,11 @@ const RIDER_BOX_HALF = {
   z: riderGeom.parameters.depth / 2
 };
 const riders = [];
+const teamRelayState = Array.from({ length: NUM_TEAMS }, () => ({
+  index: 0,
+  timer: 0,
+  side: 1
+}));
 
 for (let team = 0; team < NUM_TEAMS; team++) {
   const mat = new THREE.MeshLambertMaterial({ color: teamColors[team] });
@@ -78,7 +83,11 @@ for (let team = 0; team < NUM_TEAMS; team++) {
       laneTarget: off,
       speed: 0,
       energy: 100,
+      relaySetting: 0,
       relayIntensity: 0,
+      intensity: 50,
+      pullingOff: false,
+      pullTimer: 0,
       protectLeader: false,
       effortMode: 1,
       mesh,
@@ -93,6 +102,7 @@ export {
   riders,
   teamColors,
   riderGeom,
+  teamRelayState,
   RIDER_WIDTH,
   MIN_LATERAL_GAP
 };

@@ -3,6 +3,7 @@ import { CANNON } from './physicsWorld.js';
 import {
   riders,
   boidSystem,
+  teamRelayState,
   RIDER_WIDTH,
   MIN_LATERAL_GAP
 } from './riders.js';
@@ -28,6 +29,9 @@ const RELAY_SPEED_BOOST = 0.5;
 const LATERAL_FORCE = 5;
 const MAX_LANE_OFFSET = ROAD_WIDTH / 2 - 0.85;
 const LANE_CHANGE_SPEED = 2;
+const RELAY_INTERVAL = 5;
+const PULL_OFF_TIME = 2;
+const PULL_OFFSET = 1.5;
 
 const forwardVec = new THREE.Vector3();
 const lookAtPt = new THREE.Vector3();
@@ -98,6 +102,41 @@ function updateLaneOffsets(dt) {
   });
 }
 
+function updateRelays(dt) {
+  for (let t = 0; t < teamRelayState.length; t++) {
+    const state = teamRelayState[t];
+    const teamRiders = riders.filter(r => r.team === t && r.relaySetting > 0);
+    if (teamRiders.length === 0) continue;
+
+    teamRiders.sort((a, b) => b.trackDist - a.trackDist);
+    const leader = teamRiders[state.index % teamRiders.length];
+    teamRiders.forEach(r => {
+      r.relayIntensity = 0;
+    });
+    leader.relayIntensity = leader.relaySetting;
+
+    state.timer += dt;
+    if (state.timer >= RELAY_INTERVAL) {
+      state.timer = 0;
+      leader.pullingOff = true;
+      leader.pullTimer = 0;
+      leader.laneTarget = state.side * PULL_OFFSET;
+      state.index = (state.index + 1) % teamRiders.length;
+      state.side *= -1;
+    }
+  }
+
+  riders.forEach(r => {
+    if (r.pullingOff) {
+      r.pullTimer += dt;
+      if (r.pullTimer >= PULL_OFF_TIME) {
+        r.pullingOff = false;
+        r.laneTarget = 0;
+      }
+    }
+  });
+}
+
 function applyForces(dt) {
   const stretch = computeStretch();
   riders.forEach(r => {
@@ -107,7 +146,7 @@ function applyForces(dt) {
         : r.relayIntensity * RELAY_SPEED_BOOST;
 
     // Determine if this rider is blocked by another rider directly ahead
-    if (r.relayIntensity > 0) {
+    if (r.relayIntensity > 0 && !r.pullingOff) {
       const SAFE_DIST = 4;
       const LANE_GAP = 1.2;
       let blocked = false;
@@ -146,7 +185,7 @@ function applyForces(dt) {
       } else {
         r.laneTarget = 0;
       }
-    } else {
+    } else if (!r.pullingOff) {
       r.laneTarget = 0;
     }
 
@@ -236,7 +275,8 @@ function animate() {
       const theta = ((r.trackDist % TRACK_WRAP) / TRACK_WRAP) * 2 * Math.PI;
       const forward = new CANNON.Vec3(-Math.sin(theta), 0, Math.cos(theta));
       const currentSpeed = r.body.velocity.length();
-      const speedDiff = BASE_SPEED - currentSpeed;
+      const desiredSpeed = BASE_SPEED * (r.intensity / 50);
+      const speedDiff = desiredSpeed - currentSpeed;
       const accel = speedDiff * SPEED_GAIN;
       const accelForce = forward.scale(r.body.mass * accel);
       r.body.applyForce(accelForce, r.body.position);
@@ -245,6 +285,7 @@ function animate() {
 
   clampAndRedirect();
   updateLaneOffsets(dt);
+  updateRelays(dt);
   applyForces(dt);
   resolveOverlaps();
   boidSystem.update(dt);
