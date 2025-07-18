@@ -34,6 +34,17 @@ const centerLine = new THREE.Line(centerLineGeometry, centerLineMaterial);
 centerLine.computeLineDistances();
 scene.add(centerLine);
 
+// Start/finish line across the road
+const startLineGeom = new THREE.PlaneGeometry(ROAD_WIDTH, 0.2);
+const startLineMat = new THREE.MeshBasicMaterial({
+  color: 0xffffff,
+  side: THREE.DoubleSide
+});
+const startLine = new THREE.Mesh(startLineGeom, startLineMat);
+startLine.rotation.x = -Math.PI / 2;
+startLine.position.set(BASE_RADIUS, 0.01, 0);
+scene.add(startLine);
+
 function offsetSpline(spline, dist) {
   const pts = spline.getPoints(200).map((p, i, arr) => {
     const u = i / (arr.length - 1);
@@ -59,6 +70,7 @@ export {
   road,
   centerSpline,
   centerLine,
+  startLine,
   outerSpline,
   innerSpline
 };
