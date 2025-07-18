@@ -14,7 +14,7 @@ import {
 import { stepPhysics } from './physicsWorld.js';
 import { updateSelectionHelper, selectedIndex } from './ui.js';
 import { started } from './startButton.js';
-import { polarToDist } from './utils.js';
+import { aheadDistance, wrapDistance } from './utils.js';
 
 const BASE_SPEED = 8;
 const SPEED_GAIN = 0.3;
@@ -58,8 +58,7 @@ function computeStretch() {
   let leader = riders[0];
   let maxOffset = 0;
   riders.forEach(r => {
-    let offset = r.trackDist - minDist;
-    if (offset < 0) offset += TRACK_WRAP;
+    const offset = aheadDistance(minDist, r.trackDist);
     if (offset > maxOffset) {
       maxOffset = offset;
       leader = r;
@@ -75,8 +74,7 @@ function updateLaneOffsets(dt) {
     let ahead = null;
     riders.forEach((o, j) => {
       if (j === idx) return;
-      let delta = o.trackDist - r.trackDist;
-      if (delta <= 0) delta += TRACK_WRAP;
+      const delta = aheadDistance(r.trackDist, o.trackDist);
       if (delta < bestDelta) {
         bestDelta = delta;
         ahead = o;
@@ -110,8 +108,7 @@ function applyForces(dt) {
       let blocked = false;
       for (const other of riders) {
         if (other === r) continue;
-        let dist = other.trackDist - r.trackDist;
-        if (dist < 0) dist += TRACK_WRAP;
+        const dist = aheadDistance(r.trackDist, other.trackDist);
         if (dist > 0 && dist < SAFE_DIST) {
           if (Math.abs(other.laneOffset - r.laneOffset) < LANE_GAP) {
             blocked = true;
@@ -129,8 +126,7 @@ function applyForces(dt) {
           let collide = false;
           for (const other of riders) {
             if (other === r) continue;
-            let d = Math.abs(other.trackDist - r.trackDist);
-            if (d > TRACK_WRAP / 2) d = TRACK_WRAP - d;
+            const d = wrapDistance(other.trackDist, r.trackDist);
             if (d < SAFE_DIST && Math.abs(other.laneOffset - cand) < LANE_GAP) {
               collide = true;
               break;
@@ -153,14 +149,14 @@ function applyForces(dt) {
     r.laneOffset = THREE.MathUtils.lerp(r.laneOffset, r.laneTarget, dt * 2);
 
     const bodyPos = r.body.position;
-    const angle = (polarToDist(bodyPos.x, bodyPos.z) / TRACK_WRAP) * 2 * Math.PI;
+    const angle = ((r.trackDist % TRACK_WRAP) / TRACK_WRAP) * 2 * Math.PI;
     const targetRadius = BASE_RADIUS + r.laneOffset * (1 - stretch);
     const targetX = targetRadius * Math.cos(angle);
     const targetZ = targetRadius * Math.sin(angle);
     const lateralVec = new CANNON.Vec3(targetX - bodyPos.x, 0, targetZ - bodyPos.z);
     const lateralForce = lateralVec.scale(LATERAL_FORCE);
 
-    const theta = (polarToDist(bodyPos.x, bodyPos.z) / TRACK_WRAP) * 2 * Math.PI;
+    const theta = angle;
     const fwd = new CANNON.Vec3(-Math.sin(theta), 0, Math.cos(theta));
     const fwdForce = fwd.scale(r.currentBoost);
 
@@ -175,7 +171,7 @@ function updateCamera() {
     const r = riders[selectedIndex];
     tx = r.mesh.position.x;
     tz = r.mesh.position.z;
-    ang = (r.trackDist / TRACK_WRAP) * 2 * Math.PI;
+    ang = ((r.trackDist % TRACK_WRAP) / TRACK_WRAP) * 2 * Math.PI;
   } else {
     tx = 0;
     tz = 0;
@@ -186,7 +182,7 @@ function updateCamera() {
     tx /= riders.length;
     tz /= riders.length;
     const avg = riders.reduce((s, r) => s + r.trackDist, 0) / riders.length;
-    ang = (avg / TRACK_WRAP) * 2 * Math.PI;
+    ang = ((avg % TRACK_WRAP) / TRACK_WRAP) * 2 * Math.PI;
   }
   forwardVec.set(-Math.sin(ang), 0, Math.cos(ang));
   const BACK = 10,
@@ -207,7 +203,7 @@ function animate() {
 
   riders.forEach(r => {
     if (started) {
-      const theta = (polarToDist(r.body.position.x, r.body.position.z) / TRACK_WRAP) * 2 * Math.PI;
+      const theta = ((r.trackDist % TRACK_WRAP) / TRACK_WRAP) * 2 * Math.PI;
       const forward = new CANNON.Vec3(-Math.sin(theta), 0, Math.cos(theta));
       const currentSpeed = r.body.velocity.length();
       const speedDiff = BASE_SPEED - currentSpeed;
@@ -224,7 +220,12 @@ function animate() {
 
   riders.forEach(r => {
     const bodyPos = new THREE.Vector3().copy(r.body.position);
-    const u = (polarToDist(bodyPos.x, bodyPos.z) % TRACK_WRAP) / TRACK_WRAP;
+    const angleRaw = Math.atan2(bodyPos.z, bodyPos.x);
+    const distRaw = ((angleRaw < 0 ? angleRaw + 2 * Math.PI : angleRaw) / (2 * Math.PI)) * TRACK_WRAP;
+    if (distRaw < r.prevDist - TRACK_WRAP / 2) r.lap += 1;
+    r.prevDist = distRaw;
+    r.trackDist = distRaw + r.lap * TRACK_WRAP;
+    const u = (distRaw % TRACK_WRAP) / TRACK_WRAP;
     const posOut = outerSpline.getPointAt(u);
     const posIn = innerSpline.getPointAt(u);
     const t0 = centerSpline.getTangentAt(u);
@@ -236,9 +237,8 @@ function animate() {
     const lanePos = idealPos.clone().addScaledVector(lateralDir, r.laneOffset);
 
     r.mesh.position.copy(bodyPos.clone().lerp(lanePos, IDEAL_MIX));
-    r.trackDist = polarToDist(r.mesh.position.x, r.mesh.position.z);
 
-    const theta = (r.trackDist / TRACK_WRAP) * 2 * Math.PI;
+    const theta = ((r.trackDist % TRACK_WRAP) / TRACK_WRAP) * 2 * Math.PI;
     const dx = -Math.sin(theta),
       dz = Math.cos(theta);
     const lookAtPoint = new THREE.Vector3(r.mesh.position.x + dx, 0, r.mesh.position.z + dz);
