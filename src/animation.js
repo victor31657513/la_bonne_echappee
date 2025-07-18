@@ -42,6 +42,9 @@ function clampAndRedirect() {
   const maxR = OUTER_R - 0.1;
   riders.forEach(r => {
     const p = r.body.position;
+    const v = r.body.velocity;
+    p.y = 0;
+    v.y = 0;
     const radial = Math.hypot(p.x, p.z);
     if (radial < minR || radial > maxR) {
       const nx = p.x / radial,
@@ -49,7 +52,6 @@ function clampAndRedirect() {
       const clamped = THREE.MathUtils.clamp(radial, minR, maxR);
       p.x = nx * clamped;
       p.z = nz * clamped;
-      const v = r.body.velocity;
       const tangent = new CANNON.Vec3(-nz, 0, nx);
       const speed = v.dot(tangent);
       v.x = tangent.x * speed;
