@@ -21,6 +21,8 @@ const SPEED_GAIN = 0.3;
 const IDEAL_MIX = 0.8;
 const RELAY_SPEED_BOOST = 0.5;
 const LATERAL_FORCE = 5;
+const MAX_LANE_OFFSET = ROAD_WIDTH / 2 - 0.85;
+const LANE_CHANGE_SPEED = 2;
 
 const forwardVec = new THREE.Vector3();
 const lookAtPt = new THREE.Vector3();
@@ -65,6 +67,32 @@ function computeStretch() {
   });
   const intensity = leader.relayIntensity || 0;
   return Math.min(1, 0.2 + 0.2 * intensity);
+}
+
+function updateLaneOffsets(dt) {
+  riders.forEach((r, idx) => {
+    let bestDelta = TRACK_WRAP;
+    let ahead = null;
+    riders.forEach((o, j) => {
+      if (j === idx) return;
+      let delta = o.trackDist - r.trackDist;
+      if (delta <= 0) delta += TRACK_WRAP;
+      if (delta < bestDelta) {
+        bestDelta = delta;
+        ahead = o;
+      }
+    });
+    if (ahead && bestDelta < 5) {
+      const dir = r.laneOffset <= ahead.laneOffset ? -1 : 1;
+      r.laneOffset = THREE.MathUtils.clamp(
+        r.laneOffset + dir * LANE_CHANGE_SPEED * dt,
+        -MAX_LANE_OFFSET,
+        MAX_LANE_OFFSET
+      );
+    } else {
+      r.laneOffset = THREE.MathUtils.lerp(r.laneOffset, 0, dt);
+    }
+  });
 }
 
 function applyForces(dt) {
@@ -190,6 +218,7 @@ function animate() {
   });
 
   clampAndRedirect();
+  updateLaneOffsets(dt);
   applyForces(dt);
   boidSystem.update(dt);
 
@@ -203,8 +232,10 @@ function animate() {
     const curvature = t0.angleTo(t1);
     const blend = THREE.MathUtils.clamp(curvature * 10, 0, 1);
     const idealPos = posOut.clone().lerp(posIn, blend);
+    const lateralDir = new THREE.Vector3(-t0.z, 0, t0.x).normalize();
+    const lanePos = idealPos.clone().addScaledVector(lateralDir, r.laneOffset);
 
-    r.mesh.position.copy(bodyPos.clone().lerp(idealPos, IDEAL_MIX));
+    r.mesh.position.copy(bodyPos.clone().lerp(lanePos, IDEAL_MIX));
     r.trackDist = polarToDist(r.mesh.position.x, r.mesh.position.z);
 
     const theta = (r.trackDist / TRACK_WRAP) * 2 * Math.PI;
