@@ -26,7 +26,12 @@ teamColorsCss.forEach((col, t) => {
   }
 });
 
-// Affiche les contrôles pour l'équipe sélectionnée
+/**
+ * Affiche les contrôles associés à l'équipe sélectionnée.
+ *
+ * @param {number} tid Identifiant de l'équipe à afficher.
+ * @returns {void}
+ */
 function showTeamControls(tid) {
   teamControlsDiv.innerHTML = '';
   const relayLabel = document.createElement('label');
@@ -80,7 +85,13 @@ renderer.domElement.addEventListener('click', event => {
   }
 });
 
-// Trouve le coureur précédent ou suivant selon la piste
+/**
+ * Trouve le coureur précédent ou suivant sur la piste par rapport à un indice.
+ *
+ * @param {number} currentIdx Indice du coureur de référence.
+ * @param {'next'|'prev'} direction Direction de recherche.
+ * @returns {number} Indice du coureur trouvé.
+ */
 function findRelativeRider(currentIdx, direction) {
   const currentDist = riders[currentIdx].trackDist;
   let bestIdx = currentIdx;
@@ -115,7 +126,11 @@ window.addEventListener('keydown', event => {
   updateSelectionHelper();
 });
 
-// Met à jour le marqueur de sélection autour du coureur actif
+/**
+ * Met à jour le marqueur visuel autour du coureur actuellement sélectionné.
+ *
+ * @returns {void}
+ */
 function updateSelectionHelper() {
   if (selectedIndex !== null) {
     const rider = riders[selectedIndex];

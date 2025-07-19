@@ -15,8 +15,12 @@ world.defaultContactMaterial = contactMaterial;
 
 let physicsAccumulator = 0;
 const fixedTimeStep = 1 / 60;
-// Avance la simulation physique par pas fixes
-
+/**
+ * Avance la simulation physique par pas fixes.
+ *
+ * @param {number} dt Temps écoulé depuis le dernier appel en secondes.
+ * @returns {void}
+ */
 function stepPhysics(dt) {
   physicsAccumulator += dt;
   while (physicsAccumulator >= fixedTimeStep) {
