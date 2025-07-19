@@ -46,8 +46,17 @@
 
     <div id="vis"></div>
 
-    <!-- Ton script principal en module (importe Three.js, Cannon‑ES, bird‑oid/Boids, etc.) -->
-    <script type="module" src="src/main.js"></script>
+    <!-- Mode dev: ajoute un timestamp pour éviter le cache -->
+    <script>
+      const mainScript = document.createElement('script');
+      mainScript.type = 'module';
+      let src = 'src/main.js';
+      if (new URLSearchParams(window.location.search).has('dev')) {
+        src += '?t=' + Date.now();
+      }
+      mainScript.src = src;
+      document.currentScript.after(mainScript);
+    </script>
 
     <div id="version-container">Version: <span id="version"></span></div>
     <script>
