@@ -58,14 +58,7 @@
       document.currentScript.after(mainScript);
     </script>
 
-    <div id="version-container">Version: <span id="version"></span></div>
-    <script>
-      fetch('version.json', { cache: 'no-store' })
-        .then(r => r.json())
-        .then(data => {
-          document.getElementById('version').textContent = 'v' + data.version;
-        });
-    </script>
+    <!-- La version est désormais gérée via les releases GitHub -->
 </body>
 
 </html>
