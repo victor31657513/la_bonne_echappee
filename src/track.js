@@ -47,7 +47,13 @@ startLine.rotation.x = -Math.PI / 2;
 startLine.position.set(BASE_RADIUS, 0.01, 0);
 scene.add(startLine);
 
-// Crée une courbe décalée de la spline centrale
+/**
+ * Crée une courbe décalée par rapport à la spline centrale.
+ *
+ * @param {THREE.Curve} spline Spline de référence.
+ * @param {number} dist Distance de décalage latéral.
+ * @returns {THREE.CatmullRomCurve3} Nouvelle spline décalée.
+ */
 function offsetSpline(spline, dist) {
   const pts = spline.getPoints(200).map((p, i, arr) => {
     const u = i / (arr.length - 1);

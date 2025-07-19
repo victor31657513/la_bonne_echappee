@@ -42,8 +42,12 @@ const forwardVec = new THREE.Vector3();
 const lookAtPt = new THREE.Vector3();
 let lastTime = performance.now();
 
-// Limite la vitesse maximale des coureurs pour éviter des accélérations
-// excessives pouvant déstabiliser la simulation
+/**
+ * Limite la vitesse maximale des coureurs pour éviter des accélérations
+ * trop fortes qui déstabiliseraient la simulation.
+ *
+ * @returns {void}
+ */
 function limitRiderSpeed() {
   riders.forEach(r => {
     const v = r.body.velocity;
@@ -54,7 +58,11 @@ function limitRiderSpeed() {
   });
 }
 
-// Keep sideways motion reasonable to help collision handling
+/**
+ * Réduit la vitesse latérale afin de faciliter la gestion des collisions.
+ *
+ * @returns {void}
+ */
 function limitLateralSpeed() {
   riders.forEach(r => {
     const theta = ((r.trackDist % TRACK_WRAP) / TRACK_WRAP) * 2 * Math.PI;
@@ -68,7 +76,11 @@ function limitLateralSpeed() {
   });
 }
 
-// Redirige les coureurs pour rester sur la piste
+/**
+ * Redirige les coureurs et recadre leur position pour rester sur la piste.
+ *
+ * @returns {void}
+ */
 function clampAndRedirect() {
   const minR = INNER_R + 0.1;
   const maxR = OUTER_R - 0.1;
@@ -92,7 +104,11 @@ function clampAndRedirect() {
   });
 }
 
-// Calcule l'étirement du peloton en fonction de la vitesse
+/**
+ * Calcule l'étirement du peloton en fonction de la vitesse du leader.
+ *
+ * @returns {number} Facteur d'étirement compris entre 0 et 1.
+ */
 function computeStretch() {
   if (!started || riders.length === 0) return 0;
   let minDist = riders[0].trackDist;
@@ -117,7 +133,13 @@ function computeStretch() {
   return stretch;
 }
 
-// Met à jour la position latérale des coureurs
+/**
+ * Met à jour la position latérale de chaque coureur pour éviter les
+ * collisions et optimiser l'espace sur la route.
+ *
+ * @param {number} dt Durée écoulée depuis la dernière mise à jour en secondes.
+ * @returns {void}
+ */
 function updateLaneOffsets(dt) {
   riders.forEach((r, idx) => {
     let bestDelta = TRACK_WRAP;
@@ -154,7 +176,12 @@ function updateLaneOffsets(dt) {
   });
 }
 
-// Logique de relais entre coureurs d'une même équipe
+/**
+ * Gère la logique de relais pour chaque équipe.
+ *
+ * @param {number} dt Durée écoulée depuis la dernière mise à jour en secondes.
+ * @returns {void}
+ */
 function updateRelays(dt) {
   for (let t = 0; t < teamRelayState.length; t++) {
     const state = teamRelayState[t];
@@ -190,7 +217,12 @@ function updateRelays(dt) {
   });
 }
 
-// Applique les forces physiques sur chaque coureur
+/**
+ * Applique les différentes forces physiques sur les coureurs.
+ *
+ * @param {number} dt Durée écoulée depuis la dernière mise à jour en secondes.
+ * @returns {void}
+ */
 function applyForces(dt) {
   const stretch = computeStretch();
   riders.forEach(r => {
@@ -263,7 +295,12 @@ function applyForces(dt) {
   });
 }
 
-// Évite que les coureurs se superposent
+/**
+ * Évite que les coureurs se superposent en appliquant une résolution
+ * d'interpénétration simple.
+ *
+ * @returns {void}
+ */
 function resolveOverlaps() {
   const minDist = RIDER_WIDTH + MIN_LATERAL_GAP;
   for (let i = 0; i < riders.length; i++) {
@@ -300,7 +337,11 @@ function resolveOverlaps() {
   }
 }
 
-// Ajuste la caméra en fonction du coureur sélectionné
+/**
+ * Ajuste la caméra en fonction du coureur sélectionné ou de la moyenne du peloton.
+ *
+ * @returns {void}
+ */
 function updateCamera() {
   let tx, tz, ang;
   if (selectedIndex !== null) {
@@ -328,7 +369,11 @@ function updateCamera() {
   camera.lookAt(lookAtPt);
 }
 
-// Boucle principale d'animation
+/**
+ * Boucle principale d'animation déclenchée à chaque frame.
+ *
+ * @returns {void}
+ */
 function animate() {
   requestAnimationFrame(animate);
 
