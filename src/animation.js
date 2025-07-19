@@ -132,11 +132,22 @@ function updateLaneOffsets(dt) {
     });
     if (ahead && bestDelta < 5) {
       const dir = r.laneOffset <= ahead.laneOffset ? -1 : 1;
-      r.laneOffset = THREE.MathUtils.clamp(
-        r.laneOffset + dir * LANE_CHANGE_SPEED * dt,
-        -MAX_LANE_OFFSET,
-        MAX_LANE_OFFSET
-      );
+
+      const sideBlocked = riders.some((o, j) => {
+        if (j === idx) return false;
+        const dist = Math.abs(wrapDistance(r.trackDist, o.trackDist));
+        if (dist > 2) return false;
+        const gap = o.laneOffset - (r.laneOffset + dir * (RIDER_WIDTH + MIN_LATERAL_GAP));
+        return Math.abs(gap) < RIDER_WIDTH;
+      });
+
+      if (!sideBlocked) {
+        r.laneOffset = THREE.MathUtils.clamp(
+          r.laneOffset + dir * LANE_CHANGE_SPEED * dt,
+          -MAX_LANE_OFFSET,
+          MAX_LANE_OFFSET
+        );
+      }
     } else {
       r.laneOffset = THREE.MathUtils.lerp(r.laneOffset, 0, dt);
     }
