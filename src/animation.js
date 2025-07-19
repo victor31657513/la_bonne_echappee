@@ -129,7 +129,11 @@ function computeStretch() {
   // A faster leader narrows the width of the group.
   const leaderSpeed = leader.body.velocity.length();
   const speedFactor = leaderSpeed / BASE_SPEED;
-  const stretch = Math.min(1, 0.1 + 0.5 * Math.max(0, speedFactor - 1));
+
+  // At or below base speed allow riders to occupy the full width
+  if (speedFactor <= 1) return 0;
+
+  const stretch = Math.min(1, 0.1 + 0.5 * (speedFactor - 1));
   return stretch;
 }
 
