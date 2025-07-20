@@ -37,6 +37,7 @@ const LANE_CHANGE_SPEED = 2;
 const RELAY_INTERVAL = 5;
 const PULL_OFF_TIME = 2;
 const PULL_OFFSET = 1.5;
+const PULL_OFF_SPEED_FACTOR = 0.7;
 
 const forwardVec = new THREE.Vector3();
 const lookAtPt = new THREE.Vector3();
@@ -394,7 +395,8 @@ function animate() {
       const theta = ((r.trackDist % TRACK_WRAP) / TRACK_WRAP) * 2 * Math.PI;
       const forward = new CANNON.Vec3(-Math.sin(theta), 0, Math.cos(theta));
       const currentSpeed = r.body.velocity.length();
-      const desiredSpeed = BASE_SPEED * (r.intensity / 50);
+      let desiredSpeed = BASE_SPEED * (r.intensity / 50);
+      if (r.pullingOff) desiredSpeed *= PULL_OFF_SPEED_FACTOR;
       const speedDiff = desiredSpeed - currentSpeed;
       const accel = speedDiff * SPEED_GAIN;
       const accelForce = forward.scale(r.body.mass * accel);
