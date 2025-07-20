@@ -3,8 +3,10 @@ async function displayVersion() {
   const container = document.getElementById('version-container');
   if (!container) return;
   try {
-    const versionData = await import('../version.json', { assert: { type: 'json' } });
-    container.textContent = `Version ${versionData.default.version}`;
+    const response = await fetch('version.json');
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    const versionData = await response.json();
+    container.textContent = `Version ${versionData.version}`;
   } catch (err) {
     console.error('Impossible de charger la version', err);
   }
