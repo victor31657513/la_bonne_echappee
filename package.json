@@ -5,7 +5,9 @@
   "main": "simulation.js",
   "scripts": {
     "test": "node -e \"console.log('Tests executed')\"",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "sync-version": "node scripts/updateVersion.js",
+    "version": "npm run sync-version"
   },
   "keywords": [],
   "author": "",
