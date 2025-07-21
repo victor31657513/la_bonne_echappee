@@ -109,40 +109,6 @@ function clampAndRedirect() {
 }
 
 /**
- * Calcule l'étirement du peloton en fonction de la vitesse du leader.
- *
- * @returns {number} Facteur d'étirement compris entre 0 et 1.
- */
-function computeStretch() {
-  if (!started || riders.length === 0) return 0;
-  let minDist = riders[0].trackDist;
-  riders.forEach(r => {
-    if (r.trackDist < minDist) minDist = r.trackDist;
-  });
-  let leader = riders[0];
-  let maxOffset = 0;
-  riders.forEach(r => {
-    const offset = aheadDistance(minDist, r.trackDist);
-    if (offset > maxOffset) {
-      maxOffset = offset;
-      leader = r;
-    }
-  });
-
-  // Stretch the peloton according to the speed of the leading rider.
-  // A faster leader narrows the width of the group.
-  const leaderSpeed = leader.body.velocity.length();
-  const speedFactor = leaderSpeed / BASE_SPEED;
-
-  // At or below base speed allow riders to occupy the full width
-  if (speedFactor <= 1) return 0;
-
-  // Keep riders spread wider even at higher speeds
-  const stretch = Math.min(0.6, 0.05 + 0.3 * (speedFactor - 1));
-  return stretch;
-}
-
-/**
  * Met à jour la position latérale de chaque coureur pour éviter les
  * collisions et optimiser l'espace sur la route.
  *
@@ -233,7 +199,7 @@ function updateRelays(dt) {
  * @returns {void}
  */
 function applyForces(dt) {
-  const stretch = computeStretch();
+  // The peloton no longer narrows at high speed so we don't compute stretch
   riders.forEach(r => {
     r.currentBoost =
       r.currentBoost !== undefined
@@ -290,7 +256,8 @@ function applyForces(dt) {
 
     const bodyPos = r.body.position;
     const angle = ((r.trackDist % TRACK_WRAP) / TRACK_WRAP) * 2 * Math.PI;
-    const targetRadius = BASE_RADIUS + r.laneOffset * (1 - stretch);
+    // Keep riders near their desired lane without pulling them to the center
+    const targetRadius = BASE_RADIUS + r.laneOffset;
     const targetX = targetRadius * Math.cos(angle);
     const targetZ = targetRadius * Math.sin(angle);
     const lateralVec = new CANNON.Vec3(targetX - bodyPos.x, 0, targetZ - bodyPos.z);
