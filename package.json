@@ -1,13 +1,12 @@
 {
   "name": "la_bonne_echappee",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "",
   "main": "simulation.js",
   "scripts": {
     "test": "node -e \"console.log('Tests executed')\"",
     "lint": "eslint .",
-    "sync-version": "node scripts/updateVersion.js",
-    "version": "npm run sync-version"
+    "version": "echo version script removed"
   },
   "keywords": [],
   "author": "",
