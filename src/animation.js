@@ -28,12 +28,15 @@ const BASE_SPEED = 8;
 const SPEED_GAIN = 0.3;
 const IDEAL_MIX = 0.8;
 const RELAY_SPEED_BOOST = 0.5;
-const LATERAL_FORCE = 5;
+// Reduce lateral acceleration so riders don't slide across the road
+const LATERAL_FORCE = 3;
 const MAX_SPEED = BASE_SPEED * 2;
 // Limit side movement so riders don't slide across the road too quickly
-const MAX_LATERAL_SPEED = 4;
+// Limit side movement speed
+const MAX_LATERAL_SPEED = 3;
 const MAX_LANE_OFFSET = ROAD_WIDTH / 2 - 0.85;
-const LANE_CHANGE_SPEED = 2;
+// Slow down lane changes for smoother overtaking
+const LANE_CHANGE_SPEED = 1.5;
 const RELAY_INTERVAL = 5;
 const PULL_OFF_TIME = 2;
 const PULL_OFFSET = 1.5;
@@ -134,7 +137,8 @@ function computeStretch() {
   // At or below base speed allow riders to occupy the full width
   if (speedFactor <= 1) return 0;
 
-  const stretch = Math.min(1, 0.1 + 0.5 * (speedFactor - 1));
+  // Keep riders spread wider even at higher speeds
+  const stretch = Math.min(0.6, 0.05 + 0.3 * (speedFactor - 1));
   return stretch;
 }
 
@@ -253,7 +257,8 @@ function applyForces(dt) {
       }
 
       if (blocked) {
-        const SHIFT = 1.5;
+        // Try a wider lateral move when overtaking
+        const SHIFT = 2;
         const maxOffset = ROAD_WIDTH / 2 - 1;
         let chosen = r.laneOffset;
         for (const dir of [-1, 1]) {
