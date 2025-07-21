@@ -2,6 +2,7 @@
 
 import { riders } from './riders.js';
 import { polarToDist } from './utils.js';
+import { BASE_SPEED } from './constants.js';
 
 let started = false;
 
@@ -14,7 +15,12 @@ if (startBtn) {
       r.isAttacking = false;
       r.attackGauge = 100;
       r.intensity = r.baseIntensity;
-      r.body.velocity.set(0, 0, 0);
+      const angle = Math.atan2(r.body.position.z, r.body.position.x);
+      r.body.velocity.set(
+        -Math.sin(angle) * BASE_SPEED,
+        0,
+        Math.cos(angle) * BASE_SPEED
+      );
       r.body.angularVelocity.set(0, 0, 0);
       r.body.force.set(0, 0, 0);
       r.body.torque.set(0, 0, 0);
@@ -24,7 +30,10 @@ if (startBtn) {
       r.lap = 0;
       if (r.boid) {
         r.boid.position = [r.body.position.x, r.body.position.z];
-        r.boid.velocity = [0, 0];
+        r.boid.velocity = [
+          -Math.sin(angle) * BASE_SPEED,
+          Math.cos(angle) * BASE_SPEED
+        ];
       }
     });
     startBtn.disabled = true;
