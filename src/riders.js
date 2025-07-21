@@ -51,12 +51,21 @@ for (let team = 0; team < NUM_TEAMS; team++) {
     const idx = team * RIDERS_PER_TEAM + i;
     const row = Math.floor(idx / ridersPerRow);
     const col = idx % ridersPerRow;
-    const trackDist0 = (TRACK_LENGTH - row * ROW_SPACING + TRACK_WRAP) % TRACK_WRAP;
+    // Introduce a small random shift so riders aren't perfectly aligned on start
+    const trackJitter = THREE.MathUtils.randFloatSpread(ROW_SPACING);
+    const trackDist0 =
+      (TRACK_LENGTH - row * ROW_SPACING + trackJitter + TRACK_WRAP) % TRACK_WRAP;
+
     const usableWidth = ROAD_WIDTH - RIDER_WIDTH;
-    const rawOff = (ridersPerRow === 1 ? 0 : col / (ridersPerRow - 1) - 0.5) * usableWidth;
+    const rawOff =
+      (ridersPerRow === 1 ? 0 : col / (ridersPerRow - 1) - 0.5) * usableWidth;
     const halfRider = RIDER_WIDTH / 2;
     const maxOff = ROAD_WIDTH / 2 - halfRider;
-    const off = THREE.MathUtils.clamp(rawOff, -maxOff, maxOff);
+    const off = THREE.MathUtils.clamp(
+      rawOff + THREE.MathUtils.randFloatSpread(0.3),
+      -maxOff,
+      maxOff
+    );
     const angle0 = (trackDist0 / TRACK_LENGTH) * 2 * Math.PI;
     const x0 = (BASE_RADIUS + off) * Math.cos(angle0);
     const z0 = (BASE_RADIUS + off) * Math.sin(angle0);
