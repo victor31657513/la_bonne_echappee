@@ -227,25 +227,32 @@ function applyForces(dt) {
       }
 
       if (blocked) {
-        // Try a wider lateral move when overtaking
+        // Try progressively wider lateral moves when overtaking
         const SHIFT = 2;
         const maxOffset = ROAD_WIDTH / 2 - 1;
         let chosen = r.laneOffset;
         for (const dir of [-1, 1]) {
-          const cand = THREE.MathUtils.clamp(r.laneOffset + dir * SHIFT, -maxOffset, maxOffset);
-          let collide = false;
-          for (const other of riders) {
-            if (other === r) continue;
-            const d = wrapDistance(other.trackDist, r.trackDist);
-            if (d < SAFE_DIST && Math.abs(other.laneOffset - cand) < LANE_GAP) {
-              collide = true;
+          for (let step = SHIFT; step <= maxOffset; step += SHIFT) {
+            const cand = THREE.MathUtils.clamp(
+              r.laneOffset + dir * step,
+              -maxOffset,
+              maxOffset
+            );
+            let collide = false;
+            for (const other of riders) {
+              if (other === r) continue;
+              const d = wrapDistance(other.trackDist, r.trackDist);
+              if (d < SAFE_DIST && Math.abs(other.laneOffset - cand) < LANE_GAP) {
+                collide = true;
+                break;
+              }
+            }
+            if (!collide) {
+              chosen = cand;
               break;
             }
           }
-          if (!collide) {
-            chosen = cand;
-            break;
-          }
+          if (chosen !== r.laneOffset) break;
         }
         r.laneTarget = chosen;
       } else {
