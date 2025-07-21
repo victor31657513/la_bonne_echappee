@@ -26,10 +26,13 @@ const RIDER_WIDTH = 1.7; // match geometry width
 // Slightly smaller gap so more riders fit side by side
 const MIN_LATERAL_GAP = 0.2;
 // Collision body dimensions for Cannon.js bodies
+// Swap width/depth so side collisions use the long face of the box
 const RIDER_BOX_HALF = {
-  x: riderGeom.parameters.width / 2,
+  // along track direction
+  x: riderGeom.parameters.depth / 2,
   y: riderGeom.parameters.height / 2,
-  z: riderGeom.parameters.depth / 2
+  // lateral half-extent
+  z: riderGeom.parameters.width / 2
 };
 const riders = [];
 const teamRelayState = Array.from({ length: NUM_TEAMS }, () => ({
