@@ -26,7 +26,8 @@ import { aheadDistance, wrapDistance } from './utils.js';
 
 const BASE_SPEED = 8;
 const SPEED_GAIN = 0.3;
-const IDEAL_MIX = 0.8;
+// Mix less with the ideal line so physical collisions have more influence
+const IDEAL_MIX = 0.3;
 const RELAY_SPEED_BOOST = 0.5;
 // Reduce lateral acceleration so riders don't slide across the road
 const LATERAL_FORCE = 3;
@@ -386,6 +387,14 @@ function animate() {
 
   riders.forEach(r => {
     const bodyPos = new THREE.Vector3().copy(r.body.position);
+    // Synchronize the logical lane offset with the actual body position so
+    // collisions can push riders sideways
+    const radial = Math.hypot(bodyPos.x, bodyPos.z);
+    r.laneOffset = THREE.MathUtils.clamp(
+      radial - BASE_RADIUS,
+      -MAX_LANE_OFFSET,
+      MAX_LANE_OFFSET
+    );
     const angleRaw = Math.atan2(bodyPos.z, bodyPos.x);
     const distRaw = ((angleRaw < 0 ? angleRaw + 2 * Math.PI : angleRaw) / (2 * Math.PI)) * TRACK_WRAP;
     if (distRaw < r.prevDist - TRACK_WRAP / 2) r.lap += 1;
