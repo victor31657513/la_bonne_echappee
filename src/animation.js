@@ -284,37 +284,43 @@ function applyForces(dt) {
  */
 function resolveOverlaps() {
   const minDist = RIDER_WIDTH + MIN_LATERAL_GAP;
-  for (let i = 0; i < riders.length; i++) {
-    const a = riders[i];
-    for (let j = i + 1; j < riders.length; j++) {
-      const b = riders[j];
-      const dx = a.body.position.x - b.body.position.x;
-      const dz = a.body.position.z - b.body.position.z;
-      const distSq = dx * dx + dz * dz;
-      if (distSq < minDist * minDist && distSq > 1e-6) {
-        const dist = Math.sqrt(distSq);
-        const overlap = minDist - dist;
-        const nx = dx / dist;
-        const nz = dz / dist;
-        const pushX = nx * (overlap / 2);
-        const pushZ = nz * (overlap / 2);
-        a.body.position.x += pushX;
-        a.body.position.z += pushZ;
-        b.body.position.x -= pushX;
-        b.body.position.z -= pushZ;
+  // Iterate a few times to resolve chains of overlaps
+  for (let pass = 0; pass < 3; pass++) {
+    let moved = false;
+    for (let i = 0; i < riders.length; i++) {
+      const a = riders[i];
+      for (let j = i + 1; j < riders.length; j++) {
+        const b = riders[j];
+        const dx = a.body.position.x - b.body.position.x;
+        const dz = a.body.position.z - b.body.position.z;
+        const distSq = dx * dx + dz * dz;
+        if (distSq < minDist * minDist && distSq > 1e-6) {
+          const dist = Math.sqrt(distSq);
+          const overlap = minDist - dist;
+          const nx = dx / dist;
+          const nz = dz / dist;
+          const pushX = nx * (overlap / 2);
+          const pushZ = nz * (overlap / 2);
+          a.body.position.x += pushX;
+          a.body.position.z += pushZ;
+          b.body.position.x -= pushX;
+          b.body.position.z -= pushZ;
+          moved = true;
 
-        const relVX = a.body.velocity.x - b.body.velocity.x;
-        const relVZ = a.body.velocity.z - b.body.velocity.z;
-        const relVN = relVX * nx + relVZ * nz;
-        if (relVN < 0) {
-          const impulse = relVN / 2;
-          a.body.velocity.x -= impulse * nx;
-          a.body.velocity.z -= impulse * nz;
-          b.body.velocity.x += impulse * nx;
-          b.body.velocity.z += impulse * nz;
+          const relVX = a.body.velocity.x - b.body.velocity.x;
+          const relVZ = a.body.velocity.z - b.body.velocity.z;
+          const relVN = relVX * nx + relVZ * nz;
+          if (relVN < 0) {
+            const impulse = relVN / 2;
+            a.body.velocity.x -= impulse * nx;
+            a.body.velocity.z -= impulse * nz;
+            b.body.velocity.x += impulse * nx;
+            b.body.velocity.z += impulse * nz;
+          }
         }
       }
     }
+    if (!moved) break;
   }
 }
 
