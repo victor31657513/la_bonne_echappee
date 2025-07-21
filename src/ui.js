@@ -58,16 +58,21 @@ function showTeamControls(tid) {
       row.innerHTML = `
       <span>Rider ${idx + 1}${r.isLeader ? ' (Leader)' : ''}</span>
       <label>Relay:<select id="relay_${tid}_${idx}"><option>0</option><option>1</option><option>2</option><option>3</option></select></label>
-      <label>Intensity:<input type="range" min="0" max="100" id="int_${tid}_${idx}" value="${r.intensity}"/></label>
+      <label>Intensity:<input type="range" min="0" max="100" id="int_${tid}_${idx}" value="${r.baseIntensity}"/></label>
       <label><input type="checkbox" id="prot_${tid}_${idx}" ${r.protectLeader ? 'checked' : ''} ${r.isLeader ? 'disabled' : ''}/> Protect</label>
-      <label>Effort:<select id="eff_${tid}_${idx}"><option value="0">Follower</option><option value="1">Normal</option><option value="2">Attack</option></select></label>`;
+      <button id="atk_${tid}_${idx}">Attack</button>
+      <progress id="gauge_${tid}_${idx}" max="100" value="${r.attackGauge}"></progress>`;
       teamControlsDiv.append(row);
       document.getElementById(`relay_${tid}_${idx}`).value = r.relaySetting;
       document.getElementById(`relay_${tid}_${idx}`).addEventListener('change', e => (r.relaySetting = +e.target.value));
-      document.getElementById(`int_${tid}_${idx}`).addEventListener('input', e => (r.intensity = +e.target.value));
+      document.getElementById(`int_${tid}_${idx}`).addEventListener('input', e => {
+        r.baseIntensity = +e.target.value;
+        if (!r.isAttacking) r.intensity = r.baseIntensity;
+      });
       document.getElementById(`prot_${tid}_${idx}`).addEventListener('change', e => (r.protectLeader = e.target.checked));
-      document.getElementById(`eff_${tid}_${idx}`).value = r.effortMode;
-      document.getElementById(`eff_${tid}_${idx}`).addEventListener('change', e => (r.effortMode = +e.target.value));
+      document.getElementById(`atk_${tid}_${idx}`).addEventListener('click', () => {
+        if (r.attackGauge > 0) r.isAttacking = true;
+      });
     });
 }
 teamSelect.addEventListener('change', () => showTeamControls(+teamSelect.value));
@@ -141,6 +146,17 @@ function updateSelectionHelper() {
     selectionMarker.visible = false;
   }
 }
+
+// Met à jour régulièrement les jauges d'attaque affichées
+setInterval(() => {
+  const tid = +teamSelect.value;
+  riders
+    .filter(r => r.team === tid)
+    .forEach((r, idx) => {
+      const el = document.getElementById(`gauge_${tid}_${idx}`);
+      if (el) el.value = r.attackGauge;
+    });
+}, 100);
 
 // Ensure selection marker is visible on load
 updateSelectionHelper();

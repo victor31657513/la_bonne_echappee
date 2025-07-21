@@ -41,6 +41,12 @@ body {
     margin-right: 10px;
 }
 
+.rider-control progress {
+    width: 80px;
+    vertical-align: middle;
+    margin-left: 5px;
+}
+
 input[type='range'] {
     width: 80px;
 }
