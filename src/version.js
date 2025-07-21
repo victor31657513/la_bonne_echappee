@@ -1,12 +1,12 @@
-// Charge et affiche la version de l'application depuis version.json
+// Charge et affiche la version de l'application depuis package.json
 async function displayVersion() {
   const container = document.getElementById('version-container');
   if (!container) return;
   try {
-    const response = await fetch('version.json');
+    const response = await fetch('package.json');
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    const versionData = await response.json();
-    container.textContent = `Version ${versionData.version}`;
+    const pkg = await response.json();
+    container.textContent = `Version ${pkg.version}`;
   } catch (err) {
     console.error('Impossible de charger la version', err);
   }
