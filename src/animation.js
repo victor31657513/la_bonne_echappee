@@ -132,7 +132,8 @@ function updateLaneOffsets(dt) {
       }
     });
     if (ahead && bestDelta < 5) {
-      const dir = r.laneOffset <= ahead.laneOffset ? -1 : 1;
+      // Move outward relative to the center of the road when overtaking
+      const dir = r.baseLaneOffset >= 0 ? 1 : -1;
 
       const sideBlocked = riders.some((o, j) => {
         if (j === idx) return false;
