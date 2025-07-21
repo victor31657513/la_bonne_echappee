@@ -42,6 +42,9 @@ const RELAY_INTERVAL = 5;
 const PULL_OFF_TIME = 2;
 const PULL_OFFSET = 1.5;
 const PULL_OFF_SPEED_FACTOR = 0.7;
+const ATTACK_INTENSITY = 60; // 120% of base intensity
+const ATTACK_DRAIN = 50; // gauge units per second during attack
+const ATTACK_RECOVERY = 10; // gauge recovery per second
 
 const forwardVec = new THREE.Vector3();
 const lookAtPt = new THREE.Vector3();
@@ -363,6 +366,20 @@ function animate() {
     stepPhysics(dt);
     limitRiderSpeed();
     limitLateralSpeed();
+
+    riders.forEach(r => {
+      if (r.isAttacking) {
+        r.attackGauge = Math.max(0, r.attackGauge - ATTACK_DRAIN * dt);
+        r.intensity = ATTACK_INTENSITY;
+        if (r.attackGauge <= 0) {
+          r.isAttacking = false;
+          r.intensity = r.baseIntensity;
+        }
+      } else {
+        r.attackGauge = Math.min(100, r.attackGauge + ATTACK_RECOVERY * dt);
+        r.intensity = r.baseIntensity;
+      }
+    });
 
     riders.forEach(r => {
       const theta = ((r.trackDist % TRACK_WRAP) / TRACK_WRAP) * 2 * Math.PI;

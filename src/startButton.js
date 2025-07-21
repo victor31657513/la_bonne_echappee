@@ -11,6 +11,9 @@ if (startBtn) {
     started = true;
     riders.forEach(r => {
       r.currentBoost = 0;
+      r.isAttacking = false;
+      r.attackGauge = 100;
+      r.intensity = r.baseIntensity;
       r.body.velocity.set(0, 0, 0);
       r.body.angularVelocity.set(0, 0, 0);
       r.body.force.set(0, 0, 0);
