@@ -23,8 +23,8 @@ import { stepPhysics } from './physicsWorld.js';
 import { updateSelectionHelper, selectedIndex } from './ui.js';
 import { started } from './startButton.js';
 import { aheadDistance, wrapDistance } from './utils.js';
+import { BASE_SPEED } from './constants.js';
 
-const BASE_SPEED = 8;
 const SPEED_GAIN = 0.3;
 // Mix less with the ideal line so physical collisions have more influence
 const IDEAL_MIX = 0.3;
