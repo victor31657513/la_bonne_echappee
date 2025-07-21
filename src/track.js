@@ -18,8 +18,13 @@ road.rotation.x = -Math.PI / 2;
 scene.add(road);
 
 const trackPoints = [];
-for (let a = 0; a <= Math.PI * 2; a += 0.1) {
-  trackPoints.push(new THREE.Vector3(BASE_RADIUS * Math.cos(a), 0, BASE_RADIUS * Math.sin(a)));
+// Avoid duplicating the first point at 2π which introduced a sharp corner on the
+// center spline and caused riders to slow down each lap when crossing the
+// start/finish line.
+for (let a = 0; a < Math.PI * 2; a += 0.1) {
+  trackPoints.push(
+    new THREE.Vector3(BASE_RADIUS * Math.cos(a), 0, BASE_RADIUS * Math.sin(a))
+  );
 }
 const centerSpline = new THREE.CatmullRomCurve3(trackPoints, true);
 
