@@ -198,6 +198,22 @@ function updateRelays(dt) {
 }
 
 /**
+ * Adapte l'intensité des coureurs au leader lorsqu'il roule au maximum.
+ *
+ * @returns {void}
+ */
+function adjustIntensityToLeader() {
+  const leader = riders.reduce((a, b) => (b.trackDist > a.trackDist ? b : a), riders[0]);
+  if (leader.isAttacking || leader.intensity < 100) return;
+
+  riders.forEach(r => {
+    if (r !== leader && !r.isAttacking) {
+      r.intensity = Math.max(r.intensity, leader.intensity);
+    }
+  });
+}
+
+/**
  * Applique les différentes forces physiques sur les coureurs.
  *
  * @param {number} dt Durée écoulée depuis la dernière mise à jour en secondes.
@@ -394,6 +410,8 @@ function animate() {
         r.intensity = r.baseIntensity;
       }
     });
+
+    adjustIntensityToLeader();
 
     riders.forEach(r => {
       const theta = ((r.trackDist % TRACK_WRAP) / TRACK_WRAP) * 2 * Math.PI;
