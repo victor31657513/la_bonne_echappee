@@ -23,7 +23,8 @@ const riderGeom = new THREE.BoxGeometry(1.7, 1.5, 0.5);
 
 const RIDER_WIDTH = 1.7; // match geometry width
 // Reduced gap to fit more riders across the road at base speed
-const MIN_LATERAL_GAP = 0.3;
+// Slightly smaller gap so more riders fit side by side
+const MIN_LATERAL_GAP = 0.2;
 // Collision body dimensions for Cannon.js bodies
 const RIDER_BOX_HALF = {
   x: riderGeom.parameters.width / 2,
