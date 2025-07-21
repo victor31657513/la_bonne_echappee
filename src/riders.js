@@ -86,6 +86,7 @@ for (let team = 0; team < NUM_TEAMS; team++) {
       trackDist: trackDist0,
       lap: 0,
       prevDist: trackDist0,
+      baseLaneOffset: off,
       laneOffset: off,
       laneTarget: off,
       speed: 0,

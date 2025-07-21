@@ -180,8 +180,8 @@ function updateLaneOffsets(dt) {
         );
       }
     } else {
-      r.laneOffset = THREE.MathUtils.lerp(r.laneOffset, 0, dt);
-    }
+      r.laneOffset = THREE.MathUtils.lerp(r.laneOffset, r.baseLaneOffset, dt);
+      }
   });
 }
 
@@ -220,8 +220,8 @@ function updateRelays(dt) {
       r.pullTimer += dt;
       if (r.pullTimer >= PULL_OFF_TIME) {
         r.pullingOff = false;
-        r.laneTarget = 0;
-      }
+        r.laneTarget = r.baseLaneOffset;
+        }
     }
   });
 }
@@ -279,10 +279,10 @@ function applyForces(dt) {
         }
         r.laneTarget = chosen;
       } else {
-        r.laneTarget = 0;
+        r.laneTarget = r.baseLaneOffset;
       }
     } else if (!r.pullingOff) {
-      r.laneTarget = 0;
+      r.laneTarget = r.baseLaneOffset;
     }
 
     // Smoothly steer towards the desired lateral position
