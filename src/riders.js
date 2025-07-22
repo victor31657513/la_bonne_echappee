@@ -109,6 +109,7 @@ for (let team = 0; team < NUM_TEAMS; team++) {
       baseIntensity: 50,
       intensity: 50,
       relayChasing: false,
+      inRelayLine: false,
       pullingOff: false,
       pullTimer: 0,
       protectLeader: false,
