@@ -45,6 +45,8 @@ const PULL_OFF_SPEED_FACTOR = 0.7;
 const ATTACK_INTENSITY = 60; // 120% of base intensity
 const ATTACK_DRAIN = 50; // gauge units per second during attack
 const ATTACK_RECOVERY = 10; // gauge recovery per second
+const RELAY_QUEUE_GAP = 4;
+const RELAY_CHASE_INTENSITY = 70;
 
 const forwardVec = new THREE.Vector3();
 const lookAtPt = new THREE.Vector3();
@@ -172,8 +174,16 @@ function updateRelays(dt) {
     const leader = teamRiders[state.index % teamRiders.length];
     teamRiders.forEach(r => {
       r.relayIntensity = 0;
+      r.relayChasing = false;
     });
     leader.relayIntensity = leader.relaySetting;
+
+    for (let i = 1; i < teamRiders.length; i++) {
+      const prev = teamRiders[i - 1];
+      const r = teamRiders[i];
+      const dist = aheadDistance(r.trackDist, prev.trackDist);
+      if (dist > RELAY_QUEUE_GAP) r.relayChasing = true;
+    }
 
     state.timer += dt;
     if (state.timer >= RELAY_INTERVAL) {
@@ -408,6 +418,9 @@ function animate() {
       } else {
         r.attackGauge = Math.min(100, r.attackGauge + ATTACK_RECOVERY * dt);
         r.intensity = r.baseIntensity;
+        if (r.relayChasing) {
+          r.intensity = Math.max(r.intensity, RELAY_CHASE_INTENSITY);
+        }
       }
     });
 
