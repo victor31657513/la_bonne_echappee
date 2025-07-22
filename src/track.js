@@ -18,10 +18,11 @@ road.rotation.x = -Math.PI / 2;
 scene.add(road);
 
 const trackPoints = [];
-// Avoid duplicating the first point at 2π which introduced a sharp corner on the
-// center spline and caused riders to slow down each lap when crossing the
-// start/finish line.
-for (let a = 0; a < Math.PI * 2; a += 0.1) {
+const STEP_ANGLE = 0.1;
+// Exclude the 2π angle to avoid duplicating the first point. A duplicate
+// introduced a sharp corner in the past and caused riders to slow down each
+// lap when crossing the start/finish line.
+for (let a = 0; a < Math.PI * 2; a += STEP_ANGLE) {
   trackPoints.push(
     new THREE.Vector3(BASE_RADIUS * Math.cos(a), 0, BASE_RADIUS * Math.sin(a))
   );
