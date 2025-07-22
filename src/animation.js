@@ -124,6 +124,10 @@ function clampAndRedirect() {
  */
 function updateLaneOffsets(dt) {
   riders.forEach((r, idx) => {
+    if (r.inRelayLine) {
+      r.laneOffset = THREE.MathUtils.lerp(r.laneOffset, r.laneTarget, dt);
+      return;
+    }
     let bestDelta = TRACK_WRAP;
     let ahead = null;
     riders.forEach((o, j) => {
@@ -171,7 +175,9 @@ function updateRelays(dt) {
     const allTeam = riders.filter(r => r.team === t && r.relaySetting > 0);
     if (allTeam.length === 0) continue;
 
-    const sorted = allTeam.filter(r => !r.pullingOff).sort((a, b) => b.trackDist - a.trackDist);
+    const sorted = allTeam
+      .filter(r => !r.pullingOff)
+      .sort((a, b) => b.trackDist - a.trackDist);
     const queue = [];
     sorted.forEach(r => {
       if (queue.length === 0) {
@@ -190,14 +196,17 @@ function updateRelays(dt) {
     allTeam.forEach(r => {
       r.relayIntensity = 0;
       r.relayChasing = false;
+      r.inRelayLine = false;
     });
     leader.relayIntensity = leader.relaySetting;
+    leader.inRelayLine = true;
 
     for (let i = 1; i < queue.length; i++) {
       const prev = queue[i - 1];
       const r = queue[i];
       const dist = aheadDistance(r.trackDist, prev.trackDist);
       if (dist > RELAY_QUEUE_GAP) r.relayChasing = true;
+      r.inRelayLine = true;
     }
 
     allTeam.forEach(r => {
@@ -210,6 +219,7 @@ function updateRelays(dt) {
       state.timer = 0;
       leader.pullingOff = true;
       leader.pullTimer = 0;
+      leader.inRelayLine = false;
       leader.laneTarget = state.side * PULL_OFFSET;
       state.index = (state.index + 1) % queue.length;
       state.side *= -1;
@@ -221,8 +231,13 @@ function updateRelays(dt) {
       r.pullTimer += dt;
       if (r.pullTimer >= PULL_OFF_TIME) {
         r.pullingOff = false;
-        r.laneTarget = r.baseLaneOffset;
-        }
+        r.relayChasing = true;
+        r.laneTarget = 0;
+      }
+    } else if (r.inRelayLine) {
+      r.laneTarget = 0;
+    } else {
+      r.laneTarget = r.baseLaneOffset;
     }
   });
 }
