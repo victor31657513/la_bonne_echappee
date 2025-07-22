@@ -38,7 +38,8 @@ const MAX_LATERAL_SPEED = 3;
 const MAX_LANE_OFFSET = ROAD_WIDTH / 2 - 0.85;
 // Slow down lane changes for smoother overtaking
 const LANE_CHANGE_SPEED = 1.5;
-const RELAY_INTERVAL = 5;
+const BASE_RELAY_INTERVAL = 5;
+const RELAY_JOIN_GAP = 10;
 const PULL_OFF_TIME = 2;
 const PULL_OFFSET = 1.5;
 const PULL_OFF_SPEED_FACTOR = 0.7;
@@ -167,31 +168,50 @@ function updateLaneOffsets(dt) {
 function updateRelays(dt) {
   for (let t = 0; t < teamRelayState.length; t++) {
     const state = teamRelayState[t];
-    const teamRiders = riders.filter(r => r.team === t && r.relaySetting > 0);
-    if (teamRiders.length === 0) continue;
+    const allTeam = riders.filter(r => r.team === t && r.relaySetting > 0);
+    if (allTeam.length === 0) continue;
 
-    teamRiders.sort((a, b) => b.trackDist - a.trackDist);
-    const leader = teamRiders[state.index % teamRiders.length];
-    teamRiders.forEach(r => {
+    const sorted = allTeam.filter(r => !r.pullingOff).sort((a, b) => b.trackDist - a.trackDist);
+    const queue = [];
+    sorted.forEach(r => {
+      if (queue.length === 0) {
+        queue.push(r);
+      } else {
+        const prev = queue[queue.length - 1];
+        const dist = aheadDistance(r.trackDist, prev.trackDist);
+        if (dist <= RELAY_JOIN_GAP) queue.push(r);
+      }
+    });
+
+    if (queue.length === 0) continue;
+    if (state.index >= queue.length) state.index = 0;
+    const leader = queue[state.index];
+
+    allTeam.forEach(r => {
       r.relayIntensity = 0;
       r.relayChasing = false;
     });
     leader.relayIntensity = leader.relaySetting;
 
-    for (let i = 1; i < teamRiders.length; i++) {
-      const prev = teamRiders[i - 1];
-      const r = teamRiders[i];
+    for (let i = 1; i < queue.length; i++) {
+      const prev = queue[i - 1];
+      const r = queue[i];
       const dist = aheadDistance(r.trackDist, prev.trackDist);
       if (dist > RELAY_QUEUE_GAP) r.relayChasing = true;
     }
 
+    allTeam.forEach(r => {
+      if (!queue.includes(r)) r.relayChasing = true;
+    });
+
     state.timer += dt;
-    if (state.timer >= RELAY_INTERVAL) {
+    const interval = BASE_RELAY_INTERVAL / queue.length;
+    if (state.timer >= interval) {
       state.timer = 0;
       leader.pullingOff = true;
       leader.pullTimer = 0;
       leader.laneTarget = state.side * PULL_OFFSET;
-      state.index = (state.index + 1) % teamRiders.length;
+      state.index = (state.index + 1) % queue.length;
       state.side *= -1;
     }
   }
