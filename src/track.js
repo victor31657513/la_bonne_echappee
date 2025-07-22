@@ -3,7 +3,8 @@
 import { THREE, scene } from './setupScene.js';
 
 const TRACK_LENGTH = 1000;
-const ROAD_WIDTH = 10;
+// Slightly widen the road so six riders can fit side by side
+const ROAD_WIDTH = 12;
 const BASE_RADIUS = TRACK_LENGTH / (2 * Math.PI);
 const INNER_R = BASE_RADIUS - ROAD_WIDTH / 2;
 const OUTER_R = BASE_RADIUS + ROAD_WIDTH / 2;
