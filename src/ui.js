@@ -48,20 +48,20 @@ teamColorsCss.forEach((col, t) => {
  */
 function showTeamControls(tid) {
   teamControlsDiv.innerHTML = '';
-  const teamModeBtn = document.createElement('button');
-  let teamMode = riders.find(r => r.team === tid && r.relaySetting > 0) ? 'Relay' : 'Follower';
-  const updateTeamModeLabel = () => {
-    teamModeBtn.textContent = teamMode;
+  const teamRelayBtn = document.createElement('button');
+  let relayLevel = riders.find(r => r.team === tid)?.relaySetting ?? 0;
+  const updateTeamRelayLabel = () => {
+    teamRelayBtn.textContent = relayLevel > 0 ? `Team Relay ${relayLevel}` : 'Team Relay';
   };
-  updateTeamModeLabel();
-  teamModeBtn.addEventListener('click', () => {
-    teamMode = teamMode === 'Relay' ? 'Follower' : 'Relay';
+  updateTeamRelayLabel();
+  teamRelayBtn.addEventListener('click', () => {
+    relayLevel = relayLevel % 3 + 1;
     riders
       .filter(r => r.team === tid)
       .forEach(r => {
-        r.relaySetting = teamMode === 'Relay' ? 3 : 0;
+        r.relaySetting = relayLevel;
       });
-    updateTeamModeLabel();
+    updateTeamRelayLabel();
   });
 
   const intensityLabel = document.createElement('label');
@@ -91,7 +91,7 @@ function showTeamControls(tid) {
   });
   const teamIntensityContainer = document.createElement('div');
   teamIntensityContainer.append(intensityLabel, teamIntInput, teamIntVal);
-  teamControlsDiv.append(teamModeBtn, teamIntensityContainer, document.createElement('hr'));
+  teamControlsDiv.append(teamRelayBtn, teamIntensityContainer, document.createElement('hr'));
   riders
     .filter(r => r.team === tid)
     .forEach((r, idx) => {
@@ -101,7 +101,8 @@ function showTeamControls(tid) {
       <span>Rider ${idx + 1}${r.isLeader ? ' (Leader)' : ''}</span>
       <label>Intensity:<input type="range" min="0" max="100" step="25" list="intensityTicks" id="int_${tid}_${idx}" value="${r.baseIntensity}"/><span id="int_val_${tid}_${idx}">${r.baseIntensity}</span></label>
       <label><input type="checkbox" id="prot_${tid}_${idx}" ${r.protectLeader ? 'checked' : ''} ${r.isLeader ? 'disabled' : ''}/> Protect</label>
-      <button id="mode_btn_${tid}_${idx}">Follower</button>
+      <button id="relay_btn_${tid}_${idx}">Relay</button>
+      <button id="atk_${tid}_${idx}">Attack</button>
       <progress id="gauge_${tid}_${idx}" max="100" value="${r.attackGauge}"></progress>`;
       teamControlsDiv.append(row);
       const intensityInput = document.getElementById(`int_${tid}_${idx}`);
@@ -127,33 +128,11 @@ function showTeamControls(tid) {
         }
       });
       document.getElementById(`prot_${tid}_${idx}`).addEventListener('change', e => (r.protectLeader = e.target.checked));
-      const modeBtn = document.getElementById(`mode_btn_${tid}_${idx}`);
-      let mode = r.isAttacking ? 'Attack' : r.relaySetting > 0 ? 'Relay' : 'Follower';
-      const updateModeLabel = () => {
-        modeBtn.textContent = mode;
-      };
-      updateModeLabel();
-      modeBtn.addEventListener('click', () => {
-        if (mode === 'Follower') {
-          mode = 'Relay';
-          r.relaySetting = 3;
-          r.isAttacking = false;
-        } else if (mode === 'Relay') {
-          if (r.attackGauge > 0) {
-            mode = 'Attack';
-            r.isAttacking = true;
-            r.relaySetting = 0;
-          } else {
-            mode = 'Follower';
-            r.relaySetting = 0;
-            r.isAttacking = false;
-          }
-        } else {
-          mode = 'Follower';
-          r.relaySetting = 0;
-          r.isAttacking = false;
-        }
-        updateModeLabel();
+      document.getElementById(`relay_btn_${tid}_${idx}`).addEventListener('click', () => {
+        r.relaySetting = r.relaySetting > 0 ? 0 : 3;
+      });
+      document.getElementById(`atk_${tid}_${idx}`).addEventListener('click', () => {
+        if (r.attackGauge > 0) r.isAttacking = true;
       });
     });
 }
@@ -237,11 +216,6 @@ setInterval(() => {
     .forEach((r, idx) => {
       const el = document.getElementById(`gauge_${tid}_${idx}`);
       if (el) el.value = r.attackGauge;
-      const btn = document.getElementById(`mode_btn_${tid}_${idx}`);
-      if (btn) {
-        const expected = r.isAttacking ? 'Attack' : r.relaySetting > 0 ? 'Relay' : 'Follower';
-        if (btn.textContent !== expected) btn.textContent = expected;
-      }
     });
 }, 100);
 
