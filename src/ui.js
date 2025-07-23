@@ -4,7 +4,7 @@ import { THREE, camera, renderer, scene } from './setupScene.js';
 import { riders, teamColors, riderGeom } from './riders.js';
 import { TRACK_WRAP } from './track.js';
 
-// Start focused on a rider roughly in the middle of the peloton
+// Au démarrage, on se concentre sur un coureur situé vers le milieu du peloton
 let selectedIndex = Math.floor(riders.length / 2);
 const raycaster = new THREE.Raycaster();
 const mouse = new THREE.Vector2();
@@ -158,7 +158,7 @@ setInterval(() => {
     });
 }, 100);
 
-// Ensure selection marker is visible on load
+// S'assurer que le marqueur de sélection est visible au chargement
 updateSelectionHelper();
 
 export { selectedIndex, updateSelectionHelper };

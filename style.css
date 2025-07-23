@@ -3,7 +3,7 @@
 body {
     margin: 0;
     background-color: #000;
-    /* black background as required */
+    /* fond noir comme requis */
     color: #eee;
     font-family: sans-serif;
 }
@@ -30,7 +30,7 @@ body {
     overflow-y: auto;
 }
 
-/* Each rider control row style */
+/* Style de chaque ligne de contrôle de coureur */
 .rider-control {
     margin: 4px 0;
     padding: 4px;
