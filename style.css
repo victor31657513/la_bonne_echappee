@@ -53,6 +53,9 @@ input[type='range'] {
 .rider-control select {
     margin-left: 4px;
 }
+.rider-control button {
+    margin-left: 4px;
+}
 
 #version-container {
     position: fixed;
