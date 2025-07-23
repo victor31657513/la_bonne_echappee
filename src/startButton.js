@@ -3,6 +3,7 @@
 import { riders } from './riders.js';
 import { polarToDist } from './utils.js';
 import { BASE_SPEED } from './constants.js';
+import { emit } from './eventBus.js';
 
 let started = false;
 
@@ -15,6 +16,7 @@ if (startBtn) {
       r.isAttacking = false;
       r.attackGauge = 100;
       r.intensity = r.baseIntensity;
+      emit('intensityChange', { rider: r, value: r.intensity });
       const angle = Math.atan2(r.body.position.z, r.body.position.x);
       r.body.velocity.set(
         -Math.sin(angle) * BASE_SPEED,

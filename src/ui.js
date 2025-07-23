@@ -3,6 +3,7 @@
 import { THREE, camera, renderer, scene } from './setupScene.js';
 import { riders, teamColors, riderGeom } from './riders.js';
 import { TRACK_WRAP } from './track.js';
+import { on, emit } from './eventBus.js';
 
 // Au démarrage, on se concentre sur un coureur situé vers le milieu du peloton
 let selectedIndex = Math.floor(riders.length / 2);
@@ -67,12 +68,27 @@ function showTeamControls(tid) {
       teamControlsDiv.append(row);
       document.getElementById(`relay_${tid}_${idx}`).value = r.relaySetting;
       document.getElementById(`relay_${tid}_${idx}`).addEventListener('change', e => (r.relaySetting = +e.target.value));
-      document.getElementById(`int_${tid}_${idx}`).addEventListener('input', e => {
+      const intensityInput = document.getElementById(`int_${tid}_${idx}`);
+      intensityInput.addEventListener('input', e => {
         const val = Math.round(+e.target.value / 25) * 25;
-        e.target.value = val;
+        intensityInput.value = val;
         r.baseIntensity = val;
         document.getElementById(`int_val_${tid}_${idx}`).textContent = val;
-        if (!r.isAttacking) r.intensity = r.baseIntensity;
+        if (!r.isAttacking) {
+          r.intensity = r.baseIntensity;
+          emit('intensityChange', { rider: r, value: r.intensity });
+        }
+      });
+      on('intensityChange', payload => {
+        if (payload.rider === r) {
+          intensityInput.value = payload.value;
+          document.getElementById(`int_val_${tid}_${idx}`).textContent = payload.value;
+        }
+      });
+      on('phaseChange', payload => {
+        if (payload.rider === r) {
+          row.dataset.phase = payload.phase;
+        }
       });
       document.getElementById(`prot_${tid}_${idx}`).addEventListener('change', e => (r.protectLeader = e.target.checked));
       document.getElementById(`relay_btn_${tid}_${idx}`).addEventListener('click', () => {
