@@ -1,4 +1,5 @@
 import { RELAY_MIN_DIST, RELAY_MAX_DIST } from './constants.js';
+import { emit } from './eventBus.js';
 
 const BASE_RELAY_INTERVAL = 5;
 const RELAY_JOIN_GAP = 10;
@@ -6,6 +7,16 @@ const PULL_OFF_TIME = 2;
 const PULL_OFFSET = 1.5;
 const RELAY_TARGET_GAP = 1.5;
 const TRACK_WRAP = 1000;
+
+function setPhase(rider, phase) {
+  if (rider.relayPhase !== phase) {
+    const prev = rider.relayPhase;
+    rider.relayPhase = phase;
+    emit('phaseChange', { rider, phase, prev });
+  } else {
+    rider.relayPhase = phase;
+  }
+}
 
 function aheadDistance(from, to) {
   let diff = (to - from) % TRACK_WRAP;
@@ -51,7 +62,7 @@ function relayStep(riders, state, dt) {
     r.relayLeader = false;
   });
 
-  leader.relayPhase = 'pull';
+  setPhase(leader, 'pull');
   leader.relayIntensity = leader.relaySetting;
   leader.inRelayLine = true;
   leader.relayLeader = true;
@@ -72,7 +83,7 @@ function relayStep(riders, state, dt) {
   const interval = BASE_RELAY_INTERVAL / queue.length;
   if (state.timer >= interval) {
     state.timer = 0;
-    leader.relayPhase = 'fall_back';
+    setPhase(leader, 'fall_back');
     leader.relayTimer = 0;
     leader.inRelayLine = false;
     leader.relayLeader = false;
@@ -86,7 +97,7 @@ function relayStep(riders, state, dt) {
       r.relayTimer += dt;
       r.relayIntensity = r.relaySetting * Math.max(0, 1 - r.relayTimer / PULL_OFF_TIME);
       if (r.relayTimer >= PULL_OFF_TIME) {
-        r.relayPhase = 'line';
+        setPhase(r, 'line');
         r.relayChasing = true;
         r.laneTarget = 0;
         r.relayIntensity = 0;

@@ -26,6 +26,7 @@ import { aheadDistance, wrapDistance } from './utils.js';
 import { BASE_SPEED, RELAY_MIN_DIST, RELAY_MAX_DIST } from './constants.js';
 import { updateRelayCluster } from './relayCluster.js';
 import { relayStep } from './relayLogic.js';
+import { emit } from './eventBus.js';
 
 const SPEED_GAIN = 0.3;
 // On mélange moins avec la trajectoire idéale pour que les collisions physiques aient plus d'influence
@@ -54,6 +55,26 @@ const RELAY_TARGET_GAP = 1.5;
 const RELAY_LEADER_INTENSITY = 70;
 // Force appliquée pour corriger l'écart entre deux coureurs en relais
 const RELAY_CORRECTION_GAIN = 5;
+
+function setIntensity(rider, value) {
+  if (rider.intensity !== value) {
+    const prev = rider.intensity;
+    rider.intensity = value;
+    emit('intensityChange', { rider, value, prev });
+  } else {
+    rider.intensity = value;
+  }
+}
+
+function setPhase(rider, phase) {
+  if (rider.relayPhase !== phase) {
+    const prev = rider.relayPhase;
+    rider.relayPhase = phase;
+    emit('phaseChange', { rider, phase, prev });
+  } else {
+    rider.relayPhase = phase;
+  }
+}
 
 const forwardVec = new THREE.Vector3();
 const lookAtPt = new THREE.Vector3();
@@ -210,7 +231,7 @@ function updateRelays(dt) {
     const interval = BASE_RELAY_INTERVAL / queue.length;
     if (state.timer >= interval) {
       state.timer = 0;
-      queue[state.index].relayPhase = 'fall_back';
+      setPhase(queue[state.index], 'fall_back');
       queue[state.index].relayTimer = 0;
       queue[state.index].inRelayLine = false;
       queue[state.index].relayLeader = false;
@@ -224,7 +245,7 @@ function updateRelays(dt) {
     if (r.relayPhase === 'fall_back') {
       r.relayTimer += dt;
       if (r.relayTimer >= PULL_OFF_TIME) {
-        r.relayPhase = 'line';
+        setPhase(r, 'line');
         r.relayChasing = true;
         r.laneTarget = 0;
       }
@@ -250,7 +271,7 @@ function adjustIntensityToLeader() {
 
   riders.forEach(r => {
     if (r !== leader && !r.isAttacking) {
-      r.intensity = Math.max(r.intensity, leader.intensity);
+      setIntensity(r, Math.max(r.intensity, leader.intensity));
     }
   });
 }
@@ -443,20 +464,21 @@ function animate() {
     riders.forEach(r => {
       if (r.isAttacking) {
         r.attackGauge = Math.max(0, r.attackGauge - ATTACK_DRAIN * dt);
-        r.intensity = ATTACK_INTENSITY;
+        setIntensity(r, ATTACK_INTENSITY);
         if (r.attackGauge <= 0) {
           r.isAttacking = false;
-          r.intensity = r.baseIntensity;
+          setIntensity(r, r.baseIntensity);
         }
       } else {
         r.attackGauge = Math.min(100, r.attackGauge + ATTACK_RECOVERY * dt);
-        r.intensity = r.baseIntensity;
+        let newInt = r.baseIntensity;
         if (r.relayChasing) {
-          r.intensity = Math.max(r.intensity, RELAY_CHASE_INTENSITY);
+          newInt = Math.max(newInt, RELAY_CHASE_INTENSITY);
         }
         if (r.relayLeader) {
-          r.intensity = Math.max(r.intensity, RELAY_LEADER_INTENSITY);
+          newInt = Math.max(newInt, RELAY_LEADER_INTENSITY);
         }
+        setIntensity(r, newInt);
       }
     });
 
