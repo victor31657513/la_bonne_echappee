@@ -36,6 +36,7 @@ const centerLineGeometry = new THREE.BufferGeometry().setFromPoints(
 );
 const centerLineMaterial = new THREE.LineDashedMaterial({
   color: 0xffffff,
+  linewidth: 3,
   dashSize: 5,
   gapSize: 3
 });
