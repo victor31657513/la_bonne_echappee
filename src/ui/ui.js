@@ -66,9 +66,11 @@ function showTeamControls(tid) {
     const active = e.target.value === '1';
     riders
       .filter(r => r.team === tid)
-      .forEach(r => {
+      .forEach((r, idx) => {
         r.relaySetting = active ? 3 : 0;
         if (!active) r.isAttacking = false;
+        const sel = document.getElementById(`state_${tid}_${idx}`);
+        if (sel) sel.value = active ? 'relay' : 'followers';
       });
   });
 
@@ -115,8 +117,8 @@ function showTeamControls(tid) {
       <select id="state_${tid}_${idx}">
         <option value="followers">Followers</option>
         <option value="relay">Relay</option>
-        <option value="attack">Attack</option>
       </select>
+      <button id="atk_${tid}_${idx}">Attack</button>
       <progress id="gauge_${tid}_${idx}" max="100" value="${r.attackGauge}"></progress>`;
       teamControlsDiv.append(row);
       const intensityInput = document.getElementById(`int_${tid}_${idx}`);
@@ -143,21 +145,18 @@ function showTeamControls(tid) {
       });
       document.getElementById(`prot_${tid}_${idx}`).addEventListener('change', e => (r.protectLeader = e.target.checked));
       const stateSel = document.getElementById(`state_${tid}_${idx}`);
-      stateSel.value = r.isAttacking ? 'attack' : r.relaySetting > 0 ? 'relay' : 'followers';
+      stateSel.value = r.relaySetting > 0 ? 'relay' : 'followers';
       stateSel.addEventListener('change', e => {
         if (e.target.value === 'relay') {
           r.relaySetting = 3;
           r.isAttacking = false;
-        } else if (e.target.value === 'attack') {
-          if (r.attackGauge > 0) {
-            r.isAttacking = true;
-          } else {
-            stateSel.value = r.relaySetting > 0 ? 'relay' : 'followers';
-          }
         } else {
           r.relaySetting = 0;
           r.isAttacking = false;
         }
+      });
+      document.getElementById(`atk_${tid}_${idx}`).addEventListener('click', () => {
+        if (r.attackGauge > 0) r.isAttacking = true;
       });
     });
 }
