@@ -1,9 +1,9 @@
 // Définit la géométrie de la piste et les courbes auxiliaires
 
 import { THREE, scene, registerLineMaterial } from './setupScene.js';
-import { Line2 } from 'https://cdn.jsdelivr.net/npm/three@0.153.0/examples/jsm/lines/Line2.js?module';
-import { LineGeometry } from 'https://cdn.jsdelivr.net/npm/three@0.153.0/examples/jsm/lines/LineGeometry.js?module';
-import { LineDashedMaterial } from 'https://cdn.jsdelivr.net/npm/three@0.153.0/src/materials/LineDashedMaterial.js?module';
+import { Line2 } from 'https://unpkg.com/three@0.153.0/examples/jsm/lines/Line2.js?module';
+import { LineGeometry } from 'https://unpkg.com/three@0.153.0/examples/jsm/lines/LineGeometry.js?module';
+import { LineDashedMaterial } from 'https://unpkg.com/three@0.153.0/src/materials/LineDashedMaterial.js?module';
 
 const TRACK_LENGTH = 1000;
 // Élargit légèrement la route pour que six coureurs puissent passer côte à côte
