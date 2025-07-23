@@ -1,6 +1,9 @@
 // Définit la géométrie de la piste et les courbes auxiliaires
 
-import { THREE, scene } from './setupScene.js';
+import { THREE, scene, registerLineMaterial } from './setupScene.js';
+import { Line2 } from 'https://cdn.jsdelivr.net/npm/three@0.153.0/examples/jsm/lines/Line2.js';
+import { LineGeometry } from 'https://cdn.jsdelivr.net/npm/three@0.153.0/examples/jsm/lines/LineGeometry.js';
+import { LineDashedMaterial } from 'https://cdn.jsdelivr.net/gh/mrdoob/three.js@r153/examples/jsm/lines/LineDashedMaterial.js';
 
 const TRACK_LENGTH = 1000;
 // Élargit légèrement la route pour que six coureurs puissent passer côte à côte
@@ -31,16 +34,20 @@ for (let a = 0; a < Math.PI * 2; a += STEP_ANGLE) {
 const centerSpline = new THREE.CatmullRomCurve3(trackPoints, true);
 
 // Ligne centrale en pointillés (ligne de dissuasion)
-const centerLineGeometry = new THREE.BufferGeometry().setFromPoints(
-  centerSpline.getPoints(500)
+const centerLineGeometry = new LineGeometry();
+centerLineGeometry.setPositions(
+  centerSpline
+    .getPoints(500)
+    .flatMap(p => [p.x, p.y, p.z])
 );
-const centerLineMaterial = new THREE.LineDashedMaterial({
+const centerLineMaterial = new LineDashedMaterial({
   color: 0xffffff,
   linewidth: 3,
   dashSize: 5,
   gapSize: 3
 });
-const centerLine = new THREE.Line(centerLineGeometry, centerLineMaterial);
+registerLineMaterial(centerLineMaterial);
+const centerLine = new Line2(centerLineGeometry, centerLineMaterial);
 centerLine.computeLineDistances();
 scene.add(centerLine);
 

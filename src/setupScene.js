@@ -13,10 +13,20 @@ const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
 dirLight.position.set(100, 200, 100);
 scene.add(dirLight);
 
+// Stocke les LineMaterials à mettre à jour lors du redimensionnement
+const lineMaterials = [];
+function registerLineMaterial(mat) {
+  lineMaterials.push(mat);
+  mat.resolution.set(window.innerWidth, window.innerHeight);
+}
+
 window.addEventListener('resize', () => {
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth, window.innerHeight);
+  lineMaterials.forEach(mat =>
+    mat.resolution.set(window.innerWidth, window.innerHeight)
+  );
 });
 
-export { THREE, scene, camera, renderer };
+export { THREE, scene, camera, renderer, registerLineMaterial };
