@@ -113,6 +113,7 @@ for (let team = 0; team < NUM_TEAMS; team++) {
       inRelayLine: false,
       pullingOff: false,
       pullTimer: 0,
+      isRelayLeader: false,
       protectLeader: false,
       mesh,
       body,
