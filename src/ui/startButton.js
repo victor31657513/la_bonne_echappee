@@ -1,9 +1,9 @@
 // Gère le bouton de démarrage pour lancer la simulation
 
-import { riders } from './riders.js';
-import { polarToDist } from './utils.js';
-import { BASE_SPEED } from './constants.js';
-import { emit } from './eventBus.js';
+import { riders } from '../entities/riders.js';
+import { polarToDist } from '../utils/utils.js';
+import { BASE_SPEED } from '../utils/constants.js';
+import { emit } from '../utils/eventBus.js';
 
 let started = false;
 

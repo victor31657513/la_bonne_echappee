@@ -1,7 +1,7 @@
 // Initialise les coureurs et leur logique de regroupement
 
-import { THREE, scene } from './setupScene.js';
-import { CANNON, world } from './physicsWorld.js';
+import { THREE, scene } from '../core/setupScene.js';
+import { CANNON, world } from '../core/physicsWorld.js';
 import { System as BoidSystem, Boid, behaviors } from 'https://esm.sh/bird-oid@0.2.1';
 import { ROAD_WIDTH, TRACK_WRAP, TRACK_LENGTH, BASE_RADIUS, ROW_SPACING } from './track.js';
 import { RIDER_WIDTH, MIN_LATERAL_GAP } from './riderConstants.js';

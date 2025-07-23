@@ -1,0 +1,13 @@
+// Point d'entrée de l'application: charge les modules et démarre l'animation
+
+import './setupScene.js';
+import './physicsWorld.js';
+import '../entities/track.js';
+import '../entities/riders.js';
+import '../ui/ui.js';
+import '../ui/startButton.js';
+import initVersion from '../utils/version.js';
+import { animate } from '../logic/animation.js';
+
+animate();
+initVersion();

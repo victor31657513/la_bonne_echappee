@@ -6,10 +6,10 @@ import {
   renderer,
   scene,
   registerLineMaterial
-} from './setupScene.js';
-import { riders, teamColors, riderGeom } from './riders.js';
-import { TRACK_WRAP } from './track.js';
-import { on, emit } from './eventBus.js';
+} from '../core/setupScene.js';
+import { riders, teamColors, riderGeom } from '../entities/riders.js';
+import { TRACK_WRAP } from '../entities/track.js';
+import { on, emit } from '../utils/eventBus.js';
 import { LineSegments2 } from 'three/addons/lines/LineSegments2.js';
 import { LineSegmentsGeometry } from 'three/addons/lines/LineSegmentsGeometry.js';
 import { LineMaterial } from 'three/addons/lines/LineMaterial.js';

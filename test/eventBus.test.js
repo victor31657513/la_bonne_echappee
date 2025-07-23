@@ -1,5 +1,5 @@
 import assert from 'node:assert';
-import { on, off, emit } from '../src/eventBus.js';
+import { on, off, emit } from '../src/utils/eventBus.js';
 
 function busTest() {
   let called = 0;

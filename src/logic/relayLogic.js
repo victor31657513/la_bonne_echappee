@@ -1,5 +1,5 @@
-import { RELAY_MIN_DIST, RELAY_MAX_DIST } from './constants.js';
-import { emit } from './eventBus.js';
+import { RELAY_MIN_DIST, RELAY_MAX_DIST } from '../utils/constants.js';
+import { emit } from '../utils/eventBus.js';
 
 const BASE_RELAY_INTERVAL = 5;
 const RELAY_JOIN_GAP = 10;

@@ -1,4 +1,4 @@
-import { RIDER_WIDTH, MIN_LATERAL_GAP } from './riderConstants.js';
+import { RIDER_WIDTH, MIN_LATERAL_GAP } from '../entities/riderConstants.js';
 
 const OVERLAP_FORCE = 10;
 
