@@ -1,6 +1,6 @@
 // Fonctions utilitaires pour calculer les distances sur la piste
 
-import { TRACK_WRAP } from './track.js';
+import { TRACK_WRAP } from '../entities/track.js';
 
 /**
  * Convertit des coordonnées polaires en distance le long de la piste.

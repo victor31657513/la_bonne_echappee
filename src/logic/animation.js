@@ -1,9 +1,9 @@
 // Animation du peloton et logique de comportement des coureurs
 
-import { THREE, scene, camera, renderer } from './setupScene.js';
-import { CANNON } from './physicsWorld.js';
-import { riders, boidSystem, teamRelayState } from './riders.js';
-import { RIDER_WIDTH, MIN_LATERAL_GAP } from './riderConstants.js';
+import { THREE, scene, camera, renderer } from '../core/setupScene.js';
+import { CANNON } from '../core/physicsWorld.js';
+import { riders, boidSystem, teamRelayState } from '../entities/riders.js';
+import { RIDER_WIDTH, MIN_LATERAL_GAP } from '../entities/riderConstants.js';
 import { resolveOverlaps } from './overlapResolver.js';
 import {
   outerSpline,
@@ -14,15 +14,15 @@ import {
   TRACK_WRAP,
   BASE_RADIUS,
   ROAD_WIDTH
-} from './track.js';
-import { stepPhysics } from './physicsWorld.js';
-import { updateSelectionHelper, selectedIndex } from './ui.js';
-import { started } from './startButton.js';
-import { aheadDistance, wrapDistance } from './utils.js';
-import { BASE_SPEED, RELAY_MIN_DIST, RELAY_MAX_DIST } from './constants.js';
+} from '../entities/track.js';
+import { stepPhysics } from '../core/physicsWorld.js';
+import { updateSelectionHelper, selectedIndex } from '../ui/ui.js';
+import { started } from '../ui/startButton.js';
+import { aheadDistance, wrapDistance } from '../utils/utils.js';
+import { BASE_SPEED, RELAY_MIN_DIST, RELAY_MAX_DIST } from '../utils/constants.js';
 import { updateRelayCluster } from './relayCluster.js';
 import { relayStep } from './relayLogic.js';
-import { emit } from './eventBus.js';
+import { emit } from '../utils/eventBus.js';
 
 const SPEED_GAIN = 0.3;
 // On mélange moins avec la trajectoire idéale pour que les collisions physiques aient plus d'influence

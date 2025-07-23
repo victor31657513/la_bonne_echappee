@@ -1,5 +1,5 @@
 import assert from 'node:assert';
-import { resolveOverlaps } from '../src/overlapResolver.js';
+import { resolveOverlaps } from '../src/logic/overlapResolver.js';
 
 function makeRider(x, z) {
   return {

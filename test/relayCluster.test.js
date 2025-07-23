@@ -1,5 +1,5 @@
 import assert from 'node:assert';
-import { calculateCluster } from '../src/relayCluster.js';
+import { calculateCluster } from '../src/logic/relayCluster.js';
 
 function approxEqual(a, b, eps = 1e-6) {
   assert.ok(Math.abs(a - b) <= eps, `${a} not close to ${b}`);

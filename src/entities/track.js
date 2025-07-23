@@ -1,6 +1,6 @@
 // Définit la géométrie de la piste et les courbes auxiliaires
 
-import { THREE, scene, registerLineMaterial } from './setupScene.js';
+import { THREE, scene, registerLineMaterial } from '../core/setupScene.js';
 import { Line2 } from 'three/addons/lines/Line2.js';
 import { LineGeometry } from 'three/addons/lines/LineGeometry.js';
 import { LineMaterial } from 'three/addons/lines/LineMaterial.js';

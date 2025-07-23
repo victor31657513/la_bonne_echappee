@@ -67,7 +67,7 @@
     <script>
       const mainScript = document.createElement('script');
       mainScript.type = 'module';
-      let src = 'src/main.js';
+      let src = 'src/core/main.js';
       if (new URLSearchParams(window.location.search).has('dev')) {
         src += '?t=' + Date.now();
       }

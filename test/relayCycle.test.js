@@ -1,5 +1,5 @@
 import assert from 'node:assert';
-import { relayStep } from '../src/relayLogic.js';
+import { relayStep } from '../src/logic/relayLogic.js';
 
 function cycleTest() {
   const riders = [
