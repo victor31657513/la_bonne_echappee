@@ -46,8 +46,10 @@ const PULL_OFF_SPEED_FACTOR = 0.7;
 const ATTACK_INTENSITY = 60; // 120% of base intensity
 const ATTACK_DRAIN = 50; // gauge units per second during attack
 const ATTACK_RECOVERY = 10; // gauge recovery per second
-const RELAY_QUEUE_GAP = 4;
+const RELAY_QUEUE_GAP = 2.5;
 const RELAY_CHASE_INTENSITY = 70;
+const RELAY_TARGET_GAP = 1.5;
+const RELAY_LEADER_INTENSITY = 70;
 
 const forwardVec = new THREE.Vector3();
 const lookAtPt = new THREE.Vector3();
@@ -178,16 +180,25 @@ function updateRelays(dt) {
     const sorted = allTeam
       .filter(r => !r.pullingOff)
       .sort((a, b) => b.trackDist - a.trackDist);
-    const queue = [];
-    sorted.forEach(r => {
-      if (queue.length === 0) {
-        queue.push(r);
-      } else {
-        const prev = queue[queue.length - 1];
+
+    let queue = [];
+    for (let start = 0; start < sorted.length; start++) {
+      const candidate = [sorted[start]];
+      for (let j = start + 1; j < sorted.length; j++) {
+        const prev = candidate[candidate.length - 1];
+        const r = sorted[j];
         const dist = aheadDistance(r.trackDist, prev.trackDist);
-        if (dist <= RELAY_JOIN_GAP) queue.push(r);
+        if (dist <= RELAY_JOIN_GAP) {
+          candidate.push(r);
+        } else {
+          break;
+        }
       }
-    });
+      if (candidate.length >= 2) {
+        queue = candidate;
+        break;
+      }
+    }
 
     if (queue.length === 0) continue;
     if (state.index >= queue.length) state.index = 0;
@@ -197,15 +208,17 @@ function updateRelays(dt) {
       r.relayIntensity = 0;
       r.relayChasing = false;
       r.inRelayLine = false;
+      r.relayLeader = false;
     });
     leader.relayIntensity = leader.relaySetting;
     leader.inRelayLine = true;
+    leader.relayLeader = true;
 
     for (let i = 1; i < queue.length; i++) {
       const prev = queue[i - 1];
       const r = queue[i];
       const dist = aheadDistance(r.trackDist, prev.trackDist);
-      if (dist > RELAY_QUEUE_GAP) r.relayChasing = true;
+      if (dist > RELAY_TARGET_GAP) r.relayChasing = true;
       r.inRelayLine = true;
     }
 
@@ -220,6 +233,7 @@ function updateRelays(dt) {
       leader.pullingOff = true;
       leader.pullTimer = 0;
       leader.inRelayLine = false;
+      leader.relayLeader = false;
       leader.laneTarget = state.side * PULL_OFFSET;
       state.index = (state.index + 1) % queue.length;
       state.side *= -1;
@@ -455,6 +469,9 @@ function animate() {
         r.intensity = r.baseIntensity;
         if (r.relayChasing) {
           r.intensity = Math.max(r.intensity, RELAY_CHASE_INTENSITY);
+        }
+        if (r.relayLeader) {
+          r.intensity = Math.max(r.intensity, RELAY_LEADER_INTENSITY);
         }
       }
     });
