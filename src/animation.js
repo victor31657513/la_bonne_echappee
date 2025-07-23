@@ -214,10 +214,11 @@ function updateLaneOffsets(dt) {
 function updateRelays(dt) {
   for (let t = 0; t < teamRelayState.length; t++) {
     const state = teamRelayState[t];
-    const allTeam = riders.filter(r => r.team === t && r.relaySetting > 0);
-    if (allTeam.length === 0) continue;
+    const teamRiders = riders.filter(r => r.team === t);
+    const relayRiders = teamRiders.filter(r => r.relaySetting > 0);
+    if (relayRiders.length === 0) continue;
 
-    const { queue } = relayStep(allTeam, state, dt);
+    const { queue } = relayStep(relayRiders, state, dt);
 
     for (let i = 1; i < queue.length; i++) {
       const prev = queue[i - 1];
@@ -238,8 +239,18 @@ function updateRelays(dt) {
       r.inRelayLine = true;
     }
 
-    allTeam.forEach(r => {
+    relayRiders.forEach(r => {
       if (!queue.includes(r)) r.relayChasing = true;
+    });
+
+    teamRiders.forEach(r => {
+      if (
+        !relayRiders.includes(r) &&
+        r.relayPhase !== 'fall_back' &&
+        queue.length > 0
+      ) {
+        r.relayChasing = true;
+      }
     });
 
     state.timer += dt;
