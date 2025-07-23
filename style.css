@@ -50,7 +50,7 @@ body {
 input[type='range'] {
     width: 80px;
 }
-.rider-control button {
+.rider-control select {
     margin-left: 4px;
 }
 
