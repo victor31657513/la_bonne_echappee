@@ -23,7 +23,7 @@ import { stepPhysics } from './physicsWorld.js';
 import { updateSelectionHelper, selectedIndex } from './ui.js';
 import { started } from './startButton.js';
 import { aheadDistance, wrapDistance } from './utils.js';
-import { BASE_SPEED } from './constants.js';
+import { BASE_SPEED, RELAY_MIN_DIST, RELAY_MAX_DIST } from './constants.js';
 
 const SPEED_GAIN = 0.3;
 // Mix less with the ideal line so physical collisions have more influence
@@ -50,6 +50,8 @@ const RELAY_QUEUE_GAP = 2.5;
 const RELAY_CHASE_INTENSITY = 70;
 const RELAY_TARGET_GAP = 1.5;
 const RELAY_LEADER_INTENSITY = 70;
+// Force appliquée pour corriger l'écart entre deux coureurs en relais
+const RELAY_CORRECTION_GAIN = 5;
 
 const forwardVec = new THREE.Vector3();
 const lookAtPt = new THREE.Vector3();
@@ -219,6 +221,17 @@ function updateRelays(dt) {
       const r = queue[i];
       const dist = aheadDistance(r.trackDist, prev.trackDist);
       if (dist > RELAY_TARGET_GAP) r.relayChasing = true;
+
+      const theta = ((r.trackDist % TRACK_WRAP) / TRACK_WRAP) * 2 * Math.PI;
+      const forward = new CANNON.Vec3(-Math.sin(theta), 0, Math.cos(theta));
+      let diff = 0;
+      if (dist > RELAY_MAX_DIST) diff = dist - RELAY_MAX_DIST;
+      else if (dist < RELAY_MIN_DIST) diff = dist - RELAY_MIN_DIST;
+      if (diff !== 0) {
+        const force = forward.scale(diff * RELAY_CORRECTION_GAIN * r.body.mass);
+        r.body.applyForce(force, r.body.position);
+      }
+
       r.inRelayLine = true;
     }
 
