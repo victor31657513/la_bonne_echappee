@@ -22,9 +22,8 @@ const teamColors = Array.from({ length: NUM_TEAMS }, (_, i) => {
 const riderGeom = new THREE.BoxGeometry(1.7, 1.5, 0.5);
 
 const RIDER_WIDTH = 1.7; // match geometry width
-// Reduced gap to fit more riders across the road at base speed
-// Slightly smaller gap so more riders fit side by side
-const MIN_LATERAL_GAP = 0.2;
+// Allow riders to be tightly packed
+const MIN_LATERAL_GAP = 0;
 // Collision body dimensions for Cannon.js bodies
 // Swap width/depth so side collisions use the long face of the box
 const RIDER_BOX_HALF = {
