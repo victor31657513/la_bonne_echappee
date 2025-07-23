@@ -3,7 +3,7 @@
 import { THREE, scene, registerLineMaterial } from './setupScene.js';
 import { Line2 } from 'https://cdn.jsdelivr.net/npm/three@0.153.0/examples/jsm/lines/Line2.js';
 import { LineGeometry } from 'https://cdn.jsdelivr.net/npm/three@0.153.0/examples/jsm/lines/LineGeometry.js';
-import { LineDashedMaterial } from 'https://cdn.jsdelivr.net/gh/mrdoob/three.js@r153/examples/jsm/lines/LineDashedMaterial.js';
+import { LineDashedMaterial } from 'https://cdn.jsdelivr.net/npm/three@0.120.0/src/materials/LineDashedMaterial.js';
 
 const TRACK_LENGTH = 1000;
 // Élargit légèrement la route pour que six coureurs puissent passer côte à côte
