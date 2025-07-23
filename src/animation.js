@@ -27,26 +27,26 @@ import { BASE_SPEED, RELAY_MIN_DIST, RELAY_MAX_DIST } from './constants.js';
 import { updateRelayCluster } from './relayCluster.js';
 
 const SPEED_GAIN = 0.3;
-// Mix less with the ideal line so physical collisions have more influence
+// On mélange moins avec la trajectoire idéale pour que les collisions physiques aient plus d'influence
 const IDEAL_MIX = 0.3;
 const RELAY_SPEED_BOOST = 0.5;
-// Reduce lateral acceleration so riders don't slide across the road
+// Réduit l'accélération latérale pour éviter que les coureurs glissent sur la route
 const LATERAL_FORCE = 3;
 const MAX_SPEED = BASE_SPEED * 2;
-// Limit side movement so riders don't slide across the road too quickly
-// Limit side movement speed
+// Limite les mouvements latéraux pour que les coureurs ne glissent pas trop vite de côté
+// Limite la vitesse de déplacement latéral
 const MAX_LATERAL_SPEED = 3;
 const MAX_LANE_OFFSET = ROAD_WIDTH / 2 - RIDER_WIDTH / 2 - MIN_LATERAL_GAP / 2;
-// Slow down lane changes for smoother overtaking
+// Ralentit les changements de ligne pour des dépassements plus fluides
 const LANE_CHANGE_SPEED = 1.5;
 const BASE_RELAY_INTERVAL = 5;
 const RELAY_JOIN_GAP = 10;
 const PULL_OFF_TIME = 2;
 const PULL_OFFSET = 1.5;
 const PULL_OFF_SPEED_FACTOR = 0.7;
-const ATTACK_INTENSITY = 60; // 120% of base intensity
-const ATTACK_DRAIN = 50; // gauge units per second during attack
-const ATTACK_RECOVERY = 10; // gauge recovery per second
+const ATTACK_INTENSITY = 60; // 120 % de l'intensité de base
+const ATTACK_DRAIN = 50; // unités de jauge par seconde lors d'une attaque
+const ATTACK_RECOVERY = 10; // récupération de jauge par seconde
 const RELAY_QUEUE_GAP = 2.5;
 const RELAY_CHASE_INTENSITY = 70;
 const RELAY_TARGET_GAP = 1.5;
@@ -144,7 +144,7 @@ function updateLaneOffsets(dt) {
       }
     });
     if (ahead && bestDelta < 5) {
-      // Move outward relative to the center of the road when overtaking
+      // Se décaler vers l'extérieur par rapport au centre de la route lors d'un dépassement
       const dir = r.baseLaneOffset >= 0 ? 1 : -1;
 
       const sideBlocked = riders.some((o, j) => {
@@ -295,14 +295,14 @@ function adjustIntensityToLeader() {
  * @returns {void}
  */
 function applyForces(dt) {
-  // The peloton no longer narrows at high speed so we don't compute stretch
+  // Le peloton ne se resserre plus à haute vitesse, donc on ne calcule plus l'étirement
   riders.forEach(r => {
     r.currentBoost =
       r.currentBoost !== undefined
         ? THREE.MathUtils.lerp(r.currentBoost, r.relayIntensity * RELAY_SPEED_BOOST, dt * 2)
         : r.relayIntensity * RELAY_SPEED_BOOST;
 
-    // Determine if this rider is blocked by another rider directly ahead
+    // Détermine si ce coureur est bloqué par un autre juste devant
     if (r.relayIntensity > 0 && !r.pullingOff) {
       const SAFE_DIST = 4;
       const LANE_GAP = 1.2;
@@ -319,7 +319,7 @@ function applyForces(dt) {
       }
 
       if (blocked) {
-        // Try progressively wider lateral moves when overtaking
+        // Tenter des décalages latéraux de plus en plus larges lors d'un dépassement
         const SHIFT = 2;
         const maxOffset = ROAD_WIDTH / 2 - 1;
         let chosen = r.laneOffset;
@@ -354,12 +354,12 @@ function applyForces(dt) {
       r.laneTarget = r.baseLaneOffset;
     }
 
-    // Smoothly steer towards the desired lateral position
+    // Oriente progressivement vers la position latérale souhaitée
     r.laneOffset = THREE.MathUtils.lerp(r.laneOffset, r.laneTarget, dt * 2);
 
     const bodyPos = r.body.position;
     const angle = ((r.trackDist % TRACK_WRAP) / TRACK_WRAP) * 2 * Math.PI;
-    // Keep riders near their desired lane without pulling them to the center
+    // Garde les coureurs près de leur voie cible sans les ramener vers le centre
     const targetRadius = BASE_RADIUS + r.laneOffset;
     const targetX = targetRadius * Math.cos(angle);
     const targetZ = targetRadius * Math.sin(angle);
@@ -383,7 +383,7 @@ function applyForces(dt) {
  */
 function resolveOverlaps() {
   const minDist = RIDER_WIDTH + MIN_LATERAL_GAP;
-  // Iterate a few times to resolve chains of overlaps
+  // Itérer plusieurs fois pour résoudre des chaînes de chevauchements
   for (let pass = 0; pass < 3; pass++) {
     let moved = false;
     for (let i = 0; i < riders.length; i++) {
@@ -517,8 +517,8 @@ function animate() {
 
   riders.forEach(r => {
     const bodyPos = new THREE.Vector3().copy(r.body.position);
-    // Synchronize the logical lane offset with the actual body position so
-    // collisions can push riders sideways
+    // Synchroniser le décalage logique de voie avec la position réelle du corps
+    // afin que les collisions puissent repousser latéralement les coureurs
     const radial = Math.hypot(bodyPos.x, bodyPos.z);
     r.laneOffset = THREE.MathUtils.clamp(
       radial - BASE_RADIUS,
