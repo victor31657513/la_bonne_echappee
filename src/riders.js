@@ -4,6 +4,7 @@ import { THREE, scene } from './setupScene.js';
 import { CANNON, world } from './physicsWorld.js';
 import { System as BoidSystem, Boid, behaviors } from 'https://esm.sh/bird-oid@0.2.1';
 import { ROAD_WIDTH, TRACK_WRAP, TRACK_LENGTH, BASE_RADIUS, ROW_SPACING } from './track.js';
+import { RIDER_WIDTH, MIN_LATERAL_GAP } from './riderConstants.js';
 
 const boidBehaviors = [
   { fn: behaviors.separate, options: { distance: 5, scale: 2.0 } },
@@ -20,10 +21,6 @@ const teamColors = Array.from({ length: NUM_TEAMS }, (_, i) => {
   return c;
 });
 const riderGeom = new THREE.BoxGeometry(1.7, 1.5, 0.5);
-
-const RIDER_WIDTH = 1.7; // correspond à la largeur de la géométrie
-// écart minimal pour éviter les collisions latérales
-const MIN_LATERAL_GAP = 0.2;
 // Dimensions du corps de collision pour les objets Cannon.js
 // On inverse largeur/profondeur pour que les collisions latérales utilisent la face longue de la boîte
 const RIDER_BOX_HALF = {
@@ -128,6 +125,5 @@ export {
   teamColors,
   riderGeom,
   teamRelayState,
-  RIDER_WIDTH,
-  MIN_LATERAL_GAP
+  
 };

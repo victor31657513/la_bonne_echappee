@@ -1,0 +1,4 @@
+const RIDER_WIDTH = 1.7;
+const MIN_LATERAL_GAP = 0.2;
+
+export { RIDER_WIDTH, MIN_LATERAL_GAP };
