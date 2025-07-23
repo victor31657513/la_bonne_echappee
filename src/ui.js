@@ -18,6 +18,7 @@ scene.add(selectionMarker);
 
 const teamSelect = document.getElementById('teamSelect');
 const teamControlsDiv = document.getElementById('teamControls');
+const speedIndicator = document.getElementById('speed-indicator');
 const teamColorsCss = teamColors.map(c => `#${c.getHexString()}`);
 teamColorsCss.forEach((col, t) => {
   const opt = teamSelect.options[t];
@@ -204,6 +205,17 @@ setInterval(() => {
       const el = document.getElementById(`gauge_${tid}_${idx}`);
       if (el) el.value = r.attackGauge;
     });
+}, 100);
+
+setInterval(() => {
+  if (speedIndicator) {
+    if (selectedIndex !== null) {
+      const v = riders[selectedIndex].body.velocity.length();
+      speedIndicator.textContent = `Speed: ${v.toFixed(1)} m/s`;
+    } else {
+      speedIndicator.textContent = '';
+    }
+  }
 }, 100);
 
 // S'assurer que le marqueur de sélection est visible au chargement
