@@ -58,18 +58,39 @@ function showTeamControls(tid) {
       row.innerHTML = `
       <span>Rider ${idx + 1}${r.isLeader ? ' (Leader)' : ''}</span>
       <label>Relay:<select id="relay_${tid}_${idx}"><option>0</option><option>1</option><option>2</option><option>3</option></select></label>
-      <label>Intensity:<input type="range" min="0" max="100" id="int_${tid}_${idx}" value="${r.baseIntensity}"/></label>
+      <label>Intensity:<input type="range" min="0" max="100" step="25" list="intensityTicks" id="int_${tid}_${idx}" value="${r.baseIntensity}"/><span id="int_val_${tid}_${idx}">${r.baseIntensity}</span></label>
       <label><input type="checkbox" id="prot_${tid}_${idx}" ${r.protectLeader ? 'checked' : ''} ${r.isLeader ? 'disabled' : ''}/> Protect</label>
+      <button id="relay_btn_${tid}_${idx}">Relay</button>
+      <button id="team_relay_btn_${tid}_${idx}">Team Relay</button>
       <button id="atk_${tid}_${idx}">Attack</button>
       <progress id="gauge_${tid}_${idx}" max="100" value="${r.attackGauge}"></progress>`;
       teamControlsDiv.append(row);
       document.getElementById(`relay_${tid}_${idx}`).value = r.relaySetting;
       document.getElementById(`relay_${tid}_${idx}`).addEventListener('change', e => (r.relaySetting = +e.target.value));
       document.getElementById(`int_${tid}_${idx}`).addEventListener('input', e => {
-        r.baseIntensity = +e.target.value;
+        const val = Math.round(+e.target.value / 25) * 25;
+        e.target.value = val;
+        r.baseIntensity = val;
+        document.getElementById(`int_val_${tid}_${idx}`).textContent = val;
         if (!r.isAttacking) r.intensity = r.baseIntensity;
       });
       document.getElementById(`prot_${tid}_${idx}`).addEventListener('change', e => (r.protectLeader = e.target.checked));
+      document.getElementById(`relay_btn_${tid}_${idx}`).addEventListener('click', () => {
+        r.relaySetting = r.relaySetting > 0 ? 0 : 3;
+        document.getElementById(`relay_${tid}_${idx}`).value = r.relaySetting;
+      });
+      document.getElementById(`team_relay_btn_${tid}_${idx}`).addEventListener('click', () => {
+        const newVal = r.relaySetting > 0 ? 0 : 3;
+        riders
+          .filter(rr => rr.team === tid)
+          .forEach((rr, i) => {
+            rr.relaySetting = newVal;
+            const sel = document.getElementById(`relay_${tid}_${i}`);
+            if (sel) sel.value = newVal;
+          });
+        const relaySelect = teamControlsDiv.querySelector('select');
+        if (relaySelect) relaySelect.value = newVal;
+      });
       document.getElementById(`atk_${tid}_${idx}`).addEventListener('click', () => {
         if (r.attackGauge > 0) r.isAttacking = true;
       });
