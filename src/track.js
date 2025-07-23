@@ -3,7 +3,7 @@
 import { THREE, scene } from './setupScene.js';
 
 const TRACK_LENGTH = 1000;
-// Slightly widen the road so six riders can fit side by side
+// Élargit légèrement la route pour que six coureurs puissent passer côte à côte
 const ROAD_WIDTH = 12;
 const BASE_RADIUS = TRACK_LENGTH / (2 * Math.PI);
 const INNER_R = BASE_RADIUS - ROAD_WIDTH / 2;
@@ -20,9 +20,9 @@ scene.add(road);
 
 const trackPoints = [];
 const STEP_ANGLE = 0.1;
-// Exclude the 2π angle to avoid duplicating the first point. A duplicate
-// introduced a sharp corner in the past and caused riders to slow down each
-// lap when crossing the start/finish line.
+// On exclut l'angle 2π pour ne pas dupliquer le premier point. Un doublon
+// avait autrefois créé un virage brusque qui faisait ralentir les coureurs à
+// chaque passage sur la ligne de départ/arrivée.
 for (let a = 0; a < Math.PI * 2; a += STEP_ANGLE) {
   trackPoints.push(
     new THREE.Vector3(BASE_RADIUS * Math.cos(a), 0, BASE_RADIUS * Math.sin(a))
@@ -30,7 +30,7 @@ for (let a = 0; a < Math.PI * 2; a += STEP_ANGLE) {
 }
 const centerSpline = new THREE.CatmullRomCurve3(trackPoints, true);
 
-// Central dashed line (ligne de dissuasion)
+// Ligne centrale en pointillés (ligne de dissuasion)
 const centerLineGeometry = new THREE.BufferGeometry().setFromPoints(
   centerSpline.getPoints(500)
 );
@@ -43,7 +43,7 @@ const centerLine = new THREE.Line(centerLineGeometry, centerLineMaterial);
 centerLine.computeLineDistances();
 scene.add(centerLine);
 
-// Start/finish line across the road
+// Ligne de départ/arrivée traversant la chaussée
 const startLineGeom = new THREE.PlaneGeometry(ROAD_WIDTH, 0.2);
 const startLineMat = new THREE.MeshBasicMaterial({
   color: 0xffffff,

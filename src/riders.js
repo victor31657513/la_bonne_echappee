@@ -21,16 +21,16 @@ const teamColors = Array.from({ length: NUM_TEAMS }, (_, i) => {
 });
 const riderGeom = new THREE.BoxGeometry(1.7, 1.5, 0.5);
 
-const RIDER_WIDTH = 1.7; // match geometry width
+const RIDER_WIDTH = 1.7; // correspond à la largeur de la géométrie
 // écart minimal pour éviter les collisions latérales
 const MIN_LATERAL_GAP = 0.2;
-// Collision body dimensions for Cannon.js bodies
-// Swap width/depth so side collisions use the long face of the box
+// Dimensions du corps de collision pour les objets Cannon.js
+// On inverse largeur/profondeur pour que les collisions latérales utilisent la face longue de la boîte
 const RIDER_BOX_HALF = {
-  // along track direction
+  // selon la direction de la piste
   x: riderGeom.parameters.depth / 2,
   y: riderGeom.parameters.height / 2,
-  // lateral half-extent
+  // demi-largeur latérale
   z: riderGeom.parameters.width / 2
 };
 const riders = [];
@@ -50,7 +50,7 @@ for (let team = 0; team < NUM_TEAMS; team++) {
     const idx = team * RIDERS_PER_TEAM + i;
     const row = Math.floor(idx / ridersPerRow);
     const col = idx % ridersPerRow;
-    // Introduce a small random shift so riders aren't perfectly aligned on start
+    // Introduit un léger décalage aléatoire pour éviter que les coureurs soient parfaitement alignés au départ
     const trackJitter = THREE.MathUtils.randFloatSpread(ROW_SPACING);
     const trackDist0 =
       (TRACK_LENGTH - row * ROW_SPACING + trackJitter + TRACK_WRAP) % TRACK_WRAP;

@@ -5,7 +5,7 @@ import * as CANNON from 'https://cdn.jsdelivr.net/npm/cannon-es@0.20.0/dist/cann
 const world = new CANNON.World();
 world.gravity.set(0, 0, 0);
 world.broadphase = new CANNON.SAPBroadphase(world);
-// Increase solver iterations to better handle dense rider collisions
+// Augmente le nombre d'itérations du solveur pour mieux gérer les collisions dans un peloton dense
 world.solver.iterations = 40;
 
 const defaultMaterial = new CANNON.Material('defaultMaterial');
