@@ -2,7 +2,7 @@
 // Les positions récentes du leader sont stockées dans un buffer circulaire
 // Chaque suiveur vise une ancienne position du leader pour former une file indienne
 
-import * as THREE from 'https://unpkg.com/three@0.153.0/build/three.module.js?module';
+import * as THREE from 'https://unpkg.com/three@0.153.0/build/three.module.js';
 import * as CANNON from 'https://unpkg.com/cannon-es@0.20.0/dist/cannon-es.js?module';
 
 // Paramètres principaux

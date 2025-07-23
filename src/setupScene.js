@@ -1,6 +1,6 @@
 // Prépare la scène Three.js, la caméra et le renderer
 
-import * as THREE from 'https://unpkg.com/three@0.153.0/build/three.module.js?module';
+import * as THREE from 'https://unpkg.com/three@0.153.0/build/three.module.js';
 
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x000000);

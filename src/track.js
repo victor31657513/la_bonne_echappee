@@ -3,7 +3,7 @@
 import { THREE, scene, registerLineMaterial } from './setupScene.js';
 import { Line2 } from 'https://unpkg.com/three@0.153.0/examples/jsm/lines/Line2.js?module';
 import { LineGeometry } from 'https://unpkg.com/three@0.153.0/examples/jsm/lines/LineGeometry.js?module';
-import { LineDashedMaterial } from 'https://unpkg.com/three@0.153.0/src/materials/LineDashedMaterial.js?module';
+import { LineMaterial } from 'https://unpkg.com/three@0.153.0/examples/jsm/lines/LineMaterial.js?module';
 
 const TRACK_LENGTH = 1000;
 // Élargit légèrement la route pour que six coureurs puissent passer côte à côte
@@ -40,9 +40,10 @@ centerLineGeometry.setPositions(
     .getPoints(500)
     .flatMap(p => [p.x, p.y, p.z])
 );
-const centerLineMaterial = new LineDashedMaterial({
+const centerLineMaterial = new LineMaterial({
   color: 0xffffff,
   linewidth: 3,
+  dashed: true,
   dashSize: 5,
   gapSize: 3
 });
