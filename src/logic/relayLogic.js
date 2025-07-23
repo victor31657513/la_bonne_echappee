@@ -1,12 +1,13 @@
 import { RELAY_MIN_DIST, RELAY_MAX_DIST } from '../utils/constants.js';
 import { emit } from '../utils/eventBus.js';
-
-const BASE_RELAY_INTERVAL = 5;
-const RELAY_JOIN_GAP = 10;
-const PULL_OFF_TIME = 2;
-const PULL_OFFSET = 1.5;
-const RELAY_TARGET_GAP = 1.5;
-const TRACK_WRAP = 1000;
+import {
+  BASE_RELAY_INTERVAL,
+  RELAY_JOIN_GAP,
+  PULL_OFF_TIME,
+  PULL_OFFSET,
+  RELAY_TARGET_GAP
+} from '../utils/relayConstants.js';
+import { aheadDistance } from '../utils/utils.js';
 
 function setPhase(rider, phase) {
   if (rider.relayPhase !== phase) {
@@ -18,11 +19,6 @@ function setPhase(rider, phase) {
   }
 }
 
-function aheadDistance(from, to) {
-  let diff = (to - from) % TRACK_WRAP;
-  if (diff < 0) diff += TRACK_WRAP;
-  return diff;
-}
 
 function relayStep(riders, state, dt) {
   const sorted = riders

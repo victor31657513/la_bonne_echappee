@@ -20,6 +20,13 @@ import { updateSelectionHelper, selectedIndex } from '../ui/ui.js';
 import { started } from '../ui/startButton.js';
 import { aheadDistance, wrapDistance } from '../utils/utils.js';
 import { BASE_SPEED, RELAY_MIN_DIST, RELAY_MAX_DIST } from '../utils/constants.js';
+import {
+  BASE_RELAY_INTERVAL,
+  RELAY_JOIN_GAP,
+  PULL_OFF_TIME,
+  PULL_OFFSET,
+  RELAY_TARGET_GAP
+} from '../utils/relayConstants.js';
 import { updateRelayCluster } from './relayCluster.js';
 import { relayStep } from './relayLogic.js';
 import { emit } from '../utils/eventBus.js';
@@ -37,17 +44,12 @@ const MAX_LATERAL_SPEED = 3;
 const MAX_LANE_OFFSET = ROAD_WIDTH / 2 - RIDER_WIDTH / 2 - MIN_LATERAL_GAP / 2;
 // Ralentit les changements de ligne pour des dépassements plus fluides
 const LANE_CHANGE_SPEED = 1.5;
-const BASE_RELAY_INTERVAL = 5;
-const RELAY_JOIN_GAP = 10;
-const PULL_OFF_TIME = 2;
-const PULL_OFFSET = 1.5;
 const PULL_OFF_SPEED_FACTOR = 0.7;
 const ATTACK_INTENSITY = 60; // 120 % de l'intensité de base
 const ATTACK_DRAIN = 50; // unités de jauge par seconde lors d'une attaque
 const ATTACK_RECOVERY = 10; // récupération de jauge par seconde
 const RELAY_QUEUE_GAP = 2.5;
 const RELAY_CHASE_INTENSITY = 70;
-const RELAY_TARGET_GAP = 1.5;
 const RELAY_LEADER_INTENSITY = 70;
 // Force appliquée pour corriger l'écart entre deux coureurs en relais
 const RELAY_CORRECTION_GAIN = 5;

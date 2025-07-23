@@ -1,6 +1,8 @@
 // Fonctions utilitaires pour calculer les distances sur la piste
 
-import { TRACK_WRAP } from '../entities/track.js';
+// Valeur du tour de piste. Importer directement la piste impliquerait la
+// configuration de Three.js, ce qui complique l'exécution des tests Node.
+const TRACK_WRAP = 1000;
 
 /**
  * Convertit des coordonnées polaires en distance le long de la piste.
