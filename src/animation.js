@@ -35,7 +35,7 @@ const MAX_SPEED = BASE_SPEED * 2;
 // Limit side movement so riders don't slide across the road too quickly
 // Limit side movement speed
 const MAX_LATERAL_SPEED = 3;
-const MAX_LANE_OFFSET = ROAD_WIDTH / 2 - 0.85;
+const MAX_LANE_OFFSET = ROAD_WIDTH / 2 - RIDER_WIDTH / 2 - MIN_LATERAL_GAP / 2;
 // Slow down lane changes for smoother overtaking
 const LANE_CHANGE_SPEED = 1.5;
 const BASE_RELAY_INTERVAL = 5;
