@@ -42,7 +42,9 @@ centerLineGeometry.setPositions(
 );
 const centerLineMaterial = new LineMaterial({
   color: 0xffffff,
-  linewidth: 3,
+  // Augmente l'épaisseur de la ligne centrale pointillée
+  // pour mieux marquer la séparation des voies
+  linewidth: 6,
   dashed: true,
   dashSize: 5,
   gapSize: 3
