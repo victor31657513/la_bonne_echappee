@@ -1,10 +1,10 @@
 {
   "name": "la_bonne_echappee",
-  "version": "1.0.17",
+  "version": "1.0.18",
   "description": "",
   "main": "simulation.js",
   "scripts": {
-    "test": "node -e \"console.log('Tests executed')\"",
+    "test": "node test/relayCluster.test.js",
     "lint": "eslint .",
     "version": "echo version script removed"
   },

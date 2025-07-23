@@ -24,6 +24,7 @@ import { updateSelectionHelper, selectedIndex } from './ui.js';
 import { started } from './startButton.js';
 import { aheadDistance, wrapDistance } from './utils.js';
 import { BASE_SPEED, RELAY_MIN_DIST, RELAY_MAX_DIST } from './constants.js';
+import { updateRelayCluster } from './relayCluster.js';
 
 const SPEED_GAIN = 0.3;
 // Mix less with the ideal line so physical collisions have more influence
@@ -267,6 +268,8 @@ function updateRelays(dt) {
       r.laneTarget = r.baseLaneOffset;
     }
   });
+
+  updateRelayCluster(riders);
 }
 
 /**
