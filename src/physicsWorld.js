@@ -1,6 +1,6 @@
 // Initialise le monde physique Cannon.js et gère le pas de simulation
 
-import * as CANNON from 'https://cdn.jsdelivr.net/npm/cannon-es@0.20.0/dist/cannon-es.js';
+import * as CANNON from 'https://unpkg.com/cannon-es@0.20.0/dist/cannon-es.js?module';
 
 const world = new CANNON.World();
 world.gravity.set(0, 0, 0);
