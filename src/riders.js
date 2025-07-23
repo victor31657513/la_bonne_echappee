@@ -22,8 +22,7 @@ const teamColors = Array.from({ length: NUM_TEAMS }, (_, i) => {
 const riderGeom = new THREE.BoxGeometry(1.7, 1.5, 0.5);
 
 const RIDER_WIDTH = 1.7; // match geometry width
-// Reduced gap to fit more riders across the road at base speed
-// Slightly smaller gap so more riders fit side by side
+// écart minimal pour éviter les collisions latérales
 const MIN_LATERAL_GAP = 0.2;
 // Collision body dimensions for Cannon.js bodies
 // Swap width/depth so side collisions use the long face of the box
@@ -56,11 +55,12 @@ for (let team = 0; team < NUM_TEAMS; team++) {
     const trackDist0 =
       (TRACK_LENGTH - row * ROW_SPACING + trackJitter + TRACK_WRAP) % TRACK_WRAP;
 
-    const usableWidth = ROAD_WIDTH - RIDER_WIDTH;
+    const halfRider = RIDER_WIDTH / 2;
+    const edgeGap = MIN_LATERAL_GAP / 2;
+    const maxOff = ROAD_WIDTH / 2 - halfRider - edgeGap;
+    const usableWidth = maxOff * 2;
     const rawOff =
       (ridersPerRow === 1 ? 0 : col / (ridersPerRow - 1) - 0.5) * usableWidth;
-    const halfRider = RIDER_WIDTH / 2;
-    const maxOff = ROAD_WIDTH / 2 - halfRider;
     const off = THREE.MathUtils.clamp(
       rawOff + THREE.MathUtils.randFloatSpread(0.3),
       -maxOff,
