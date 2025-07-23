@@ -25,6 +25,7 @@ import { started } from './startButton.js';
 import { aheadDistance, wrapDistance } from './utils.js';
 import { BASE_SPEED, RELAY_MIN_DIST, RELAY_MAX_DIST } from './constants.js';
 import { updateRelayCluster } from './relayCluster.js';
+import { relayStep } from './relayLogic.js';
 
 const SPEED_GAIN = 0.3;
 // On mélange moins avec la trajectoire idéale pour que les collisions physiques aient plus d'influence
@@ -180,42 +181,7 @@ function updateRelays(dt) {
     const allTeam = riders.filter(r => r.team === t && r.relaySetting > 0);
     if (allTeam.length === 0) continue;
 
-    const sorted = allTeam
-      .filter(r => !r.pullingOff)
-      .sort((a, b) => b.trackDist - a.trackDist);
-
-    let queue = [];
-    for (let start = 0; start < sorted.length; start++) {
-      const candidate = [sorted[start]];
-      for (let j = start + 1; j < sorted.length; j++) {
-        const prev = candidate[candidate.length - 1];
-        const r = sorted[j];
-        const dist = aheadDistance(r.trackDist, prev.trackDist);
-        if (dist <= RELAY_JOIN_GAP) {
-          candidate.push(r);
-        } else {
-          break;
-        }
-      }
-      if (candidate.length >= 2) {
-        queue = candidate;
-        break;
-      }
-    }
-
-    if (queue.length === 0) continue;
-    if (state.index >= queue.length) state.index = 0;
-    const leader = queue[state.index];
-
-    allTeam.forEach(r => {
-      r.relayIntensity = 0;
-      r.relayChasing = false;
-      r.inRelayLine = false;
-      r.relayLeader = false;
-    });
-    leader.relayIntensity = leader.relaySetting;
-    leader.inRelayLine = true;
-    leader.relayLeader = true;
+    const { queue } = relayStep(allTeam, state, dt);
 
     for (let i = 1; i < queue.length; i++) {
       const prev = queue[i - 1];
@@ -244,27 +210,28 @@ function updateRelays(dt) {
     const interval = BASE_RELAY_INTERVAL / queue.length;
     if (state.timer >= interval) {
       state.timer = 0;
-      leader.pullingOff = true;
-      leader.pullTimer = 0;
-      leader.inRelayLine = false;
-      leader.relayLeader = false;
-      leader.laneTarget = state.side * PULL_OFFSET;
+      queue[state.index].relayPhase = 'fall_back';
+      queue[state.index].relayTimer = 0;
+      queue[state.index].inRelayLine = false;
+      queue[state.index].relayLeader = false;
+      queue[state.index].laneTarget = state.side * PULL_OFFSET;
       state.index = (state.index + 1) % queue.length;
       state.side *= -1;
     }
   }
 
   riders.forEach(r => {
-    if (r.pullingOff) {
-      r.pullTimer += dt;
-      if (r.pullTimer >= PULL_OFF_TIME) {
-        r.pullingOff = false;
+    if (r.relayPhase === 'fall_back') {
+      r.relayTimer += dt;
+      if (r.relayTimer >= PULL_OFF_TIME) {
+        r.relayPhase = 'line';
         r.relayChasing = true;
         r.laneTarget = 0;
       }
-    } else if (r.inRelayLine) {
+    }
+    if (r.inRelayLine) {
       r.laneTarget = 0;
-    } else {
+    } else if (r.relayPhase !== 'fall_back') {
       r.laneTarget = r.baseLaneOffset;
     }
   });
@@ -302,8 +269,9 @@ function applyForces(dt) {
         ? THREE.MathUtils.lerp(r.currentBoost, r.relayIntensity * RELAY_SPEED_BOOST, dt * 2)
         : r.relayIntensity * RELAY_SPEED_BOOST;
 
-    // Détermine si ce coureur est bloqué par un autre juste devant
-    if (r.relayIntensity > 0 && !r.pullingOff) {
+
+    // Determine if this rider is blocked by another rider directly ahead
+    if (r.relayIntensity > 0 && r.relayPhase !== 'fall_back') {
       const SAFE_DIST = 4;
       const LANE_GAP = 1.2;
       let blocked = false;
@@ -350,7 +318,7 @@ function applyForces(dt) {
       } else {
         r.laneTarget = r.baseLaneOffset;
       }
-    } else if (!r.pullingOff) {
+    } else if (r.relayPhase !== 'fall_back') {
       r.laneTarget = r.baseLaneOffset;
     }
 
@@ -499,7 +467,7 @@ function animate() {
       const forward = new CANNON.Vec3(-Math.sin(theta), 0, Math.cos(theta));
       const currentSpeed = r.body.velocity.length();
       let desiredSpeed = BASE_SPEED * (r.intensity / 50);
-      if (r.pullingOff) desiredSpeed *= PULL_OFF_SPEED_FACTOR;
+      if (r.relayPhase === 'fall_back') desiredSpeed *= PULL_OFF_SPEED_FACTOR;
       const speedDiff = desiredSpeed - currentSpeed;
       const accel = speedDiff * SPEED_GAIN;
       const accelForce = forward.scale(r.body.mass * accel);
