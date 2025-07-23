@@ -6,8 +6,7 @@ Cette simulation affiche un peloton de cyclistes en 3D dans votre navigateur. Le
 Ouvrez `index.html` dans un navigateur moderne. Le fichier charge automatiquement les modules nécessaires via des imports ES modules et utilise des bibliothèques depuis un CDN.
 Les versions du projet sont désormais créées automatiquement lors d'un merge dans `main` grâce au workflow `release-please`. Consultez les releases GitHub pour connaître la dernière version disponible.
 
-Chaque coureur dispose maintenant d'un interrupteur permettant de choisir entre les modes **Follower**, **Relay** et **Attack**. Le mode Attack pousse le coureur à 120 % d'intensité tant que sa jauge d'attaque n'est pas vide.
-Chaque équipe possède également un interrupteur global pour passer de **Follower** à **Relay**.
+Chaque coureur dispose maintenant d'un bouton **Attack** qui le pousse à 120 % d'intensité tant que sa jauge d'attaque n'est pas vide. Celle-ci se vide rapidement lors d'une attaque et se recharge lentement ensuite.
 
 ## Gestion des relais
 
