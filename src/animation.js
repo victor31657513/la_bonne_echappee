@@ -118,6 +118,7 @@ function limitLateralSpeed() {
  * @returns {void}
  */
 function updatePelotonChase() {
+  let chase = false;
   riders.forEach(r => {
     let minDist = TRACK_WRAP;
     riders.forEach(o => {
@@ -125,7 +126,11 @@ function updatePelotonChase() {
       const d = aheadDistance(r.trackDist, o.trackDist);
       if (d > 0 && d < minDist) minDist = d;
     });
-    r.relayChasing = minDist > PELOTON_GAP;
+    if (minDist > PELOTON_GAP) chase = true;
+  });
+
+  riders.forEach(r => {
+    r.relayChasing = chase;
   });
 }
 
