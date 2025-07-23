@@ -51,6 +51,8 @@ const RELAY_TARGET_GAP = 1.5;
 const RELAY_LEADER_INTENSITY = 70;
 // Force appliquée pour corriger l'écart entre deux coureurs en relais
 const RELAY_CORRECTION_GAIN = 5;
+// Distance au-delà de laquelle un coureur se met à chasser le groupe
+const PELOTON_GAP = 5;
 
 function setIntensity(rider, value) {
   if (rider.intensity !== value) {
@@ -107,6 +109,23 @@ function limitLateralSpeed() {
       r.body.velocity.x -= excess * right.x;
       r.body.velocity.z -= excess * right.z;
     }
+  });
+}
+
+/**
+ * Active le mode "chase" lorsque l'espace devant un coureur devient trop grand.
+ *
+ * @returns {void}
+ */
+function updatePelotonChase() {
+  riders.forEach(r => {
+    let minDist = TRACK_WRAP;
+    riders.forEach(o => {
+      if (o === r) return;
+      const d = aheadDistance(r.trackDist, o.trackDist);
+      if (d > 0 && d < minDist) minDist = d;
+    });
+    r.relayChasing = minDist > PELOTON_GAP;
   });
 }
 
@@ -408,6 +427,7 @@ function animate() {
     stepPhysics(dt);
     limitRiderSpeed();
     limitLateralSpeed();
+    updatePelotonChase();
 
     riders.forEach(r => {
       if (r.isAttacking) {
