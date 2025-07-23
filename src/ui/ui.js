@@ -48,20 +48,28 @@ teamColorsCss.forEach((col, t) => {
  */
 function showTeamControls(tid) {
   teamControlsDiv.innerHTML = '';
-  const teamRelayBtn = document.createElement('button');
-  let relayLevel = riders.find(r => r.team === tid)?.relaySetting ?? 0;
-  const updateTeamRelayLabel = () => {
-    teamRelayBtn.textContent = relayLevel > 0 ? `Team Relay ${relayLevel}` : 'Team Relay';
-  };
-  updateTeamRelayLabel();
-  teamRelayBtn.addEventListener('click', () => {
-    relayLevel = relayLevel % 3 + 1;
+  const teamRelaySelect = document.createElement('select');
+  const teamRelayOpts = [
+    { label: 'Followers', value: '0' },
+    { label: 'Relay', value: '1' }
+  ];
+  teamRelayOpts.forEach(optInfo => {
+    const opt = document.createElement('option');
+    opt.value = optInfo.value;
+    opt.textContent = optInfo.label;
+    teamRelaySelect.append(opt);
+  });
+  teamRelaySelect.value = riders.some(r => r.team === tid && r.relaySetting > 0)
+    ? '1'
+    : '0';
+  teamRelaySelect.addEventListener('change', e => {
+    const active = e.target.value === '1';
     riders
       .filter(r => r.team === tid)
       .forEach(r => {
-        r.relaySetting = relayLevel;
+        r.relaySetting = active ? 3 : 0;
+        if (!active) r.isAttacking = false;
       });
-    updateTeamRelayLabel();
   });
 
   const intensityLabel = document.createElement('label');
@@ -91,7 +99,10 @@ function showTeamControls(tid) {
   });
   const teamIntensityContainer = document.createElement('div');
   teamIntensityContainer.append(intensityLabel, teamIntInput, teamIntVal);
-  teamControlsDiv.append(teamRelayBtn, teamIntensityContainer, document.createElement('hr'));
+  const relayContainer = document.createElement('label');
+  relayContainer.textContent = 'Team Mode:';
+  relayContainer.append(teamRelaySelect);
+  teamControlsDiv.append(relayContainer, teamIntensityContainer, document.createElement('hr'));
   riders
     .filter(r => r.team === tid)
     .forEach((r, idx) => {
@@ -101,8 +112,11 @@ function showTeamControls(tid) {
       <span>Rider ${idx + 1}${r.isLeader ? ' (Leader)' : ''}</span>
       <label>Intensity:<input type="range" min="0" max="100" step="25" list="intensityTicks" id="int_${tid}_${idx}" value="${r.baseIntensity}"/><span id="int_val_${tid}_${idx}">${r.baseIntensity}</span></label>
       <label><input type="checkbox" id="prot_${tid}_${idx}" ${r.protectLeader ? 'checked' : ''} ${r.isLeader ? 'disabled' : ''}/> Protect</label>
-      <button id="relay_btn_${tid}_${idx}">Relay</button>
-      <button id="atk_${tid}_${idx}">Attack</button>
+      <select id="state_${tid}_${idx}">
+        <option value="followers">Followers</option>
+        <option value="relay">Relay</option>
+        <option value="attack">Attack</option>
+      </select>
       <progress id="gauge_${tid}_${idx}" max="100" value="${r.attackGauge}"></progress>`;
       teamControlsDiv.append(row);
       const intensityInput = document.getElementById(`int_${tid}_${idx}`);
@@ -128,11 +142,22 @@ function showTeamControls(tid) {
         }
       });
       document.getElementById(`prot_${tid}_${idx}`).addEventListener('change', e => (r.protectLeader = e.target.checked));
-      document.getElementById(`relay_btn_${tid}_${idx}`).addEventListener('click', () => {
-        r.relaySetting = r.relaySetting > 0 ? 0 : 3;
-      });
-      document.getElementById(`atk_${tid}_${idx}`).addEventListener('click', () => {
-        if (r.attackGauge > 0) r.isAttacking = true;
+      const stateSel = document.getElementById(`state_${tid}_${idx}`);
+      stateSel.value = r.isAttacking ? 'attack' : r.relaySetting > 0 ? 'relay' : 'followers';
+      stateSel.addEventListener('change', e => {
+        if (e.target.value === 'relay') {
+          r.relaySetting = 3;
+          r.isAttacking = false;
+        } else if (e.target.value === 'attack') {
+          if (r.attackGauge > 0) {
+            r.isAttacking = true;
+          } else {
+            stateSel.value = r.relaySetting > 0 ? 'relay' : 'followers';
+          }
+        } else {
+          r.relaySetting = 0;
+          r.isAttacking = false;
+        }
       });
     });
 }
