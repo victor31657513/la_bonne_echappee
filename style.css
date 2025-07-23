@@ -50,6 +50,9 @@ body {
 input[type='range'] {
     width: 80px;
 }
+.rider-control button {
+    margin-left: 4px;
+}
 
 #version-container {
     position: fixed;
