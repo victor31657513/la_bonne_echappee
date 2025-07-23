@@ -1,18 +1,30 @@
 // Interface utilisateur: sélection et contrôles des coureurs
 
-import { THREE, camera, renderer, scene } from './setupScene.js';
+import {
+  THREE,
+  camera,
+  renderer,
+  scene,
+  registerLineMaterial
+} from './setupScene.js';
 import { riders, teamColors, riderGeom } from './riders.js';
 import { TRACK_WRAP } from './track.js';
 import { on, emit } from './eventBus.js';
+import { LineSegments2 } from 'https://cdn.jsdelivr.net/npm/three@0.153.0/examples/jsm/lines/LineSegments2.js';
+import { LineSegmentsGeometry } from 'https://cdn.jsdelivr.net/npm/three@0.153.0/examples/jsm/lines/LineSegmentsGeometry.js';
+import { LineMaterial } from 'https://cdn.jsdelivr.net/npm/three@0.153.0/examples/jsm/lines/LineMaterial.js';
 
 // Au démarrage, on se concentre sur un coureur situé vers le milieu du peloton
 let selectedIndex = Math.floor(riders.length / 2);
 const raycaster = new THREE.Raycaster();
 const mouse = new THREE.Vector2();
 
-const selectionMarkerGeom = new THREE.EdgesGeometry(riderGeom);
-const selectionMarkerMat = new THREE.LineBasicMaterial({ color: 0xffff00, linewidth: 4 });
-const selectionMarker = new THREE.LineSegments(selectionMarkerGeom, selectionMarkerMat);
+const selectionEdges = new THREE.EdgesGeometry(riderGeom);
+const selectionMarkerGeom = new LineSegmentsGeometry().fromEdgesGeometry(selectionEdges);
+const selectionMarkerMat = new LineMaterial({ color: 0xffff00, linewidth: 4 });
+registerLineMaterial(selectionMarkerMat);
+const selectionMarker = new LineSegments2(selectionMarkerGeom, selectionMarkerMat);
+selectionMarker.computeLineDistances();
 selectionMarker.visible = false;
 scene.add(selectionMarker);
 
