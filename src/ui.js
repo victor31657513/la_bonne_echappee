@@ -89,7 +89,6 @@ function showTeamControls(tid) {
       <label>Intensity:<input type="range" min="0" max="100" step="25" list="intensityTicks" id="int_${tid}_${idx}" value="${r.baseIntensity}"/><span id="int_val_${tid}_${idx}">${r.baseIntensity}</span></label>
       <label><input type="checkbox" id="prot_${tid}_${idx}" ${r.protectLeader ? 'checked' : ''} ${r.isLeader ? 'disabled' : ''}/> Protect</label>
       <button id="relay_btn_${tid}_${idx}">Relay</button>
-      <button id="team_relay_btn_${tid}_${idx}">Team Relay</button>
       <button id="atk_${tid}_${idx}">Attack</button>
       <progress id="gauge_${tid}_${idx}" max="100" value="${r.attackGauge}"></progress>`;
       teamControlsDiv.append(row);
@@ -118,16 +117,6 @@ function showTeamControls(tid) {
       document.getElementById(`prot_${tid}_${idx}`).addEventListener('change', e => (r.protectLeader = e.target.checked));
       document.getElementById(`relay_btn_${tid}_${idx}`).addEventListener('click', () => {
         r.relaySetting = r.relaySetting > 0 ? 0 : 3;
-      });
-      document.getElementById(`team_relay_btn_${tid}_${idx}`).addEventListener('click', () => {
-        const newVal = r.relaySetting > 0 ? 0 : 3;
-        riders
-          .filter(rr => rr.team === tid)
-          .forEach(rr => {
-            rr.relaySetting = newVal;
-          });
-        relayLevel = newVal;
-        updateTeamRelayLabel();
       });
       document.getElementById(`atk_${tid}_${idx}`).addEventListener('click', () => {
         if (r.attackGauge > 0) r.isAttacking = true;
