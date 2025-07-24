@@ -68,7 +68,12 @@ function relayStep(riders, state, dt) {
     r.relayLeader = false;
   });
 
+  const newLeader = leader.relayPhase !== 'pull';
   setPhase(leader, 'pull');
+  if (newLeader) {
+    leader.relayTimer = 0;
+    leader.relayTime = BASE_RELAY_INTERVAL / queue.length;
+  }
   leader.relayIntensity = leader.relaySetting;
   leader.inRelayLine = true;
   leader.relayLeader = true;
@@ -85,18 +90,20 @@ function relayStep(riders, state, dt) {
     if (!queue.includes(r) && r.relayPhase !== 'fall_back') r.relayChasing = true;
   });
 
-  state.timer += dt;
-  const interval = BASE_RELAY_INTERVAL / queue.length;
-  if (state.timer >= interval) {
-    state.timer = 0;
-    setPhase(leader, 'fall_back');
-    leader.relayTimer = 0;
-    leader.inRelayLine = false;
-    leader.relayLeader = false;
-    leader.laneTarget = state.side * PULL_OFFSET;
-    state.index = (state.index + 1) % queue.length;
-    state.side *= -1;
-  }
+  riders.forEach(r => {
+    if (r.relayPhase === 'pull') {
+      r.relayTimer += dt;
+      if (r.relayTimer >= r.relayTime) {
+        setPhase(r, 'fall_back');
+        r.relayTimer = 0;
+        r.inRelayLine = false;
+        r.relayLeader = false;
+        r.laneTarget = state.side * PULL_OFFSET;
+        state.index = (state.index + 1) % queue.length;
+        state.side *= -1;
+      }
+    }
+  });
 
   riders.forEach(r => {
     if (r.relayPhase === 'fall_back') {

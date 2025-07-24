@@ -112,6 +112,7 @@ for (let team = 0; team < NUM_TEAMS; team++) {
       inRelayLine: false,
       relayPhase: 'line',
       relayTimer: 0,
+      relayTime: 0,
       isRelayLeader: false,
       protectLeader: false,
       mesh,
