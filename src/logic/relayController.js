@@ -66,30 +66,9 @@ function updateRelays(dt) {
         r.relayChasing = true;
       }
     });
-
-    state.timer += dt;
-    const interval = BASE_RELAY_INTERVAL / queue.length;
-    if (state.timer >= interval) {
-      state.timer = 0;
-      setPhase(queue[state.index], 'fall_back');
-      queue[state.index].relayTimer = 0;
-      queue[state.index].inRelayLine = false;
-      queue[state.index].relayLeader = false;
-      queue[state.index].laneTarget = state.side * PULL_OFFSET;
-      state.index = (state.index + 1) % queue.length;
-      state.side *= -1;
-    }
   }
 
   riders.forEach(r => {
-    if (r.relayPhase === 'fall_back') {
-      r.relayTimer += dt;
-      if (r.relayTimer >= PULL_OFF_TIME) {
-        setPhase(r, 'line');
-        r.relayChasing = true;
-        r.laneTarget = 0;
-      }
-    }
     if (r.inRelayLine) {
       r.laneTarget = 0;
     } else if (r.relayPhase !== 'fall_back') {
