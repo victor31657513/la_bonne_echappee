@@ -10,12 +10,17 @@ const tmpVec = new THREE.Vector3();
 let extraAngle = 0;
 let rotating = false;
 let lastX = 0;
+let zoomFactor = 1;
+
+const MIN_ZOOM = 0.5;
+const MAX_ZOOM = 2;
 
 function initCameraControls() {
   renderer.domElement.addEventListener('mousedown', e => {
     if (e.button !== 1) return;
     if (e.detail === 2) {
       extraAngle = 0;
+      zoomFactor = 1;
       return;
     }
     rotating = true;
@@ -32,6 +37,12 @@ function initCameraControls() {
 
   window.addEventListener('mouseup', e => {
     if (e.button === 1) rotating = false;
+  });
+
+  renderer.domElement.addEventListener('wheel', e => {
+    const delta = e.deltaY > 0 ? 0.1 : -0.1;
+    zoomFactor = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, zoomFactor + delta));
+    e.preventDefault();
   });
 }
 
@@ -56,8 +67,8 @@ function updateCamera() {
   }
   forwardVec.set(-Math.sin(ang), 0, Math.cos(ang));
   tmpVec.copy(forwardVec).applyAxisAngle(new THREE.Vector3(0, 1, 0), extraAngle);
-  const BACK = 10,
-    H = 5;
+  const BACK = 10 * zoomFactor,
+    H = 5 * zoomFactor;
   camera.position.set(tx - tmpVec.x * BACK, H, tz - tmpVec.z * BACK);
   lookAtPt.set(tx, 1.5, tz);
   camera.lookAt(lookAtPt);
