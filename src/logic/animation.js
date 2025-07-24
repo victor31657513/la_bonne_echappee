@@ -43,8 +43,8 @@ const PULL_OFF_SPEED_FACTOR = 0.7;
 const ATTACK_INTENSITY = 60; // 120 % de l'intensité de base
 const ATTACK_DRAIN = 50; // unités de jauge par seconde lors d'une attaque
 const ATTACK_RECOVERY = 10; // récupération de jauge par seconde
-const RELAY_CHASE_INTENSITY = 70;
-const RELAY_LEADER_INTENSITY = 70;
+const RELAY_CHASE_INTENSITY = 100;
+const RELAY_LEADER_INTENSITY = 100;
 const PELOTON_GAP = 5;
 
 // Intensité et direction du vent latéral. direction = 1 pour un vent venant de la gauche
@@ -370,10 +370,10 @@ function animate() {
       } else {
         r.attackGauge = Math.min(100, r.attackGauge + ATTACK_RECOVERY * dt);
         let newInt = r.baseIntensity;
-        if (r.relayChasing && r.baseIntensity >= RELAY_CHASE_INTENSITY) {
+        if (r.relayChasing) {
           newInt = Math.max(newInt, RELAY_CHASE_INTENSITY);
         }
-        if (r.relayLeader && r.baseIntensity >= RELAY_LEADER_INTENSITY) {
+        if (r.relayLeader) {
           newInt = Math.max(newInt, RELAY_LEADER_INTENSITY);
         }
         setIntensity(r, newInt);

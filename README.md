@@ -16,6 +16,7 @@ automatiquement selon le nombre de coureurs présents dans cette file : plus la
 file est longue, plus chaque relais est court. Lorsqu'un relayeur termine son
 effort, il laisse les autres le dépasser et se replace derrière le dernier tout
 en accélérant pour recoller si besoin.
+En mode *relay*, les coureurs passent désormais à 100 % d'intensité pour rejoindre et mener la file.
 
 ## Développement
 Les dépendances de développement (ESLint) sont gérées via `npm`. Pour vérifier le linting et exécuter le jeu de tests factice :
