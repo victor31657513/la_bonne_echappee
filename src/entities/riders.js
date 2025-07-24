@@ -99,6 +99,7 @@ for (let team = 0; team < NUM_TEAMS; team++) {
       laneOffset: off,
       laneTarget: off,
       speed: 0,
+      draftFactor: 1,
       attackGauge: 100,
       isAttacking: false,
       relaySetting: 0,

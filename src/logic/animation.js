@@ -45,6 +45,10 @@ const RELAY_CHASE_INTENSITY = 70;
 const RELAY_LEADER_INTENSITY = 70;
 const PELOTON_GAP = 5;
 
+// Intensité et direction du vent latéral. direction = 1 pour un vent venant de la gauche
+const WIND_STRENGTH = 0.5;
+const WIND_DIRECTION = 1;
+
 function setIntensity(rider, value) {
   if (rider.intensity !== value) {
     const prev = rider.intensity;
@@ -88,6 +92,42 @@ function limitLateralSpeed() {
       r.body.velocity.x -= excess * right.x;
       r.body.velocity.z -= excess * right.z;
     }
+  });
+}
+
+/**
+ * Calcule le facteur d\'aspiration et la tra\xEEn\xE9e pour chaque coureur.
+ *
+ * @returns {void}
+ */
+function updateDraftFactors() {
+  riders.forEach(r => {
+    let aheadCount = 0;
+    riders.forEach(o => {
+      if (o === r) return;
+      const dist = aheadDistance(r.trackDist, o.trackDist);
+      if (dist > 0 && dist < 6 && Math.abs(o.laneOffset - r.laneOffset) < 1.5) {
+        aheadCount += 1;
+      }
+    });
+
+    let drag = 1 - Math.min(aheadCount * 0.15, 0.8);
+
+    // P\xE9nalit\xE9 si exposition au vent lat\xE9ral
+    const needLeft = WIND_DIRECTION === 1;
+    const sheltered = riders.some(o => {
+      if (o === r) return false;
+      const dist = aheadDistance(r.trackDist, o.trackDist);
+      const lateral = o.laneOffset - r.laneOffset;
+      if (needLeft) {
+        return dist >= 0 && dist < 2 && lateral < 0 && Math.abs(lateral) < 2;
+      }
+      return dist >= 0 && dist < 2 && lateral > 0 && Math.abs(lateral) < 2;
+    });
+    if (!sheltered) drag = Math.min(1, drag + 0.2);
+
+    r.body.linearDamping = 0.2 * drag;
+    r.draftFactor = 1 + 0.625 * (1 - drag);
   });
 }
 
@@ -185,7 +225,13 @@ function updateLaneOffsets(dt) {
       }
     } else {
       r.laneOffset = THREE.MathUtils.lerp(r.laneOffset, r.baseLaneOffset, dt);
-      }
+    }
+    const windShift = WIND_DIRECTION * 0.3;
+    r.laneOffset = THREE.MathUtils.lerp(
+      r.laneOffset,
+      THREE.MathUtils.clamp(r.laneTarget + windShift, -MAX_LANE_OFFSET, MAX_LANE_OFFSET),
+      dt
+    );
   });
 }
 
@@ -294,8 +340,14 @@ function applyForces(dt) {
     const theta = angle;
     const fwd = new CANNON.Vec3(-Math.sin(theta), 0, Math.cos(theta));
     const fwdForce = fwd.scale(r.currentBoost);
+    const right = new CANNON.Vec3(Math.cos(theta), 0, Math.sin(theta));
+    const windForce = right.scale(WIND_STRENGTH * WIND_DIRECTION);
 
-    const totalForce = new CANNON.Vec3(lateralForce.x + fwdForce.x, 0, lateralForce.z + fwdForce.z);
+    const totalForce = new CANNON.Vec3(
+      lateralForce.x + fwdForce.x + windForce.x,
+      0,
+      lateralForce.z + fwdForce.z + windForce.z
+    );
     r.body.applyForce(totalForce, bodyPos);
   });
 }
@@ -323,6 +375,7 @@ function animate() {
     limitRiderSpeed();
     limitLateralSpeed();
     updatePelotonChase();
+    updateDraftFactors();
 
     riders.forEach(r => {
       if (r.isAttacking) {
@@ -351,7 +404,7 @@ function animate() {
       const theta = ((r.trackDist % TRACK_WRAP) / TRACK_WRAP) * 2 * Math.PI;
       const forward = new CANNON.Vec3(-Math.sin(theta), 0, Math.cos(theta));
       const currentSpeed = r.body.velocity.length();
-      let desiredSpeed = BASE_SPEED * (r.intensity / 50);
+      let desiredSpeed = BASE_SPEED * (r.intensity / 50) * r.draftFactor;
       if (r.relayPhase === 'fall_back') desiredSpeed *= PULL_OFF_SPEED_FACTOR;
       const speedDiff = desiredSpeed - currentSpeed;
       const accel = speedDiff * SPEED_GAIN;
