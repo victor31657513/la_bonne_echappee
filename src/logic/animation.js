@@ -169,6 +169,12 @@ function updateLaneOffsets(dt) {
       r.laneOffset = THREE.MathUtils.lerp(r.laneOffset, r.laneTarget, dt);
       return;
     }
+    if (r.protectLeader) {
+      const leader = riders.find(o => o.team === r.team && o.isLeader);
+      if (leader && leader !== r) {
+        r.laneTarget = THREE.MathUtils.lerp(r.laneTarget, leader.laneOffset, dt);
+      }
+    }
     let bestDelta = TRACK_WRAP;
     let ahead = null;
     riders.forEach((o, j) => {
@@ -444,4 +450,4 @@ function animate() {
   renderer.render(scene, camera);
 }
 
-export { animate };
+export { animate, updateLaneOffsets };
