@@ -2,7 +2,7 @@
 
 import { THREE, scene, camera, renderer } from '../core/setupScene.js';
 import { CANNON } from '../core/physicsWorld.js';
-import { riders, boidSystem, teamRelayState } from '../entities/riders.js';
+import { riders, boidSystem } from '../entities/riders.js';
 import { RIDER_WIDTH, MIN_LATERAL_GAP } from '../entities/riderConstants.js';
 import { resolveOverlaps } from './overlapResolver.js';
 import {
@@ -19,16 +19,9 @@ import { stepPhysics } from '../core/physicsWorld.js';
 import { updateSelectionHelper, selectedIndex } from '../ui/ui.js';
 import { started } from '../ui/startButton.js';
 import { aheadDistance, wrapDistance } from '../utils/utils.js';
-import { BASE_SPEED, RELAY_MIN_DIST, RELAY_MAX_DIST } from '../utils/constants.js';
-import {
-  BASE_RELAY_INTERVAL,
-  RELAY_JOIN_GAP,
-  PULL_OFF_TIME,
-  PULL_OFFSET,
-  RELAY_TARGET_GAP
-} from '../utils/relayConstants.js';
-import { updateRelayCluster } from './relayCluster.js';
-import { relayStep } from './relayLogic.js';
+import { BASE_SPEED } from '../utils/constants.js';
+import { updateRelays } from './relayController.js';
+import { updateCamera } from './cameraController.js';
 import { emit } from '../utils/eventBus.js';
 
 const SPEED_GAIN = 0.3;
@@ -48,12 +41,8 @@ const PULL_OFF_SPEED_FACTOR = 0.7;
 const ATTACK_INTENSITY = 60; // 120 % de l'intensité de base
 const ATTACK_DRAIN = 50; // unités de jauge par seconde lors d'une attaque
 const ATTACK_RECOVERY = 10; // récupération de jauge par seconde
-const RELAY_QUEUE_GAP = 2.5;
 const RELAY_CHASE_INTENSITY = 70;
 const RELAY_LEADER_INTENSITY = 70;
-// Force appliquée pour corriger l'écart entre deux coureurs en relais
-const RELAY_CORRECTION_GAIN = 5;
-// Distance au-delà de laquelle un coureur se met à chasser le groupe
 const PELOTON_GAP = 5;
 
 function setIntensity(rider, value) {
@@ -66,18 +55,6 @@ function setIntensity(rider, value) {
   }
 }
 
-function setPhase(rider, phase) {
-  if (rider.relayPhase !== phase) {
-    const prev = rider.relayPhase;
-    rider.relayPhase = phase;
-    emit('phaseChange', { rider, phase, prev });
-  } else {
-    rider.relayPhase = phase;
-  }
-}
-
-const forwardVec = new THREE.Vector3();
-const lookAtPt = new THREE.Vector3();
 let lastTime = performance.now();
 
 /**
@@ -218,80 +195,6 @@ function updateLaneOffsets(dt) {
  * @param {number} dt Durée écoulée depuis la dernière mise à jour en secondes.
  * @returns {void}
  */
-function updateRelays(dt) {
-  for (let t = 0; t < teamRelayState.length; t++) {
-    const state = teamRelayState[t];
-    const teamRiders = riders.filter(r => r.team === t);
-    const relayRiders = teamRiders.filter(r => r.relaySetting > 0);
-    if (relayRiders.length === 0) continue;
-
-    const { queue } = relayStep(relayRiders, state, dt);
-
-    for (let i = 1; i < queue.length; i++) {
-      const prev = queue[i - 1];
-      const r = queue[i];
-      const dist = aheadDistance(r.trackDist, prev.trackDist);
-      if (dist > RELAY_TARGET_GAP) r.relayChasing = true;
-
-      const theta = ((r.trackDist % TRACK_WRAP) / TRACK_WRAP) * 2 * Math.PI;
-      const forward = new CANNON.Vec3(-Math.sin(theta), 0, Math.cos(theta));
-      let diff = 0;
-      if (dist > RELAY_MAX_DIST) diff = dist - RELAY_MAX_DIST;
-      else if (dist < RELAY_MIN_DIST) diff = dist - RELAY_MIN_DIST;
-      if (diff !== 0) {
-        const force = forward.scale(diff * RELAY_CORRECTION_GAIN * r.body.mass);
-        r.body.applyForce(force, r.body.position);
-      }
-
-      r.inRelayLine = true;
-    }
-
-    relayRiders.forEach(r => {
-      if (!queue.includes(r)) r.relayChasing = true;
-    });
-
-    teamRiders.forEach(r => {
-      if (
-        !relayRiders.includes(r) &&
-        r.relayPhase !== 'fall_back' &&
-        queue.length > 0
-      ) {
-        r.relayChasing = true;
-      }
-    });
-
-    state.timer += dt;
-    const interval = BASE_RELAY_INTERVAL / queue.length;
-    if (state.timer >= interval) {
-      state.timer = 0;
-      setPhase(queue[state.index], 'fall_back');
-      queue[state.index].relayTimer = 0;
-      queue[state.index].inRelayLine = false;
-      queue[state.index].relayLeader = false;
-      queue[state.index].laneTarget = state.side * PULL_OFFSET;
-      state.index = (state.index + 1) % queue.length;
-      state.side *= -1;
-    }
-  }
-
-  riders.forEach(r => {
-    if (r.relayPhase === 'fall_back') {
-      r.relayTimer += dt;
-      if (r.relayTimer >= PULL_OFF_TIME) {
-        setPhase(r, 'line');
-        r.relayChasing = true;
-        r.laneTarget = 0;
-      }
-    }
-    if (r.inRelayLine) {
-      r.laneTarget = 0;
-    } else if (r.relayPhase !== 'fall_back') {
-      r.laneTarget = r.baseLaneOffset;
-    }
-  });
-
-  updateRelayCluster(riders);
-}
 
 /**
  * Adapte l'intensité des coureurs au leader lorsqu'il roule au maximum.
@@ -402,32 +305,6 @@ function applyForces(dt) {
  *
  * @returns {void}
  */
-function updateCamera() {
-  let tx, tz, ang;
-  if (selectedIndex !== null) {
-    const r = riders[selectedIndex];
-    tx = r.mesh.position.x;
-    tz = r.mesh.position.z;
-    ang = ((r.trackDist % TRACK_WRAP) / TRACK_WRAP) * 2 * Math.PI;
-  } else {
-    tx = 0;
-    tz = 0;
-    riders.forEach(r => {
-      tx += r.mesh.position.x;
-      tz += r.mesh.position.z;
-    });
-    tx /= riders.length;
-    tz /= riders.length;
-    const avg = riders.reduce((s, r) => s + r.trackDist, 0) / riders.length;
-    ang = ((avg % TRACK_WRAP) / TRACK_WRAP) * 2 * Math.PI;
-  }
-  forwardVec.set(-Math.sin(ang), 0, Math.cos(ang));
-  const BACK = 10,
-    H = 5;
-  camera.position.set(tx - forwardVec.x * BACK, H, tz - forwardVec.z * BACK);
-  lookAtPt.set(tx, 1.5, tz);
-  camera.lookAt(lookAtPt);
-}
 
 /**
  * Boucle principale d'animation déclenchée à chaque frame.
