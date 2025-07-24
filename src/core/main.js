@@ -8,6 +8,8 @@ import '../ui/ui.js';
 import '../ui/startButton.js';
 import initVersion from '../utils/version.js';
 import { animate } from '../logic/animation.js';
+import { initCameraControls } from '../logic/cameraController.js';
 
+initCameraControls();
 animate();
 initVersion();

@@ -1,10 +1,39 @@
-import { THREE, camera } from '../core/setupScene.js';
+import { THREE, camera, renderer } from '../core/setupScene.js';
 import { riders } from '../entities/riders.js';
 import { TRACK_WRAP } from '../entities/track.js';
 import { selectedIndex } from '../ui/ui.js';
 
 const forwardVec = new THREE.Vector3();
 const lookAtPt = new THREE.Vector3();
+const tmpVec = new THREE.Vector3();
+
+let extraAngle = 0;
+let rotating = false;
+let lastX = 0;
+
+function initCameraControls() {
+  renderer.domElement.addEventListener('mousedown', e => {
+    if (e.button !== 1) return;
+    if (e.detail === 2) {
+      extraAngle = 0;
+      return;
+    }
+    rotating = true;
+    lastX = e.clientX;
+    e.preventDefault();
+  });
+
+  window.addEventListener('mousemove', e => {
+    if (!rotating) return;
+    const dx = e.clientX - lastX;
+    lastX = e.clientX;
+    extraAngle += dx * 0.005;
+  });
+
+  window.addEventListener('mouseup', e => {
+    if (e.button === 1) rotating = false;
+  });
+}
 
 function updateCamera() {
   let tx, tz, ang;
@@ -26,11 +55,12 @@ function updateCamera() {
     ang = ((avg % TRACK_WRAP) / TRACK_WRAP) * 2 * Math.PI;
   }
   forwardVec.set(-Math.sin(ang), 0, Math.cos(ang));
+  tmpVec.copy(forwardVec).applyAxisAngle(new THREE.Vector3(0, 1, 0), extraAngle);
   const BACK = 10,
     H = 5;
-  camera.position.set(tx - forwardVec.x * BACK, H, tz - forwardVec.z * BACK);
+  camera.position.set(tx - tmpVec.x * BACK, H, tz - tmpVec.z * BACK);
   lookAtPt.set(tx, 1.5, tz);
   camera.lookAt(lookAtPt);
 }
 
-export { updateCamera };
+export { updateCamera, initCameraControls };
