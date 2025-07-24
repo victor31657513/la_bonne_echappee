@@ -42,4 +42,15 @@ function wrapDistance(a, b) {
   return diff;
 }
 
-export { polarToDist, aheadDistance, wrapDistance };
+/**
+ * Angle d'orientation d'un segment de ligne dans l'axe de la trajectoire.
+ *
+ * @param {number} x Composante X de la tangente.
+ * @param {number} z Composante Z de la tangente.
+ * @returns {number} Angle en radians.
+ */
+function dashAngle(x, z) {
+  return Math.atan2(x, z);
+}
+
+export { polarToDist, aheadDistance, wrapDistance, dashAngle };

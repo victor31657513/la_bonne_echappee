@@ -1,6 +1,7 @@
 // Définit la géométrie de la piste et les courbes auxiliaires
 
 import { THREE, scene } from '../core/setupScene.js';
+import { dashAngle } from '../utils/utils.js';
 
 const TRACK_LENGTH = 1000;
 // Élargit légèrement la route pour que six coureurs puissent passer côte à côte
@@ -45,7 +46,7 @@ for (let dist = 0; dist < centerLength; dist += DASH_LENGTH + GAP_LENGTH) {
   const u = (dist + DASH_LENGTH / 2) / centerLength;
   const pos = centerSpline.getPointAt(u % 1);
   const tangent = centerSpline.getTangentAt(u % 1);
-  const angle = Math.atan2(tangent.z, tangent.x);
+  const angle = dashAngle(tangent.x, tangent.z);
   const dash = new THREE.Mesh(dashGeom, dashMat);
   dash.rotation.y = angle;
   dash.position.copy(pos);
