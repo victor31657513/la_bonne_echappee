@@ -1,4 +1,8 @@
-import { RELAY_MIN_DIST, RELAY_MAX_DIST } from '../utils/constants.js';
+import {
+  RELAY_MIN_DIST,
+  RELAY_MAX_DIST,
+  ENERGY_THRESHOLD
+} from '../utils/constants.js';
 import { emit } from '../utils/eventBus.js';
 import {
   BASE_RELAY_INTERVAL,
@@ -49,7 +53,13 @@ function relayStep(riders, state, dt) {
   }
 
   if (state.index >= queue.length) state.index = 0;
-  const leader = queue[state.index];
+  let leader = queue[state.index];
+  let attempts = 0;
+  while (leader.energy < ENERGY_THRESHOLD && attempts < queue.length) {
+    state.index = (state.index + 1) % queue.length;
+    leader = queue[state.index];
+    attempts += 1;
+  }
 
   riders.forEach(r => {
     r.relayIntensity = 0;

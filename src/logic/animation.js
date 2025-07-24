@@ -20,6 +20,7 @@ import { updateSelectionHelper, selectedIndex } from '../ui/ui.js';
 import { started } from '../ui/startButton.js';
 import { aheadDistance, wrapDistance } from '../utils/utils.js';
 import { BASE_SPEED } from '../utils/constants.js';
+import { updateEnergy } from './energyLogic.js';
 import { updateRelays } from './relayController.js';
 import { updateCamera } from './cameraController.js';
 import { emit } from '../utils/eventBus.js';
@@ -376,6 +377,7 @@ function animate() {
     limitLateralSpeed();
     updatePelotonChase();
     updateDraftFactors();
+    updateEnergy(riders, dt);
 
     riders.forEach(r => {
       if (r.isAttacking) {
