@@ -55,7 +55,11 @@ function relayStep(riders, state, dt) {
   if (state.index >= queue.length) state.index = 0;
   let leader = queue[state.index];
   let attempts = 0;
-  while (leader.energy < ENERGY_THRESHOLD && attempts < queue.length) {
+  while (
+    (leader.energy < ENERGY_THRESHOLD ||
+      (leader.isLeader && riders.some(o => o.team === leader.team && o.protectLeader))) &&
+    attempts < queue.length
+  ) {
     state.index = (state.index + 1) % queue.length;
     leader = queue[state.index];
     attempts += 1;

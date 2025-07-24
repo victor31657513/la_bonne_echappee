@@ -37,6 +37,13 @@ function updateDraftFactors(riders, windDirection = 1) {
 
     r.body.linearDamping = 0.2 * drag;
     r.draftFactor = 1 + 0.625 * (1 - drag);
+
+    if (
+      r.isLeader &&
+      riders.some(o => o.team === r.team && o.protectLeader)
+    ) {
+      r.draftFactor += 0.05;
+    }
   });
 }
 
