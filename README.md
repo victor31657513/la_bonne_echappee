@@ -24,3 +24,7 @@ Les dépendances de développement (ESLint) sont gérées via `npm`. Pour vérif
 npm run lint
 npm test
 ```
+
+## Effets sonores
+
+Un dossier `sounds/` est présent à la racine du projet pour accueillir vos effets sonores au format `.wav`.
