@@ -1,9 +1,6 @@
 // Définit la géométrie de la piste et les courbes auxiliaires
 
-import { THREE, scene, registerLineMaterial } from '../core/setupScene.js';
-import { Line2 } from 'three/addons/lines/Line2.js';
-import { LineGeometry } from 'three/addons/lines/LineGeometry.js';
-import { LineMaterial } from 'three/addons/lines/LineMaterial.js';
+import { THREE, scene } from '../core/setupScene.js';
 
 const TRACK_LENGTH = 1000;
 // Élargit légèrement la route pour que six coureurs puissent passer côte à côte
@@ -34,25 +31,28 @@ for (let a = 0; a < Math.PI * 2; a += STEP_ANGLE) {
 const centerSpline = new THREE.CatmullRomCurve3(trackPoints, true);
 
 // Ligne centrale en pointillés (ligne de dissuasion)
-const centerLineGeometry = new LineGeometry();
-centerLineGeometry.setPositions(
-  centerSpline
-    .getPoints(500)
-    .flatMap(p => [p.x, p.y, p.z])
-);
-const centerLineMaterial = new LineMaterial({
-  color: 0xffffff,
-  // Augmente l'épaisseur de la ligne centrale pointillée
-  // pour mieux marquer la séparation des voies
-  linewidth: 6,
-  dashed: true,
-  dashSize: 5,
-  gapSize: 3
-});
-registerLineMaterial(centerLineMaterial);
-const centerLine = new Line2(centerLineGeometry, centerLineMaterial);
-centerLine.computeLineDistances();
-scene.add(centerLine);
+const DASH_LENGTH = 5;
+const GAP_LENGTH = 3;
+const DASH_WIDTH = 0.2;
+
+const centerDashes = new THREE.Group();
+const dashGeom = new THREE.PlaneGeometry(DASH_WIDTH, DASH_LENGTH);
+const dashMat = new THREE.MeshBasicMaterial({ color: 0xffffff, side: THREE.DoubleSide });
+dashGeom.rotateX(-Math.PI / 2);
+
+const centerLength = centerSpline.getLength();
+for (let dist = 0; dist < centerLength; dist += DASH_LENGTH + GAP_LENGTH) {
+  const u = (dist + DASH_LENGTH / 2) / centerLength;
+  const pos = centerSpline.getPointAt(u % 1);
+  const tangent = centerSpline.getTangentAt(u % 1);
+  const angle = Math.atan2(tangent.z, tangent.x);
+  const dash = new THREE.Mesh(dashGeom, dashMat);
+  dash.rotation.y = angle;
+  dash.position.copy(pos);
+  dash.position.y = 0.01;
+  centerDashes.add(dash);
+}
+scene.add(centerDashes);
 
 // Ligne de départ/arrivée traversant la chaussée
 const startLineGeom = new THREE.PlaneGeometry(ROAD_WIDTH, 0.2);
@@ -96,7 +96,7 @@ export {
   ROW_SPACING,
   road,
   centerSpline,
-  centerLine,
+  centerDashes,
   startLine,
   outerSpline,
   innerSpline
