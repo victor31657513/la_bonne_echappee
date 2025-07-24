@@ -18,11 +18,8 @@ if (startBtn) {
       r.intensity = r.baseIntensity;
       emit('intensityChange', { rider: r, value: r.intensity });
       const angle = Math.atan2(r.body.position.z, r.body.position.x);
-      r.body.velocity.set(
-        -Math.sin(angle) * BASE_SPEED,
-        0,
-        Math.cos(angle) * BASE_SPEED
-      );
+      // Laisse la physique accélérer progressivement
+      r.body.velocity.set(0, 0, 0);
       r.body.angularVelocity.set(0, 0, 0);
       r.body.force.set(0, 0, 0);
       r.body.torque.set(0, 0, 0);
@@ -32,10 +29,8 @@ if (startBtn) {
       r.lap = 0;
       if (r.boid) {
         r.boid.position = [r.body.position.x, r.body.position.z];
-        r.boid.velocity = [
-          -Math.sin(angle) * BASE_SPEED,
-          Math.cos(angle) * BASE_SPEED
-        ];
+        // La vitesse du boid est nulle pour démarrer à l'arrêt
+        r.boid.velocity = [0, 0];
       }
     });
     startBtn.disabled = true;
