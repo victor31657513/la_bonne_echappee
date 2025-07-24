@@ -25,6 +25,12 @@ npm run lint
 npm test
 ```
 
+## Conventions de nommage
+
+- Les modules JavaScript (`.js`) utilisent le lower camelCase (`monModule.js`).
+- Les répertoires et fichiers d’assets sont nommés en minuscules.
+- Les fichiers de test se terminent par `.test.js` et se trouvent dans `test/`.
+
 ## Effets sonores
 
 Un dossier `sounds/` est présent à la racine du projet pour accueillir vos effets sonores au format `.wav`.
