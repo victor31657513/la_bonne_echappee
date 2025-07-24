@@ -76,3 +76,10 @@ input[type='range'] {
     font-size: 0.9em;
     color: #fff;
 }
+
+#soundToggle {
+    background: rgba(20, 20, 20, 0.8);
+    border: none;
+    color: #fff;
+    cursor: pointer;
+}

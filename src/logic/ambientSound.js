@@ -32,4 +32,29 @@ function initAmbientSound(progress = 0) {
   updateAmbientSound(progress);
 }
 
-export { initAmbientSound, updateAmbientSound };
+/**
+ * Relance la lecture des sons d'ambiance suite à une interaction utilisateur.
+ *
+ * @returns {void}
+ */
+function resumeAmbientSound() {
+  applause.play().catch(() => {});
+  helicopter.play().catch(() => {});
+}
+
+/**
+ * Met la lecture des sons d'ambiance en pause.
+ *
+ * @returns {void}
+ */
+function pauseAmbientSound() {
+  applause.pause();
+  helicopter.pause();
+}
+
+export {
+  initAmbientSound,
+  updateAmbientSound,
+  resumeAmbientSound,
+  pauseAmbientSound
+};
