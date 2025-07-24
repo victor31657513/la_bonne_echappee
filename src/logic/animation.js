@@ -19,6 +19,7 @@ import { stepPhysics } from '../core/physicsWorld.js';
 import { updateSelectionHelper, selectedIndex } from '../ui/ui.js';
 import { started } from '../ui/startButton.js';
 import { aheadDistance, wrapDistance } from '../utils/utils.js';
+import { updateDraftFactors as computeDraftFactors } from './draftLogic.js';
 import { BASE_SPEED } from '../utils/constants.js';
 import { updateEnergy } from './energyLogic.js';
 import { updateRelays } from './relayController.js';
@@ -102,34 +103,7 @@ function limitLateralSpeed() {
  * @returns {void}
  */
 function updateDraftFactors() {
-  riders.forEach(r => {
-    let aheadCount = 0;
-    riders.forEach(o => {
-      if (o === r) return;
-      const dist = aheadDistance(r.trackDist, o.trackDist);
-      if (dist > 0 && dist < 6 && Math.abs(o.laneOffset - r.laneOffset) < 1.5) {
-        aheadCount += 1;
-      }
-    });
-
-    let drag = 1 - Math.min(aheadCount * 0.15, 0.8);
-
-    // P\xE9nalit\xE9 si exposition au vent lat\xE9ral
-    const needLeft = WIND_DIRECTION === 1;
-    const sheltered = riders.some(o => {
-      if (o === r) return false;
-      const dist = aheadDistance(r.trackDist, o.trackDist);
-      const lateral = o.laneOffset - r.laneOffset;
-      if (needLeft) {
-        return dist >= 0 && dist < 2 && lateral < 0 && Math.abs(lateral) < 2;
-      }
-      return dist >= 0 && dist < 2 && lateral > 0 && Math.abs(lateral) < 2;
-    });
-    if (!sheltered) drag = Math.min(1, drag + 0.2);
-
-    r.body.linearDamping = 0.2 * drag;
-    r.draftFactor = 1 + 0.625 * (1 - drag);
-  });
+  computeDraftFactors(riders, WIND_DIRECTION);
 }
 
 /**
