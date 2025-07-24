@@ -335,10 +335,10 @@ function animate() {
       } else {
         r.attackGauge = Math.min(100, r.attackGauge + ATTACK_RECOVERY * dt);
         let newInt = r.baseIntensity;
-        if (r.relayChasing) {
+        if (r.relayChasing && r.baseIntensity >= RELAY_CHASE_INTENSITY) {
           newInt = Math.max(newInt, RELAY_CHASE_INTENSITY);
         }
-        if (r.relayLeader) {
+        if (r.relayLeader && r.baseIntensity >= RELAY_LEADER_INTENSITY) {
           newInt = Math.max(newInt, RELAY_LEADER_INTENSITY);
         }
         setIntensity(r, newInt);
