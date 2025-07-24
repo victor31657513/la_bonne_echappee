@@ -6,6 +6,7 @@ import '../entities/track.js';
 import '../entities/riders.js';
 import '../ui/ui.js';
 import '../ui/startButton.js';
+import '../ui/soundToggle.js';
 import initVersion from '../utils/version.js';
 import { animate } from '../logic/animation.js';
 import { initCameraControls } from '../logic/cameraController.js';

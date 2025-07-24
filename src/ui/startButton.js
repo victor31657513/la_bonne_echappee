@@ -4,6 +4,7 @@ import { riders } from '../entities/riders.js';
 import { polarToDist } from '../utils/utils.js';
 import { BASE_SPEED } from '../utils/constants.js';
 import { emit } from '../utils/eventBus.js';
+import { resumeAmbientSound } from '../logic/ambientSound.js';
 
 let started = false;
 
@@ -11,6 +12,7 @@ const startBtn = document.getElementById('startBtn');
 if (startBtn) {
   startBtn.addEventListener('click', () => {
     started = true;
+    resumeAmbientSound();
     riders.forEach(r => {
       r.currentBoost = 0;
       r.isAttacking = false;
