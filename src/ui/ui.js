@@ -62,17 +62,6 @@ function showTeamControls(tid) {
   teamRelaySelect.value = riders.some(r => r.team === tid && r.relaySetting > 0)
     ? '1'
     : '0';
-  teamRelaySelect.addEventListener('change', e => {
-    const active = e.target.value === '1';
-    riders
-      .filter(r => r.team === tid)
-      .forEach((r, idx) => {
-        r.relaySetting = active ? 3 : 0;
-        if (!active) r.isAttacking = false;
-        const sel = document.getElementById(`state_${tid}_${idx}`);
-        if (sel) sel.value = active ? 'relay' : 'followers';
-      });
-  });
 
   const intensityLabel = document.createElement('label');
   intensityLabel.textContent = 'Team Intensity:';
@@ -104,6 +93,36 @@ function showTeamControls(tid) {
   const relayContainer = document.createElement('label');
   relayContainer.textContent = 'Team Mode:';
   relayContainer.append(teamRelaySelect);
+
+  function resetTeamIntensity() {
+    teamIntInput.value = 50;
+    teamIntVal.textContent = 50;
+    riders
+      .filter(r => r.team === tid)
+      .forEach((r, idx) => {
+        r.baseIntensity = 50;
+        r.intensity = 50;
+        emit('intensityChange', { rider: r, value: 50 });
+        const slider = document.getElementById(`int_${tid}_${idx}`);
+        const span = document.getElementById(`int_val_${tid}_${idx}`);
+        if (slider) slider.value = 50;
+        if (span) span.textContent = 50;
+      });
+  }
+
+  teamRelaySelect.addEventListener('change', e => {
+    const active = e.target.value === '1';
+    riders
+      .filter(r => r.team === tid)
+      .forEach((r, idx) => {
+        r.relaySetting = active ? 3 : 0;
+        if (!active) r.isAttacking = false;
+        const sel = document.getElementById(`state_${tid}_${idx}`);
+        if (sel) sel.value = active ? 'relay' : 'followers';
+      });
+    if (!active) resetTeamIntensity();
+  });
+
   teamControlsDiv.append(relayContainer, teamIntensityContainer, document.createElement('hr'));
   riders
     .filter(r => r.team === tid)
@@ -153,6 +172,7 @@ function showTeamControls(tid) {
         } else {
           r.relaySetting = 0;
           r.isAttacking = false;
+          resetTeamIntensity();
         }
       });
       document.getElementById(`atk_${tid}_${idx}`).addEventListener('click', () => {
