@@ -2,6 +2,7 @@ import { THREE, camera, renderer } from '../core/setupScene.js';
 import { riders } from '../entities/riders.js';
 import { TRACK_WRAP } from '../entities/track.js';
 import { selectedIndex } from '../ui/ui.js';
+import { initAmbientSound, updateAmbientSound } from './ambientSound.js';
 
 const forwardVec = new THREE.Vector3();
 const lookAtPt = new THREE.Vector3();
@@ -21,6 +22,7 @@ function initCameraControls() {
     if (e.detail === 2) {
       extraAngle = 0;
       zoomFactor = 1;
+      updateAmbientSound((zoomFactor - MIN_ZOOM) / (MAX_ZOOM - MIN_ZOOM));
       return;
     }
     rotating = true;
@@ -42,8 +44,11 @@ function initCameraControls() {
   renderer.domElement.addEventListener('wheel', e => {
     const delta = e.deltaY > 0 ? 0.1 : -0.1;
     zoomFactor = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, zoomFactor + delta));
+    updateAmbientSound((zoomFactor - MIN_ZOOM) / (MAX_ZOOM - MIN_ZOOM));
     e.preventDefault();
   });
+
+  initAmbientSound((zoomFactor - MIN_ZOOM) / (MAX_ZOOM - MIN_ZOOM));
 }
 
 function updateCamera() {
