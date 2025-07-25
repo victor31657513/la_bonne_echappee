@@ -10,6 +10,7 @@ import {
 import { riders, teamColors, riderGeom } from '../entities/riders.js';
 import { TRACK_WRAP } from '../entities/track.js';
 import { on, emit } from '../utils/eventBus.js';
+import { updateBreakawayDisplay } from './breakawayDisplay.js';
 import { LineSegments2 } from 'three/addons/lines/LineSegments2.js';
 import { LineSegmentsGeometry } from 'three/addons/lines/LineSegmentsGeometry.js';
 import { LineMaterial } from 'three/addons/lines/LineMaterial.js';
@@ -31,6 +32,7 @@ scene.add(selectionMarker);
 const teamSelect = document.getElementById('teamSelect');
 const teamControlsDiv = document.getElementById('teamControls');
 const speedIndicator = document.getElementById('speed-indicator');
+const chaseTeams = new Set();
 const teamColorsCss = teamColors.map(c => `#${c.getHexString()}`);
 teamColorsCss.forEach((col, t) => {
   const opt = teamSelect.options[t];
@@ -123,7 +125,24 @@ function showTeamControls(tid) {
     if (!active) resetTeamIntensity();
   });
 
-  teamControlsDiv.append(relayContainer, teamIntensityContainer, document.createElement('hr'));
+  const chaseBtn = document.createElement('button');
+  chaseBtn.textContent = chaseTeams.has(tid) ? 'Stop Chase' : 'Chase Breakaway';
+  chaseBtn.addEventListener('click', () => {
+    if (chaseTeams.has(tid)) {
+      chaseTeams.delete(tid);
+      chaseBtn.textContent = 'Chase Breakaway';
+    } else {
+      chaseTeams.add(tid);
+      chaseBtn.textContent = 'Stop Chase';
+    }
+  });
+
+  teamControlsDiv.append(
+    relayContainer,
+    teamIntensityContainer,
+    chaseBtn,
+    document.createElement('hr')
+  );
   riders
     .filter(r => r.team === tid)
     .forEach((r, idx) => {
@@ -138,6 +157,7 @@ function showTeamControls(tid) {
         <option value="relay">Relay</option>
       </select>
       <button id="atk_${tid}_${idx}">Attack</button>
+      <button id="early_${tid}_${idx}">Early Atk</button>
       <progress id="gauge_${tid}_${idx}" max="100" value="${r.attackGauge}"></progress>`;
       teamControlsDiv.append(row);
       const intensityInput = document.getElementById(`int_${tid}_${idx}`);
@@ -177,6 +197,12 @@ function showTeamControls(tid) {
       });
       document.getElementById(`atk_${tid}_${idx}`).addEventListener('click', () => {
         if (r.attackGauge > 0) r.isAttacking = true;
+      });
+      document.getElementById(`early_${tid}_${idx}`).addEventListener('click', () => {
+        if (r.attackGauge > 0) {
+          r.isAttacking = true;
+          r.relaySetting = 0;
+        }
       });
     });
 }
@@ -252,6 +278,7 @@ function updateSelectionHelper() {
   }
 }
 
+
 // Met à jour régulièrement les jauges d'attaque affichées
 setInterval(() => {
   const tid = +teamSelect.value;
@@ -275,7 +302,9 @@ setInterval(() => {
   }
 }, 100);
 
+setInterval(updateBreakawayDisplay, 100);
+
 // S'assurer que le marqueur de sélection est visible au chargement
 updateSelectionHelper();
 
-export { selectedIndex, updateSelectionHelper };
+export { selectedIndex, updateSelectionHelper, updateBreakawayDisplay, chaseTeams };
