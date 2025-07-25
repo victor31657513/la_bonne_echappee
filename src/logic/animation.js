@@ -20,11 +20,12 @@ import { updateSelectionHelper, selectedIndex } from '../ui/ui.js';
 import { started } from '../ui/startButton.js';
 import { aheadDistance, wrapDistance } from '../utils/utils.js';
 import { updateDraftFactors as computeDraftFactors } from './draftLogic.js';
-import { BASE_SPEED } from '../utils/constants.js';
+import { BASE_SPEED, FATIGUE_RATE } from '../utils/constants.js';
 import { updateEnergy } from './energyLogic.js';
 import { updateRelays } from './relayController.js';
 import { updateCamera } from './cameraController.js';
 import { emit } from '../utils/eventBus.js';
+import { updateBreakaway } from './breakawayManager.js';
 
 const SPEED_GAIN = 0.3;
 // On mélange moins avec la trajectoire idéale pour que les collisions physiques aient plus d'influence
@@ -46,6 +47,7 @@ const ATTACK_RECOVERY = 10; // récupération de jauge par seconde
 const RELAY_CHASE_INTENSITY = 100;
 const RELAY_LEADER_INTENSITY = 100;
 const PELOTON_GAP = 5;
+const BREAKAWAY_INTENSITY = 80;
 
 // Intensité et direction du vent latéral. direction = 1 pour un vent venant de la gauche
 const WIND_STRENGTH = 0.5;
@@ -356,8 +358,14 @@ function animate() {
     limitRiderSpeed();
     limitLateralSpeed();
     updatePelotonChase();
+    updateBreakaway(riders);
     updateDraftFactors();
     updateEnergy(riders, dt);
+    riders.forEach(r => {
+      if (r.inBreakaway && !r.inRelayLine) {
+        r.energy = Math.max(0, r.energy - FATIGUE_RATE * dt);
+      }
+    });
 
     riders.forEach(r => {
       if (r.isAttacking) {
@@ -375,6 +383,9 @@ function animate() {
         }
         if (r.relayLeader) {
           newInt = Math.max(newInt, RELAY_LEADER_INTENSITY);
+        }
+        if (r.inBreakaway) {
+          newInt = Math.max(newInt, BREAKAWAY_INTENSITY);
         }
         setIntensity(r, newInt);
       }

@@ -1,10 +1,10 @@
 {
   "name": "la_bonne_echappee",
-  "version": "1.0.54",
+  "version": "1.0.55",
   "description": "",
   "main": "src/core/main.js",
   "scripts": {
-    "test": "node test/relayCluster.test.js && node test/relayCycle.test.js && node test/eventBus.test.js && node test/overlapResolution.test.js && node test/dashOrientation.test.js && node test/draftFactor.test.js && node test/protectLeader.test.js",
+    "test": "node test/relayCluster.test.js && node test/relayCycle.test.js && node test/eventBus.test.js && node test/overlapResolution.test.js && node test/dashOrientation.test.js && node test/draftFactor.test.js && node test/protectLeader.test.js && node test/breakawayManager.test.js",
     "lint": "eslint .",
     "version": "echo version script removed"
   },

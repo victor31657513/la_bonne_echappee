@@ -110,6 +110,7 @@ for (let team = 0; team < NUM_TEAMS; team++) {
       relayChasing: false,
       relayLeader: false,
       inRelayLine: false,
+      inBreakaway: false,
       relayPhase: 'line',
       relayTimer: 0,
       relayTime: 0,
