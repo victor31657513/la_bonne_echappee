@@ -252,6 +252,20 @@ function updateRiderIntensity(r, dt) {
     return;
   }
 
+  if (r.mode === 'follower') {
+    let minDist = TRACK_WRAP;
+    riders.forEach(o => {
+      if (o === r) return;
+      const d = aheadDistance(r.trackDist, o.trackDist);
+      if (d > 0 && d < minDist) minDist = d;
+    });
+    if (minDist > 2) {
+      const desiredIntensity = Math.min(100, (35 / 3.6 / BASE_SPEED) * 50);
+      setIntensity(r, desiredIntensity);
+      return;
+    }
+  }
+
   if (r.mode === 'relay' && r.relayPhase === 'pull') {
     setIntensity(r, r.relaySetting);
     return;
