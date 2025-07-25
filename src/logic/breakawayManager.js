@@ -53,8 +53,18 @@ function updateBreakaway(riders) {
 
   const chasers = riders.filter(r => !r.inBreakaway && r.relayChasing);
   if (chasers.length > 0) {
-    const avg = chasers.reduce((s, r) => s + (r.intensity || 50), 0) / chasers.length;
-    breakaway.closingRate = Math.max(0, (avg - 50) / 50);
+    const teamMap = new Map();
+    chasers.forEach(r => {
+      const key = r.team;
+      if (!teamMap.has(key)) {
+        teamMap.set(key, { sum: 0, count: 0 });
+      }
+      const info = teamMap.get(key);
+      info.sum += r.intensity || 50;
+      info.count++;
+    });
+    const teamAvg = [...teamMap.values()].reduce((s, v) => s + v.sum / v.count, 0) / teamMap.size;
+    breakaway.closingRate = Math.max(0, (teamAvg - 50) / 50);
   } else {
     breakaway.closingRate = 0;
   }
