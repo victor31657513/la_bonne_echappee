@@ -7,6 +7,7 @@ function protectLeaderTest() {
       team: 0,
       isLeader: true,
       relaySetting: 3,
+      mode: 'relay',
       trackDist: 100,
       baseLaneOffset: 0,
       laneOffset: 0,
@@ -20,6 +21,7 @@ function protectLeaderTest() {
       team: 0,
       protectLeader: true,
       relaySetting: 3,
+      mode: 'relay',
       trackDist: 99,
       baseLaneOffset: 0,
       laneOffset: 0,
@@ -32,6 +34,7 @@ function protectLeaderTest() {
     {
       team: 0,
       relaySetting: 3,
+      mode: 'relay',
       trackDist: 98,
       baseLaneOffset: 0,
       laneOffset: 0,

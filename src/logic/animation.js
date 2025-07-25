@@ -127,7 +127,11 @@ function updatePelotonChase() {
   });
 
   riders.forEach(r => {
-    r.relayChasing = chase || chaseTeams.has(r.team);
+    if (r.mode !== 'solo') {
+      r.relayChasing = chase || chaseTeams.has(r.team);
+    } else {
+      r.relayChasing = false;
+    }
   });
 }
 
@@ -230,6 +234,53 @@ function updateLaneOffsets(dt) {
  * @returns {void}
  */
 
+function updateRiderIntensity(r, dt) {
+  if (r.isAttacking) {
+    r.attackGauge = Math.max(0, r.attackGauge - ATTACK_DRAIN * dt);
+    setIntensity(r, ATTACK_INTENSITY);
+    if (r.attackGauge <= 0) {
+      r.isAttacking = false;
+      setIntensity(r, r.baseIntensity);
+    }
+    return;
+  }
+
+  r.attackGauge = Math.min(100, r.attackGauge + ATTACK_RECOVERY * dt);
+
+  if (r.mode === 'solo') {
+    setIntensity(r, r.baseIntensity);
+    return;
+  }
+
+  if (r.mode === 'relay' && r.relayPhase === 'pull') {
+    setIntensity(r, r.relaySetting);
+    return;
+  }
+
+  let newInt = r.baseIntensity;
+  if (r.relayChasing) newInt = Math.max(newInt, RELAY_CHASE_INTENSITY);
+  if (r.relayLeader) newInt = Math.max(newInt, RELAY_LEADER_INTENSITY);
+  if (r.inBreakaway) newInt = Math.max(newInt, BREAKAWAY_INTENSITY);
+
+  let bestDist = TRACK_WRAP;
+  let ahead = null;
+  for (const o of riders) {
+    if (o === r) continue;
+    const d = aheadDistance(r.trackDist, o.trackDist);
+    if (d > 0 && d < bestDist) {
+      bestDist = d;
+      ahead = o;
+    }
+  }
+  if (!ahead || bestDist > PELOTON_GAP) {
+    newInt = Math.min(100, newInt + 50 * dt);
+  } else {
+    newInt = Math.max(newInt, ahead.intensity);
+  }
+
+  setIntensity(r, newInt);
+}
+
 /**
  * Adapte l'intensité des coureurs au leader lorsqu'il roule au maximum.
  *
@@ -240,7 +291,7 @@ function adjustIntensityToLeader() {
   if (leader.isAttacking || leader.intensity < 100) return;
 
   riders.forEach(r => {
-    if (r !== leader && !r.isAttacking) {
+    if (r !== leader && r.mode !== 'solo' && !r.isAttacking) {
       setIntensity(r, Math.max(r.intensity, leader.intensity));
     }
   });
@@ -369,27 +420,7 @@ function animate() {
     updateEnergy(riders, dt);
 
     riders.forEach(r => {
-      if (r.isAttacking) {
-        r.attackGauge = Math.max(0, r.attackGauge - ATTACK_DRAIN * dt);
-        setIntensity(r, ATTACK_INTENSITY);
-        if (r.attackGauge <= 0) {
-          r.isAttacking = false;
-          setIntensity(r, r.baseIntensity);
-        }
-      } else {
-        r.attackGauge = Math.min(100, r.attackGauge + ATTACK_RECOVERY * dt);
-        let newInt = r.baseIntensity;
-        if (r.relayChasing) {
-          newInt = Math.max(newInt, RELAY_CHASE_INTENSITY);
-        }
-        if (r.relayLeader) {
-          newInt = Math.max(newInt, RELAY_LEADER_INTENSITY);
-        }
-        if (r.inBreakaway) {
-          newInt = Math.max(newInt, BREAKAWAY_INTENSITY);
-        }
-        setIntensity(r, newInt);
-      }
+      updateRiderIntensity(r, dt);
     });
 
     adjustIntensityToLeader();

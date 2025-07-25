@@ -6,7 +6,8 @@ function makeRider(dist, lane = 0) {
     trackDist: dist,
     laneOffset: lane,
     body: { linearDamping: 0 },
-    draftFactor: 1
+    draftFactor: 1,
+    mode: 'follower'
   };
 }
 

@@ -4,9 +4,9 @@ import { BREAKAWAY_TRIGGER_GAP, BREAKAWAY_CAPTURE_GAP } from '../src/utils/const
 
 function testDetection() {
   const riders = [
-    { trackDist: 100, inRelayLine: false },
-    { trackDist: 100 - (BREAKAWAY_TRIGGER_GAP + 1), inRelayLine: false },
-    { trackDist: 50, inRelayLine: false }
+    { trackDist: 100, inRelayLine: false, mode: 'follower' },
+    { trackDist: 100 - (BREAKAWAY_TRIGGER_GAP + 1), inRelayLine: false, mode: 'follower' },
+    { trackDist: 50, inRelayLine: false, mode: 'follower' }
   ];
   updateBreakaway(riders);
   assert.strictEqual(breakaway.members.length, 1);
@@ -15,9 +15,9 @@ function testDetection() {
 
 function testReintegration() {
   const riders = [
-    { trackDist: 100, inRelayLine: false },
-    { trackDist: 100 - (BREAKAWAY_TRIGGER_GAP + 1), inRelayLine: false },
-    { trackDist: 50, inRelayLine: false }
+    { trackDist: 100, inRelayLine: false, mode: 'follower' },
+    { trackDist: 100 - (BREAKAWAY_TRIGGER_GAP + 1), inRelayLine: false, mode: 'follower' },
+    { trackDist: 50, inRelayLine: false, mode: 'follower' }
   ];
   updateBreakaway(riders);
   // reduce gap below capture threshold

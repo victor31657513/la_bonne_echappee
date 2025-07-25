@@ -6,7 +6,8 @@ function makeRider(x, z) {
     body: {
       position: { x, z },
       velocity: { x: 0, z: 0 }
-    }
+    },
+    mode: 'follower'
   };
 }
 

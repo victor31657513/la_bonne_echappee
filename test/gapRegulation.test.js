@@ -8,7 +8,7 @@ function approx(a, b, eps = 1e-6) {
 }
 
 function testPenalty() {
-  const r = { relayPhase: 'line', inRelayLine: false, inBreakaway: true, draftFactor: 1, energy: 100 };
+  const r = { relayPhase: 'line', inRelayLine: false, inBreakaway: true, draftFactor: 1, energy: 100, mode: 'follower' };
   breakaway.members = [r];
   breakaway.gap = BREAKAWAY_MIN_GAP / 2;
   updateEnergy([r], 1);
@@ -19,10 +19,10 @@ function testPenalty() {
 
 function testClosingRate() {
   const riders = [
-    { trackDist: 100, team: 0, intensity: 50, relayChasing: false },
-    { trackDist: 80, team: 1, intensity: 50, relayChasing: false },
-    { trackDist: 60, team: 2, intensity: 100, relayChasing: true },
-    { trackDist: 58, team: 3, intensity: 100, relayChasing: true }
+    { trackDist: 100, team: 0, intensity: 50, relayChasing: false, mode: 'follower' },
+    { trackDist: 80, team: 1, intensity: 50, relayChasing: false, mode: 'follower' },
+    { trackDist: 60, team: 2, intensity: 100, relayChasing: true, mode: 'follower' },
+    { trackDist: 58, team: 3, intensity: 100, relayChasing: true, mode: 'follower' }
   ];
   updateBreakaway(riders);
   approx(breakaway.closingRate, 1);

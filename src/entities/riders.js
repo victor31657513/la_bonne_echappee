@@ -106,6 +106,7 @@ for (let team = 0; team < NUM_TEAMS; team++) {
       relayIntensity: 0,
       baseIntensity: 50,
       intensity: 50,
+      mode: 'follower',
       energy: 100,
       relayChasing: false,
       relayLeader: false,

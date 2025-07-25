@@ -7,9 +7,9 @@ function approxEqual(a, b, eps = 1e-6) {
 
 function testBasic() {
   const riders = [
-    { trackDist: 0, inRelayLine: true },
-    { trackDist: 4, inRelayLine: true },
-    { trackDist: 10, inRelayLine: false }
+    { trackDist: 0, inRelayLine: true, mode: 'follower' },
+    { trackDist: 4, inRelayLine: true, mode: 'follower' },
+    { trackDist: 10, inRelayLine: false, mode: 'follower' }
   ];
   const res = calculateCluster(riders);
   assert.strictEqual(res.members.length, 2);
@@ -18,7 +18,7 @@ function testBasic() {
 }
 
 function testEmpty() {
-  const riders = [{ trackDist: 5, inRelayLine: false }];
+  const riders = [{ trackDist: 5, inRelayLine: false, mode: 'follower' }];
   const res = calculateCluster(riders);
   assert.strictEqual(res.members.length, 0);
   assert.strictEqual(res.avgDist, 0);
