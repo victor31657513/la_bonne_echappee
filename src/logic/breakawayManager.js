@@ -1,9 +1,13 @@
-import { BREAKAWAY_TRIGGER_GAP, BREAKAWAY_CAPTURE_GAP } from '../utils/constants.js';
+import {
+  BREAKAWAY_TRIGGER_GAP,
+  BREAKAWAY_CAPTURE_GAP
+} from '../utils/constants.js';
 import { aheadDistance } from '../utils/utils.js';
 
 const breakaway = {
   members: [],
-  gap: 0
+  gap: 0,
+  closingRate: 0
 };
 
 function updateBreakaway(riders) {
@@ -45,6 +49,14 @@ function updateBreakaway(riders) {
       riders.forEach(r => { r.inBreakaway = newMembers.includes(r); });
       breakaway.gap = gap;
     }
+  }
+
+  const chasers = riders.filter(r => !r.inBreakaway && r.relayChasing);
+  if (chasers.length > 0) {
+    const avg = chasers.reduce((s, r) => s + (r.intensity || 50), 0) / chasers.length;
+    breakaway.closingRate = Math.max(0, (avg - 50) / 50);
+  } else {
+    breakaway.closingRate = 0;
   }
 }
 
