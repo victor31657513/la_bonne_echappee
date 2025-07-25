@@ -1,7 +1,7 @@
 import assert from 'node:assert';
 import { updateBreakaway, breakaway } from '../src/logic/breakawayManager.js';
 import { updateEnergy } from '../src/logic/energyLogic.js';
-import { BREAKAWAY_MIN_GAP, FATIGUE_RATE } from '../src/utils/constants.js';
+import { BREAKAWAY_MIN_GAP, FATIGUE_RATE, EXPOSED_WIND_FATIGUE } from '../src/utils/constants.js';
 
 function approx(a, b, eps = 1e-6) {
   assert.ok(Math.abs(a - b) <= eps, `${a} not close to ${b}`);
@@ -13,7 +13,7 @@ function testPenalty() {
   breakaway.gap = BREAKAWAY_MIN_GAP / 2;
   updateEnergy([r], 1);
   const ratio = 1 - breakaway.gap / BREAKAWAY_MIN_GAP;
-  const expected = 100 - FATIGUE_RATE * (1 + ratio);
+  const expected = 100 - FATIGUE_RATE * (1 + ratio) * EXPOSED_WIND_FATIGUE;
   approx(r.energy, expected);
 }
 
