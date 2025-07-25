@@ -1,11 +1,11 @@
 import assert from 'node:assert';
 import { updateEnergy } from '../src/logic/energyLogic.js';
-import { FATIGUE_RATE, RECOVERY_RATE } from '../src/utils/constants.js';
+import { FATIGUE_RATE, RECOVERY_RATE, EXPOSED_WIND_FATIGUE } from '../src/utils/constants.js';
 
 function testFatigue() {
   const riders = [{ relayPhase: 'pull', draftFactor: 1, inRelayLine: false, inBreakaway: false, energy: 100 }];
   updateEnergy(riders, 1);
-  assert.strictEqual(riders[0].energy, 100 - FATIGUE_RATE);
+  assert.strictEqual(riders[0].energy, 100 - FATIGUE_RATE * EXPOSED_WIND_FATIGUE);
 }
 
 function testRecovery() {
