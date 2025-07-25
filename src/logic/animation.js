@@ -361,11 +361,6 @@ function animate() {
     updateBreakaway(riders);
     updateDraftFactors();
     updateEnergy(riders, dt);
-    riders.forEach(r => {
-      if (r.inBreakaway && !r.inRelayLine) {
-        r.energy = Math.max(0, r.energy - FATIGUE_RATE * dt);
-      }
-    });
 
     riders.forEach(r => {
       if (r.isAttacking) {
