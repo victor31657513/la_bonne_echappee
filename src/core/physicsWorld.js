@@ -1,17 +1,13 @@
-// Initialise le monde physique Cannon.js et gère le pas de simulation
+// Initialise le monde physique Rapier et gère le pas de simulation
 
-import * as CANNON from 'https://unpkg.com/cannon-es@0.20.0/dist/cannon-es.js?module';
+import RAPIER from '@dimforge/rapier3d';
 
-const world = new CANNON.World();
-world.gravity.set(0, 0, 0);
-world.broadphase = new CANNON.SAPBroadphase(world);
+await RAPIER.init();
+
+const world = new RAPIER.World({ gravity: { x: 0, y: 0, z: 0 } });
 // Augmente le nombre d'itérations du solveur pour mieux gérer les collisions dans un peloton dense
-world.solver.iterations = 40;
-
-const defaultMaterial = new CANNON.Material('defaultMaterial');
-const contactMaterial = new CANNON.ContactMaterial(defaultMaterial, defaultMaterial, { friction: 0.3, restitution: 0.1 });
-world.addContactMaterial(contactMaterial);
-world.defaultContactMaterial = contactMaterial;
+world.integrationParameters.numSolverIterations = 40;
+world.integrationParameters.numAdditionalFrictionIterations = 40;
 
 let physicsAccumulator = 0;
 const fixedTimeStep = 1 / 60;
@@ -29,4 +25,4 @@ function stepPhysics(dt) {
   }
 }
 
-export { CANNON, world, stepPhysics };
+export { RAPIER, world, stepPhysics };

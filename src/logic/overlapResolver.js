@@ -17,8 +17,10 @@ function resolveOverlaps(riders) {
       const a = riders[i];
       for (let j = i + 1; j < riders.length; j++) {
         const b = riders[j];
-        const dx = a.body.position.x - b.body.position.x;
-        const dz = a.body.position.z - b.body.position.z;
+        const ap = a.body.translation();
+        const bp = b.body.translation();
+        const dx = ap.x - bp.x;
+        const dz = ap.z - bp.z;
         const distSq = dx * dx + dz * dz;
         if (distSq < minDist * minDist && distSq > 1e-6) {
           const dist = Math.sqrt(distSq);
@@ -28,21 +30,27 @@ function resolveOverlaps(riders) {
           const adjust = (overlap / 2) * OVERLAP_FORCE;
           const adjX = nx * adjust;
           const adjZ = nz * adjust;
-          a.body.velocity.x += adjX;
-          a.body.velocity.z += adjZ;
-          b.body.velocity.x -= adjX;
-          b.body.velocity.z -= adjZ;
+          const av = a.body.linvel();
+          const bv = b.body.linvel();
+          a.body.setLinvel({ x: av.x + adjX, y: av.y, z: av.z + adjZ }, true);
+          b.body.setLinvel({ x: bv.x - adjX, y: bv.y, z: bv.z - adjZ }, true);
           moved = true;
 
-          const relVX = a.body.velocity.x - b.body.velocity.x;
-          const relVZ = a.body.velocity.z - b.body.velocity.z;
+          const av2 = a.body.linvel();
+          const bv2 = b.body.linvel();
+          const relVX = av2.x - bv2.x;
+          const relVZ = av2.z - bv2.z;
           const relVN = relVX * nx + relVZ * nz;
           if (relVN < 0) {
             const impulse = relVN / 2;
-            a.body.velocity.x -= impulse * nx;
-            a.body.velocity.z -= impulse * nz;
-            b.body.velocity.x += impulse * nx;
-            b.body.velocity.z += impulse * nz;
+            a.body.setLinvel(
+              { x: av2.x - impulse * nx, y: av2.y, z: av2.z - impulse * nz },
+              true
+            );
+            b.body.setLinvel(
+              { x: bv2.x + impulse * nx, y: bv2.y, z: bv2.z + impulse * nz },
+              true
+            );
           }
         }
       }

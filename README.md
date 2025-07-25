@@ -3,7 +3,7 @@
 Cette simulation affiche un peloton de cyclistes en 3D dans votre navigateur. Les sources sont séparées en modules JavaScript situés dans `src/`.
 
 ## Utilisation
-Ouvrez `index.html` dans un navigateur moderne. Le fichier charge automatiquement les modules nécessaires via des imports ES modules et utilise des bibliothèques depuis un CDN.
+Ouvrez `index.html` dans un navigateur moderne. Le fichier charge automatiquement les modules nécessaires via des imports ES modules et utilise des bibliothèques depuis un CDN. Le moteur physique [Rapier](https://rapier.rs/) est désormais requis et doit être chargé en tant que module externe.
 Les versions du projet sont désormais créées automatiquement lors d'un merge dans `main` grâce au workflow `release-please`. Consultez les releases GitHub pour connaître la dernière version disponible.
 
 Chaque coureur dispose maintenant d'un bouton **Attack** qui le pousse à 120 % d'intensité tant que sa jauge d'attaque n'est pas vide. Celle-ci se vide rapidement lors d'une attaque et se recharge lentement ensuite.
@@ -36,6 +36,14 @@ Les dépendances de développement (ESLint) sont gérées via `npm`. Pour vérif
 ```bash
 npm run lint
 npm test
+```
+
+Dans le navigateur, Rapier peut être chargé depuis un CDN avec :
+
+```html
+<script type="module">
+  import RAPIER from 'https://cdn.jsdelivr.net/npm/@dimforge/rapier3d@0.18.0/rapier.js';
+</script>
 ```
 
 ## Conventions de nommage

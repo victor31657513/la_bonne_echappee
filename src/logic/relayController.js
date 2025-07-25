@@ -1,4 +1,4 @@
-import { CANNON } from '../core/physicsWorld.js';
+import { RAPIER } from '../core/physicsWorld.js';
 import { riders, teamRelayState } from '../entities/riders.js';
 import { relayStep } from './relayLogic.js';
 import { updateRelayCluster } from './relayCluster.js';
@@ -41,13 +41,17 @@ function updateRelays(dt) {
       if (dist > RELAY_TARGET_GAP) r.relayChasing = true;
 
       const theta = ((r.trackDist % TRACK_WRAP) / TRACK_WRAP) * 2 * Math.PI;
-      const forward = new CANNON.Vec3(-Math.sin(theta), 0, Math.cos(theta));
+      const forward = new RAPIER.Vector3(-Math.sin(theta), 0, Math.cos(theta));
       let diff = 0;
       if (dist > RELAY_MAX_DIST) diff = dist - RELAY_MAX_DIST;
       else if (dist < RELAY_MIN_DIST) diff = dist - RELAY_MIN_DIST;
       if (diff !== 0) {
-        const force = forward.scale(diff * RELAY_CORRECTION_GAIN * r.body.mass);
-        r.body.applyForce(force, r.body.position);
+        const force = new RAPIER.Vector3(
+          forward.x * diff * RELAY_CORRECTION_GAIN * r.body.mass(),
+          0,
+          forward.z * diff * RELAY_CORRECTION_GAIN * r.body.mass()
+        );
+        r.body.addForce(force, true);
       }
 
       r.inRelayLine = true;
