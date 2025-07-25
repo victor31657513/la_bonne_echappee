@@ -6,7 +6,8 @@ function makeRider(dist, lane) {
     trackDist: dist,
     laneOffset: lane,
     bordureChasing: false,
-    bordurePenalty: 0
+    bordurePenalty: 0,
+    mode: 'follower'
   };
 }
 
