@@ -20,6 +20,7 @@ import { updateSelectionHelper, selectedIndex, chaseTeams } from '../ui/ui.js';
 import { started } from '../ui/startButton.js';
 import { aheadDistance, wrapDistance } from '../utils/utils.js';
 import { updateDraftFactors as computeDraftFactors } from './draftLogic.js';
+import { updateBordure } from './bordureLogic.js';
 import { BASE_SPEED, FATIGUE_RATE } from '../utils/constants.js';
 import { updateEnergy } from './energyLogic.js';
 import { updateRelays } from './relayController.js';
@@ -128,6 +129,10 @@ function updatePelotonChase() {
   riders.forEach(r => {
     r.relayChasing = chase || chaseTeams.has(r.team);
   });
+}
+
+function updateBordureStatus() {
+  updateBordure(riders, WIND_STRENGTH);
 }
 
 /**
@@ -358,6 +363,7 @@ function animate() {
     limitRiderSpeed();
     limitLateralSpeed();
     updatePelotonChase();
+    updateBordureStatus();
     updateBreakaway(riders);
     updateDraftFactors();
     updateEnergy(riders, dt);

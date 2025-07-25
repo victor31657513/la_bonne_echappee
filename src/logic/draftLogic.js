@@ -34,6 +34,7 @@ function updateDraftFactors(riders, windDirection = 1) {
       return false;
     });
     if (!sheltered && windDirection !== 0) drag = Math.min(1, drag + 0.2);
+    if (r.bordurePenalty) drag = Math.min(1, drag + r.bordurePenalty);
 
     r.body.linearDamping = 0.2 * drag;
     r.draftFactor = 1 + 0.625 * (1 - drag);
