@@ -10,7 +10,7 @@ import {
 import { riders, teamColors, riderGeom } from '../entities/riders.js';
 import { TRACK_WRAP } from '../entities/track.js';
 import { on, emit } from '../utils/eventBus.js';
-import { updateBreakawayDisplay } from './breakawayDisplay.js';
+import { breakawayText } from './breakawayDisplay.js';
 import { LineSegments2 } from 'three/addons/lines/LineSegments2.js';
 import { LineSegmentsGeometry } from 'three/addons/lines/LineSegmentsGeometry.js';
 import { LineMaterial } from 'three/addons/lines/LineMaterial.js';
@@ -295,16 +295,17 @@ setInterval(() => {
     if (selectedIndex !== null) {
       const v = riders[selectedIndex].body.velocity.length();
       const kmh = v * 3.6;
-      speedIndicator.textContent = `Speed: ${kmh.toFixed(1)} km/h`;
+      let text = `Speed: ${kmh.toFixed(1)} km/h`;
+      const bText = breakawayText();
+      if (bText) text += ` | ${bText}`;
+      speedIndicator.textContent = text;
     } else {
       speedIndicator.textContent = '';
     }
   }
 }, 100);
 
-setInterval(updateBreakawayDisplay, 100);
-
 // S'assurer que le marqueur de sélection est visible au chargement
 updateSelectionHelper();
 
-export { selectedIndex, updateSelectionHelper, updateBreakawayDisplay, chaseTeams };
+export { selectedIndex, updateSelectionHelper, chaseTeams };
