@@ -8,6 +8,8 @@ const RELAY_MAX_DIST = 3.0;
 const FATIGUE_RATE = 5; // unités par seconde
 const RECOVERY_RATE = 3; // unités par seconde
 const ENERGY_THRESHOLD = 20;
+const BREAKAWAY_TRIGGER_GAP = 10;
+const BREAKAWAY_CAPTURE_GAP = 5;
 
 export {
   BASE_SPEED,
@@ -15,5 +17,7 @@ export {
   RELAY_MAX_DIST,
   FATIGUE_RATE,
   RECOVERY_RATE,
-  ENERGY_THRESHOLD
+  ENERGY_THRESHOLD,
+  BREAKAWAY_TRIGGER_GAP,
+  BREAKAWAY_CAPTURE_GAP
 };
