@@ -50,20 +50,20 @@ teamColorsCss.forEach((col, t) => {
  */
 function showTeamControls(tid) {
   teamControlsDiv.innerHTML = '';
-  const teamRelaySelect = document.createElement('select');
-  const teamRelayOpts = [
-    { label: 'Followers', value: '0' },
-    { label: 'Relay', value: '1' }
+  const teamModeSelect = document.createElement('select');
+  const teamModeOpts = [
+    { label: 'Follower', value: 'follower' },
+    { label: 'Solo', value: 'solo' },
+    { label: 'Relay', value: 'relay' }
   ];
-  teamRelayOpts.forEach(optInfo => {
+  teamModeOpts.forEach(optInfo => {
     const opt = document.createElement('option');
     opt.value = optInfo.value;
     opt.textContent = optInfo.label;
-    teamRelaySelect.append(opt);
+    teamModeSelect.append(opt);
   });
-  teamRelaySelect.value = riders.some(r => r.team === tid && r.relaySetting > 0)
-    ? '1'
-    : '0';
+  const teamRider = riders.find(r => r.team === tid);
+  teamModeSelect.value = teamRider ? teamRider.mode : 'follower';
 
   const intensityLabel = document.createElement('label');
   intensityLabel.textContent = 'Team Intensity:';
@@ -83,18 +83,32 @@ function showTeamControls(tid) {
     riders
       .filter(r => r.team === tid)
       .forEach(r => {
-        r.baseIntensity = val;
-        if (!r.isAttacking) {
-          r.intensity = val;
-          emit('intensityChange', { rider: r, value: val });
+        if (teamModeSelect.value === 'relay') {
+          r.relaySetting = val;
+          if (r.mode === 'relay' && r.relayPhase === 'pull') {
+            r.intensity = val;
+            emit('intensityChange', { rider: r, value: val });
+          }
+        } else {
+          r.baseIntensity = val;
+          if (!r.isAttacking) {
+            r.intensity = val;
+            emit('intensityChange', { rider: r, value: val });
+          }
         }
       });
+  });
+  on('intensityChange', payload => {
+    if (payload.rider.team === tid && teamModeSelect.value === 'relay') {
+      teamIntInput.value = payload.rider.relaySetting;
+      teamIntVal.textContent = payload.rider.relaySetting;
+    }
   });
   const teamIntensityContainer = document.createElement('div');
   teamIntensityContainer.append(intensityLabel, teamIntInput, teamIntVal);
   const relayContainer = document.createElement('label');
   relayContainer.textContent = 'Team Mode:';
-  relayContainer.append(teamRelaySelect);
+  relayContainer.append(teamModeSelect);
 
   function resetTeamIntensity() {
     teamIntInput.value = 50;
@@ -112,17 +126,24 @@ function showTeamControls(tid) {
       });
   }
 
-  teamRelaySelect.addEventListener('change', e => {
-    const active = e.target.value === '1';
+  teamModeSelect.addEventListener('change', e => {
+    const mode = e.target.value;
+    const relay = mode === 'relay';
     riders
       .filter(r => r.team === tid)
       .forEach((r, idx) => {
-        r.relaySetting = active ? 3 : 0;
-        if (!active) r.isAttacking = false;
+        r.mode = mode;
+        r.relaySetting = relay ? 3 : 0;
+        if (!relay) r.isAttacking = false;
         const sel = document.getElementById(`state_${tid}_${idx}`);
-        if (sel) sel.value = active ? 'relay' : 'followers';
+        if (sel) sel.value = mode;
+        const slider = document.getElementById(`int_${tid}_${idx}`);
+        if (slider) {
+          slider.disabled =
+            mode === 'follower' || (mode === 'relay' && r.relayPhase !== 'pull');
+        }
       });
-    if (!active) resetTeamIntensity();
+    if (!relay) resetTeamIntensity();
   });
 
   const chaseBtn = document.createElement('button');
@@ -153,7 +174,8 @@ function showTeamControls(tid) {
       <label>Intensity:<input type="range" min="0" max="100" step="25" list="intensityTicks" id="int_${tid}_${idx}" value="${r.baseIntensity}"/><span id="int_val_${tid}_${idx}">${r.baseIntensity}</span></label>
       <label><input type="checkbox" id="prot_${tid}_${idx}" ${r.protectLeader ? 'checked' : ''} ${r.isLeader ? 'disabled' : ''}/> Protect</label>
       <select id="state_${tid}_${idx}">
-        <option value="followers">Followers</option>
+        <option value="follower">Follower</option>
+        <option value="solo">Solo</option>
         <option value="relay">Relay</option>
       </select>
       <button id="atk_${tid}_${idx}">Attack</button>
@@ -161,14 +183,22 @@ function showTeamControls(tid) {
       <progress id="gauge_${tid}_${idx}" max="100" value="${r.attackGauge}"></progress>`;
       teamControlsDiv.append(row);
       const intensityInput = document.getElementById(`int_${tid}_${idx}`);
+      intensityInput.disabled =
+        r.mode === 'follower' || (r.mode === 'relay' && r.relayPhase !== 'pull');
       intensityInput.addEventListener('input', e => {
         const val = Math.round(+e.target.value / 25) * 25;
         intensityInput.value = val;
-        r.baseIntensity = val;
         document.getElementById(`int_val_${tid}_${idx}`).textContent = val;
-        if (!r.isAttacking) {
-          r.intensity = r.baseIntensity;
-          emit('intensityChange', { rider: r, value: r.intensity });
+        if (r.mode === 'relay' && r.relayPhase === 'pull') {
+          r.relaySetting = val;
+          r.intensity = val;
+          emit('intensityChange', { rider: r, value: val });
+        } else {
+          r.baseIntensity = val;
+          if (!r.isAttacking) {
+            r.intensity = r.baseIntensity;
+            emit('intensityChange', { rider: r, value: r.intensity });
+          }
         }
       });
       on('intensityChange', payload => {
@@ -180,20 +210,24 @@ function showTeamControls(tid) {
       on('phaseChange', payload => {
         if (payload.rider === r) {
           row.dataset.phase = payload.phase;
+          if (r.mode === 'relay') {
+            intensityInput.disabled = payload.phase !== 'pull';
+          }
         }
       });
       document.getElementById(`prot_${tid}_${idx}`).addEventListener('change', e => (r.protectLeader = e.target.checked));
       const stateSel = document.getElementById(`state_${tid}_${idx}`);
-      stateSel.value = r.relaySetting > 0 ? 'relay' : 'followers';
+      stateSel.value = r.mode;
       stateSel.addEventListener('change', e => {
-        if (e.target.value === 'relay') {
+        r.mode = e.target.value;
+        if (r.mode === 'relay') {
           r.relaySetting = 3;
-          r.isAttacking = false;
+          intensityInput.disabled = r.relayPhase !== 'pull';
         } else {
           r.relaySetting = 0;
-          r.isAttacking = false;
-          resetTeamIntensity();
+          intensityInput.disabled = r.mode === 'follower';
         }
+        r.isAttacking = false;
       });
       document.getElementById(`atk_${tid}_${idx}`).addEventListener('click', () => {
         if (r.attackGauge > 0) r.isAttacking = true;
