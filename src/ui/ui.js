@@ -99,8 +99,8 @@ function showTeamControls(tid) {
   });
   on('intensityChange', payload => {
     if (payload.rider.team === tid && teamModeSelect.value === 'relay') {
-      teamIntInput.value = payload.rider.relaySetting;
-      teamIntVal.textContent = payload.rider.relaySetting;
+      teamIntInput.value = payload.value;
+      teamIntVal.textContent = payload.value;
     }
   });
   const teamIntensityContainer = document.createElement('div');
