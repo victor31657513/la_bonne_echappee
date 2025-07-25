@@ -2,13 +2,28 @@ import assert from 'node:assert';
 import { resolveOverlaps } from '../src/logic/overlapResolver.js';
 
 function makeRider(x, z) {
-  return {
-    body: {
-      position: { x, z },
-      velocity: { x: 0, z: 0 }
+  const body = {
+    _pos: { x, y: 0, z },
+    _vel: { x: 0, y: 0, z: 0 },
+    get position() {
+      return this._pos;
     },
-    mode: 'follower'
+    get velocity() {
+      return this._vel;
+    },
+    translation() {
+      return { x: this._pos.x, y: this._pos.y, z: this._pos.z };
+    },
+    linvel() {
+      return { x: this._vel.x, y: this._vel.y, z: this._vel.z };
+    },
+    setLinvel(v) {
+      this._vel.x = v.x;
+      this._vel.y = v.y;
+      this._vel.z = v.z;
+    }
   };
+  return { body, mode: 'follower' };
 }
 
 function testNoTeleport() {
