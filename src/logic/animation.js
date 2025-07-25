@@ -16,7 +16,7 @@ import {
   ROAD_WIDTH
 } from '../entities/track.js';
 import { stepPhysics } from '../core/physicsWorld.js';
-import { updateSelectionHelper, selectedIndex, chaseTeams } from '../ui/ui.js';
+import { updateSelectionHelper, selectedIndex } from '../ui/ui.js';
 import { started } from '../ui/startButton.js';
 import { aheadDistance, wrapDistance } from '../utils/utils.js';
 import { updateDraftFactors as computeDraftFactors } from './draftLogic.js';
@@ -128,7 +128,7 @@ function updatePelotonChase() {
 
   riders.forEach(r => {
     if (r.mode !== 'solo') {
-      r.relayChasing = chase || chaseTeams.has(r.team);
+      r.relayChasing = chase;
     } else {
       r.relayChasing = false;
     }
