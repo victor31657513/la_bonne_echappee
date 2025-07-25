@@ -7,6 +7,15 @@ Ouvrez `index.html` dans un navigateur moderne. Le fichier charge automatiquemen
 Les versions du projet sont désormais créées automatiquement lors d'un merge dans `main` grâce au workflow `release-please`. Consultez les releases GitHub pour connaître la dernière version disponible.
 
 Chaque coureur dispose maintenant d'un bouton **Attack** qui le pousse à 120 % d'intensité tant que sa jauge d'attaque n'est pas vide. Celle-ci se vide rapidement lors d'une attaque et se recharge lentement ensuite.
+Les anciens boutons *Early Atk* et *Chase Breakaway* ont été retirés afin de simplifier l'interface.
+
+## Modes des coureurs
+
+Trois modes déterminent désormais le comportement d'intensité :
+
+- **Follower** (par défaut) : l'intensité s'adapte automatiquement au peloton ou au coureur qui précède.
+- **Solo** : le coureur applique en continu l'intensité choisie, sans ajustement automatique.
+- **Relay** : le coureur rejoint la file à 100 % puis mène selon l'intensité de relais sélectionnée lorsqu'il arrive en tête. Hors phase de *pull*, son intensité redevient gérée comme en mode *follower*.
 
 ## Gestion des relais
 
@@ -15,8 +24,11 @@ alors en file indienne derrière le relayeur de tête. La durée d'un relais var
 automatiquement selon le nombre de coureurs présents dans cette file : plus la
 file est longue, plus chaque relais est court. Lorsqu'un relayeur termine son
 effort, il laisse les autres le dépasser et se replace derrière le dernier tout
-en accélérant pour recoller si besoin.
-En mode *relay*, les coureurs passent désormais à 100 % d'intensité pour rejoindre et mener la file.
+en accélérant pour recoller si besoin. La glissière d'intensité de l'équipe se
+synchronise automatiquement avec les coureurs lorsque ceux‑ci sont en mode
+*relay*.
+En mode *relay*, les coureurs passent désormais à 100 % d'intensité pour
+rejoindre et mener la file.
 
 ## Développement
 Les dépendances de développement (ESLint) sont gérées via `npm`. Pour vérifier le linting et exécuter le jeu de tests factice :
