@@ -1,7 +1,7 @@
 // Initialise les coureurs et leur logique de regroupement
 
 import { THREE, scene } from '../core/setupScene.js';
-import { CANNON, world } from '../core/physicsWorld.js';
+import { RAPIER, world } from '../core/physicsWorld.js';
 import { System as BoidSystem, Boid, behaviors } from 'https://esm.sh/bird-oid@0.2.1';
 import { ROAD_WIDTH, TRACK_WRAP, TRACK_LENGTH, BASE_RADIUS, ROW_SPACING } from './track.js';
 import { RIDER_WIDTH, MIN_LATERAL_GAP } from './riderConstants.js';
@@ -72,17 +72,17 @@ for (let team = 0; team < NUM_TEAMS; team++) {
     mesh.rotation.y = angle0 + Math.PI / 2;
     scene.add(mesh);
 
-    const body = new CANNON.Body({ mass: 1 });
-    const halfExtents = new CANNON.Vec3(
+    const bodyDesc = RAPIER.RigidBodyDesc.dynamic()
+      .setTranslation(x0, 0, z0)
+      .setLinearDamping(0.2)
+      .setAngularDamping(0.2);
+    const body = world.createRigidBody(bodyDesc);
+    const colliderDesc = RAPIER.ColliderDesc.cuboid(
       RIDER_BOX_HALF.x,
       RIDER_BOX_HALF.y,
       RIDER_BOX_HALF.z
     );
-    body.addShape(new CANNON.Box(halfExtents));
-    body.position.set(x0, 0, z0);
-    body.linearDamping = 0.2;
-    body.angularDamping = 0.2;
-    world.addBody(body);
+    world.createCollider(colliderDesc, body);
 
     const boid = new Boid(boidBehaviors);
     boid.position = [x0, z0];

@@ -1,7 +1,7 @@
 // Animation du peloton et logique de comportement des coureurs
 
 import { THREE, scene, camera, renderer } from '../core/setupScene.js';
-import { CANNON } from '../core/physicsWorld.js';
+import { RAPIER } from '../core/physicsWorld.js';
 import { riders, boidSystem } from '../entities/riders.js';
 import { RIDER_WIDTH, MIN_LATERAL_GAP } from '../entities/riderConstants.js';
 import { resolveOverlaps } from './overlapResolver.js';
@@ -74,10 +74,14 @@ let lastTime = performance.now();
  */
 function limitRiderSpeed() {
   riders.forEach(r => {
-    const v = r.body.velocity;
-    const speed = v.length();
+    const v = r.body.linvel();
+    const speed = Math.hypot(v.x, v.y, v.z);
     if (speed > MAX_SPEED) {
-      v.scale(MAX_SPEED / speed, v);
+      const scale = MAX_SPEED / speed;
+      r.body.setLinvel(
+        new RAPIER.Vector3(v.x * scale, v.y * scale, v.z * scale),
+        true
+      );
     }
   });
 }
@@ -90,12 +94,17 @@ function limitRiderSpeed() {
 function limitLateralSpeed() {
   riders.forEach(r => {
     const theta = ((r.trackDist % TRACK_WRAP) / TRACK_WRAP) * 2 * Math.PI;
-    const right = new CANNON.Vec3(Math.cos(theta), 0, Math.sin(theta));
-    const latSpeed = r.body.velocity.dot(right);
+    const right = new RAPIER.Vector3(Math.cos(theta), 0, Math.sin(theta));
+    const v = r.body.linvel();
+    const latSpeed = v.x * right.x + v.z * right.z;
     if (Math.abs(latSpeed) > MAX_LATERAL_SPEED) {
       const excess = latSpeed - Math.sign(latSpeed) * MAX_LATERAL_SPEED;
-      r.body.velocity.x -= excess * right.x;
-      r.body.velocity.z -= excess * right.z;
+      const newV = new RAPIER.Vector3(
+        v.x - excess * right.x,
+        v.y,
+        v.z - excess * right.z
+      );
+      r.body.setLinvel(newV, true);
     }
   });
 }
@@ -148,8 +157,8 @@ function clampAndRedirect() {
   const minR = INNER_R + 0.1;
   const maxR = OUTER_R - 0.1;
   riders.forEach(r => {
-    const p = r.body.position;
-    const v = r.body.velocity;
+    const p = r.body.translation();
+    const v = r.body.linvel();
     p.y = 0;
     v.y = 0;
     const radial = Math.hypot(p.x, p.z);
@@ -157,12 +166,13 @@ function clampAndRedirect() {
       const nx = p.x / radial,
         nz = p.z / radial;
       const clamped = THREE.MathUtils.clamp(radial, minR, maxR);
-      p.x = nx * clamped;
-      p.z = nz * clamped;
-      const tangent = new CANNON.Vec3(-nz, 0, nx);
-      const speed = v.dot(tangent);
-      v.x = tangent.x * speed;
-      v.z = tangent.z * speed;
+      r.body.setTranslation({ x: nx * clamped, y: 0, z: nz * clamped }, true);
+      const tangent = new RAPIER.Vector3(-nz, 0, nx);
+      const speed = v.x * tangent.x + v.z * tangent.z;
+      r.body.setLinvel(
+        new RAPIER.Vector3(tangent.x * speed, 0, tangent.z * speed),
+        true
+      );
     }
   });
 }
@@ -381,27 +391,39 @@ function applyForces(dt) {
     // Oriente progressivement vers la position latérale souhaitée
     r.laneOffset = THREE.MathUtils.lerp(r.laneOffset, r.laneTarget, dt * 2);
 
-    const bodyPos = r.body.position;
+    const bodyPos = r.body.translation();
     const angle = ((r.trackDist % TRACK_WRAP) / TRACK_WRAP) * 2 * Math.PI;
     // Garde les coureurs près de leur voie cible sans les ramener vers le centre
     const targetRadius = BASE_RADIUS + r.laneOffset;
     const targetX = targetRadius * Math.cos(angle);
     const targetZ = targetRadius * Math.sin(angle);
-    const lateralVec = new CANNON.Vec3(targetX - bodyPos.x, 0, targetZ - bodyPos.z);
-    const lateralForce = lateralVec.scale(LATERAL_FORCE);
+    const lateralVec = new RAPIER.Vector3(targetX - bodyPos.x, 0, targetZ - bodyPos.z);
+    const lateralForce = new RAPIER.Vector3(
+      lateralVec.x * LATERAL_FORCE,
+      0,
+      lateralVec.z * LATERAL_FORCE
+    );
 
     const theta = angle;
-    const fwd = new CANNON.Vec3(-Math.sin(theta), 0, Math.cos(theta));
-    const fwdForce = fwd.scale(r.currentBoost);
-    const right = new CANNON.Vec3(Math.cos(theta), 0, Math.sin(theta));
-    const windForce = right.scale(WIND_STRENGTH * WIND_DIRECTION);
+    const fwd = new RAPIER.Vector3(-Math.sin(theta), 0, Math.cos(theta));
+    const fwdForce = new RAPIER.Vector3(
+      fwd.x * r.currentBoost,
+      0,
+      fwd.z * r.currentBoost
+    );
+    const right = new RAPIER.Vector3(Math.cos(theta), 0, Math.sin(theta));
+    const windForce = new RAPIER.Vector3(
+      right.x * WIND_STRENGTH * WIND_DIRECTION,
+      0,
+      right.z * WIND_STRENGTH * WIND_DIRECTION
+    );
 
-    const totalForce = new CANNON.Vec3(
+    const totalForce = new RAPIER.Vector3(
       lateralForce.x + fwdForce.x + windForce.x,
       0,
       lateralForce.z + fwdForce.z + windForce.z
     );
-    r.body.applyForce(totalForce, bodyPos);
+    r.body.addForce(totalForce, true);
   });
 }
 
@@ -441,14 +463,19 @@ function animate() {
 
     riders.forEach(r => {
       const theta = ((r.trackDist % TRACK_WRAP) / TRACK_WRAP) * 2 * Math.PI;
-      const forward = new CANNON.Vec3(-Math.sin(theta), 0, Math.cos(theta));
-      const currentSpeed = r.body.velocity.length();
+      const forward = new RAPIER.Vector3(-Math.sin(theta), 0, Math.cos(theta));
+      const vel = r.body.linvel();
+      const currentSpeed = Math.hypot(vel.x, vel.y, vel.z);
       let desiredSpeed = BASE_SPEED * (r.intensity / 50) * r.draftFactor;
       if (r.relayPhase === 'fall_back') desiredSpeed *= PULL_OFF_SPEED_FACTOR;
       const speedDiff = desiredSpeed - currentSpeed;
       const accel = speedDiff * SPEED_GAIN;
-      const accelForce = forward.scale(r.body.mass * accel);
-      r.body.applyForce(accelForce, r.body.position);
+      const accelForce = new RAPIER.Vector3(
+        forward.x * r.body.mass() * accel,
+        0,
+        forward.z * r.body.mass() * accel
+      );
+      r.body.addForce(accelForce, true);
     });
 
     clampAndRedirect();
@@ -461,7 +488,7 @@ function animate() {
 
 
   riders.forEach(r => {
-    const bodyPos = new THREE.Vector3().copy(r.body.position);
+    const bodyPos = new THREE.Vector3().copy(r.body.translation());
     // Synchroniser le décalage logique de voie avec la position réelle du corps
     // afin que les collisions puissent repousser latéralement les coureurs
     const radial = Math.hypot(bodyPos.x, bodyPos.z);
@@ -494,11 +521,15 @@ function animate() {
     const lookAtPoint = new THREE.Vector3(r.mesh.position.x + dx, 0, r.mesh.position.z + dz);
     r.mesh.lookAt(lookAtPoint);
     r.mesh.rotateY(-Math.PI / 2);
-    r.body.quaternion.set(
-      r.mesh.quaternion.x,
-      r.mesh.quaternion.y,
-      r.mesh.quaternion.z,
-      r.mesh.quaternion.w
+    r.body.setTranslation({ x: bodyPos.x, y: 0, z: bodyPos.z }, false);
+    r.body.setRotation(
+      {
+        x: r.mesh.quaternion.x,
+        y: r.mesh.quaternion.y,
+        z: r.mesh.quaternion.z,
+        w: r.mesh.quaternion.w
+      },
+      false
     );
   });
 
