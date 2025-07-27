@@ -1,4 +1,5 @@
 import { aheadDistance } from '../utils/utils.js';
+import { BASE_LINEAR_DAMPING, DRAFT_FACTOR_SCALE } from '../utils/constants.js';
 
 function updateDraftFactors(riders, windDirection = 1) {
   riders.forEach(r => {
@@ -36,8 +37,8 @@ function updateDraftFactors(riders, windDirection = 1) {
     if (!sheltered && windDirection !== 0) drag = Math.min(1, drag + 0.2);
     if (r.bordurePenalty) drag = Math.min(1, drag + r.bordurePenalty);
 
-    r.body.linearDamping = 0.2 * drag;
-    r.draftFactor = 1 + 0.625 * (1 - drag);
+    r.body.linearDamping = BASE_LINEAR_DAMPING * drag;
+    r.draftFactor = 1 + DRAFT_FACTOR_SCALE * (1 - drag);
 
     if (
       r.isLeader &&

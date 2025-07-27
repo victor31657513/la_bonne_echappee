@@ -14,6 +14,11 @@ const BREAKAWAY_MIN_GAP = 15;
 const BREAKAWAY_MAX_GAP = 40;
 const BORDURE_LANE_GAP = 1.0;
 
+// Amortissement de base appliqué aux coureurs avant la traînée
+const BASE_LINEAR_DAMPING = 0.15;
+// Intensité de l'effet d'aspiration sur la vitesse
+const DRAFT_FACTOR_SCALE = 0.7;
+
 // Multiplicateurs de fatigue liés à l'exposition au vent
 const SHELTERED_WIND_FATIGUE = 1.0;
 const EXPOSED_WIND_FATIGUE = 1.5;
@@ -31,5 +36,7 @@ export {
   BREAKAWAY_MAX_GAP,
   BORDURE_LANE_GAP,
   SHELTERED_WIND_FATIGUE,
-  EXPOSED_WIND_FATIGUE
+  EXPOSED_WIND_FATIGUE,
+  BASE_LINEAR_DAMPING,
+  DRAFT_FACTOR_SCALE
 };

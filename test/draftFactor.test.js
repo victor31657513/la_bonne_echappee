@@ -19,8 +19,8 @@ function testLinePositions() {
   const riders = [makeRider(10), makeRider(8), makeRider(6), makeRider(4), makeRider(2)];
   updateDraftFactors(riders, 0);
   approx(riders[0].draftFactor, 1.0);
-  approx(riders[1].draftFactor, 1.19);
-  approx(riders[4].draftFactor, 1.31);
+  approx(riders[1].draftFactor, 1.21);
+  approx(riders[4].draftFactor, 1.35);
 }
 
 function testDeepGroup() {
@@ -35,7 +35,7 @@ function testDeepGroup() {
   ];
   updateDraftFactors(riders, 0);
   assert.ok(riders[6].draftFactor > 1.5);
-  approx(riders[6].body.linearDamping, 0.01);
+  approx(riders[6].body.linearDamping, 0.0075);
 }
 
 testLinePositions();
