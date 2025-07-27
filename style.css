@@ -1,11 +1,26 @@
 /* Style de la page pour la simulation */
 /* style.css */
-body {
+html, body {
     margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+}
+
+body {
     background-color: #000;
     /* fond noir comme requis */
     color: #eee;
     font-family: sans-serif;
+}
+
+#vis {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
 }
 
 #controls {
