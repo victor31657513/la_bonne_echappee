@@ -32,11 +32,6 @@ if (startBtn) {
       r.trackDist = polarToDist(pos.x, pos.z);
       r.prevDist = r.trackDist;
       r.lap = 0;
-      if (r.boid) {
-        r.boid.position = [pos.x, pos.z];
-        // La vitesse du boid est nulle pour démarrer à l'arrêt
-        r.boid.velocity = [0, 0];
-      }
     });
     devLog('Riders repositioned', riders.map(r => r.body.translation()));
     // Force un recalcul de la taille du canvas au démarrage
