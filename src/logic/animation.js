@@ -165,9 +165,11 @@ function clampAndRedirect() {
     v.y = 0;
     const radial = Math.hypot(p.x, p.z);
     if (radial < minR || radial > maxR) {
-      const nx = p.x / radial,
-        nz = p.z / radial;
-      const clamped = THREE.MathUtils.clamp(radial, minR, maxR);
+      // Si un coureur se retrouve exactement au centre, son rayon est nul
+      // ce qui produirait des valeurs NaN lors de la normalisation.
+      const nx = radial > 0 ? p.x / radial : 1;
+      const nz = radial > 0 ? p.z / radial : 0;
+      const clamped = THREE.MathUtils.clamp(radial || minR, minR, maxR);
       r.body.setTranslation({ x: nx * clamped, y: 0, z: nz * clamped }, true);
       const tangent = new RAPIER.Vector3(-nz, 0, nx);
       const speed = v.x * tangent.x + v.z * tangent.z;
