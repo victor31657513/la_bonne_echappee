@@ -6,12 +6,14 @@ import { BASE_SPEED } from '../utils/constants.js';
 import { emit } from '../utils/eventBus.js';
 import { resumeAmbientSound } from '../logic/ambientSound.js';
 import { RAPIER } from '../core/physicsWorld.js';
+import { devLog } from '../utils/devLog.js';
 
 let started = false;
 
 const startBtn = document.getElementById('startBtn');
 if (startBtn) {
   startBtn.addEventListener('click', () => {
+    devLog('Start button clicked');
     started = true;
     resumeAmbientSound();
     riders.forEach(r => {
@@ -35,6 +37,7 @@ if (startBtn) {
         r.boid.velocity = [0, 0];
       }
     });
+    devLog('Riders repositioned', riders.map(r => r.body.translation()));
     // Force un recalcul de la taille du canvas au démarrage
     window.dispatchEvent(new Event('resize'));
     startBtn.disabled = true;
