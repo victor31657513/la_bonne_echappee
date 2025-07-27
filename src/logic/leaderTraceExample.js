@@ -5,7 +5,7 @@
 import * as THREE from 'three';
 import RAPIER from '@dimforge/rapier3d';
 
-await RAPIER.init({});
+await RAPIER.init();
 
 // Paramètres principaux
 const NUM_RUNNERS = 5; // leader compris
