@@ -306,8 +306,9 @@ setInterval(() => {
 setInterval(() => {
   if (speedIndicator) {
     if (selectedIndex !== null) {
-      const v = riders[selectedIndex].body.velocity.length();
-      const kmh = v * 3.6;
+      const vel = riders[selectedIndex].body.linvel();
+      const speed = Math.hypot(vel.x, vel.y, vel.z);
+      const kmh = speed * 3.6;
       const text = `Speed: ${kmh.toFixed(1)} km/h`;
       speedIndicator.textContent = text;
     } else {
