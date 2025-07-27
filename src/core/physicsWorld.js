@@ -14,7 +14,7 @@ world.integrationParameters.numAdditionalFrictionIterations = 40;
 
 let physicsAccumulator = 0;
 const fixedTimeStep = 1 / 60;
-world.timestep = fixedTimeStep;
+world.integrationParameters.dt = fixedTimeStep;
 /**
  * Avance la simulation physique par pas fixes.
  *
