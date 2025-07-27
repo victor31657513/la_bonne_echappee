@@ -18,7 +18,7 @@ import {
 import { stepPhysics } from '../core/physicsWorld.js';
 import { updateSelectionHelper, selectedIndex } from '../ui/ui.js';
 import { started } from '../ui/startButton.js';
-import { aheadDistance, wrapDistance } from '../utils/utils.js';
+import { aheadDistance, wrapDistance, polarToDist } from '../utils/utils.js';
 import { updateDraftFactors as computeDraftFactors } from './draftLogic.js';
 import { updateBordure } from './bordureLogic.js';
 import { BASE_SPEED, FATIGUE_RATE } from '../utils/constants.js';
@@ -109,6 +109,33 @@ function limitLateralSpeed() {
       r.body.setLinvel(newV, true);
     }
   });
+}
+
+function sanitizeRider(r) {
+  const pos = r.body.translation();
+  const vel = r.body.linvel();
+  const invalid = [pos.x, pos.y, pos.z, vel.x, vel.y, vel.z].some(
+    v => Number.isNaN(v) || !Number.isFinite(v)
+  );
+  if (invalid) {
+    const angle = Number.isFinite(r.trackDist)
+      ? ((r.trackDist % TRACK_WRAP) / TRACK_WRAP) * 2 * Math.PI
+      : 0;
+    const x = (BASE_RADIUS + r.baseLaneOffset) * Math.cos(angle);
+    const z = (BASE_RADIUS + r.baseLaneOffset) * Math.sin(angle);
+    r.body.setTranslation({ x, y: 0, z }, true);
+    r.body.setLinvel({ x: 0, y: 0, z: 0 }, true);
+    r.trackDist = polarToDist(x, z);
+    r.prevDist = r.trackDist;
+    r.lap = 0;
+  }
+  if (!Number.isFinite(r.laneOffset)) {
+    r.laneOffset = r.baseLaneOffset;
+  }
+}
+
+function sanitizeRiders() {
+  riders.forEach(sanitizeRider);
 }
 
 /**
@@ -458,6 +485,7 @@ function animate() {
       loggedStartFrame = true;
     }
     stepPhysics(dt);
+    sanitizeRiders();
     const first = riders[0];
     if (first) {
       const pos = first.body.translation();
