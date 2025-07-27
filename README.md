@@ -48,6 +48,13 @@ Dans le navigateur, Rapier peut être chargé depuis un CDN avec :
 </script>
 ```
 
+## Constantes supplémentaires
+
+Deux nouvelles constantes sont définies dans `src/utils/constants.js` :
+
+- `BASE_LINEAR_DAMPING` : amortissement de base appliqué aux coureurs avant la traînée.
+- `DRAFT_FACTOR_SCALE` : intensité du bonus de vitesse lié à l'aspiration.
+
 ## Conventions de nommage
 
 - Les modules JavaScript (`.js`) utilisent le lower camelCase (`monModule.js`).
