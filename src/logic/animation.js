@@ -458,6 +458,20 @@ function animate() {
       loggedStartFrame = true;
     }
     stepPhysics(dt);
+    const first = riders[0];
+    if (first) {
+      const pos = first.body.translation();
+      const vel = first.body.linvel();
+      const lane = first.laneOffset;
+      devLog('Physics step', {
+        pos: { x: pos.x, y: pos.y, z: pos.z },
+        vel: { x: vel.x, y: vel.y, z: vel.z },
+        laneOffset: lane
+      });
+      if ([pos.x, pos.y, pos.z, vel.x, vel.y, vel.z, lane].some(v => Number.isNaN(v) || Math.abs(v) > 1e5)) {
+        devLog('Unstable physics values', { pos, vel, laneOffset: lane });
+      }
+    }
     limitRiderSpeed();
     limitLateralSpeed();
     updatePelotonChase();

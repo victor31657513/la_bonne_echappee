@@ -7,6 +7,7 @@ import { emit } from '../utils/eventBus.js';
 import { resumeAmbientSound } from '../logic/ambientSound.js';
 import { RAPIER } from '../core/physicsWorld.js';
 import { devLog } from '../utils/devLog.js';
+import { camera } from '../core/setupScene.js';
 
 let started = false;
 
@@ -39,7 +40,19 @@ if (startBtn) {
     });
     devLog('Riders repositioned', riders.map(r => r.body.translation()));
     // Force un recalcul de la taille du canvas au démarrage
+    const before = {
+      x: camera.position.x,
+      y: camera.position.y,
+      z: camera.position.z
+    };
+    devLog('Camera before resize', before);
     window.dispatchEvent(new Event('resize'));
+    const after = {
+      x: camera.position.x,
+      y: camera.position.y,
+      z: camera.position.z
+    };
+    devLog('Camera after resize', after);
     startBtn.disabled = true;
   });
 }
