@@ -2,7 +2,7 @@
 
 import RAPIER from '@dimforge/rapier3d';
 
-await RAPIER.init({});
+await RAPIER.init();
 
 const world = new RAPIER.World({ gravity: { x: 0, y: 0, z: 0 } });
 // Augmente le nombre d'itérations du solveur pour mieux gérer les collisions dans un peloton dense
@@ -11,6 +11,7 @@ world.integrationParameters.numAdditionalFrictionIterations = 40;
 
 let physicsAccumulator = 0;
 const fixedTimeStep = 1 / 60;
+world.timestep = fixedTimeStep;
 /**
  * Avance la simulation physique par pas fixes.
  *
@@ -20,7 +21,7 @@ const fixedTimeStep = 1 / 60;
 function stepPhysics(dt) {
   physicsAccumulator += dt;
   while (physicsAccumulator >= fixedTimeStep) {
-    world.step(fixedTimeStep);
+    world.step();
     physicsAccumulator -= fixedTimeStep;
   }
 }
