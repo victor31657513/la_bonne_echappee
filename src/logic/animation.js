@@ -27,6 +27,7 @@ import { updateRelays } from './relayController.js';
 import { updateCamera } from './cameraController.js';
 import { emit } from '../utils/eventBus.js';
 import { updateBreakaway } from './breakawayManager.js';
+import { devLog } from '../utils/devLog.js';
 
 const SPEED_GAIN = 0.3;
 // On mélange moins avec la trajectoire idéale pour que les collisions physiques aient plus d'influence
@@ -65,6 +66,7 @@ function setIntensity(rider, value) {
 }
 
 let lastTime = performance.now();
+let loggedStartFrame = false;
 
 /**
  * Limite la vitesse maximale des coureurs pour éviter des accélérations
@@ -446,6 +448,15 @@ function animate() {
   lastTime = now;
 
   if (started) {
+    if (!loggedStartFrame) {
+      const cam = camera.position;
+      const first = riders[0]?.body.translation();
+      devLog('First animation frame', {
+        cameraPos: { x: cam.x, y: cam.y, z: cam.z },
+        firstRider: first
+      });
+      loggedStartFrame = true;
+    }
     stepPhysics(dt);
     limitRiderSpeed();
     limitLateralSpeed();
