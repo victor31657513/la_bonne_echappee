@@ -304,16 +304,14 @@ setInterval(() => {
 }, 100);
 
 setInterval(() => {
-  if (speedIndicator) {
-    if (selectedIndex !== null) {
-      const vel = riders[selectedIndex].body.linvel();
-      const speed = Math.hypot(vel.x, vel.y, vel.z);
-      const kmh = speed * 3.6;
-      const text = `Speed: ${kmh.toFixed(1)} km/h`;
-      speedIndicator.textContent = text;
-    } else {
-      speedIndicator.textContent = '';
-    }
+  if (!speedIndicator) return;
+  if (selectedIndex !== null) {
+    const { x, y, z } = riders[selectedIndex].body.linvel();
+    const speed = Math.hypot(x, y, z);
+    const kmh = Number.isFinite(speed) ? speed * 3.6 : 0;
+    speedIndicator.textContent = `Speed: ${kmh.toFixed(1)} km/h`;
+  } else {
+    speedIndicator.textContent = '';
   }
 }, 100);
 
