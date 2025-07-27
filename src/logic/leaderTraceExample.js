@@ -77,7 +77,7 @@ function animate() {
     const vel = follower.body.linvel();
     const forceX = dx * 5 - vel.x;
     follower.body.setLinvel(
-      { x: vel.x + forceX * world.timestep, y: 0, z: vel.z },
+      { x: vel.x + forceX * world.integrationParameters.dt, y: 0, z: vel.z },
       true
     );
     follower.body.setTranslation({ x: pos.x, y: 0, z: pos.z + dz * 0.2 }, true);
