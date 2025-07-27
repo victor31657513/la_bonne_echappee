@@ -35,6 +35,8 @@ if (startBtn) {
         r.boid.velocity = [0, 0];
       }
     });
+    // Force un recalcul de la taille du canvas au démarrage
+    window.dispatchEvent(new Event('resize'));
     startBtn.disabled = true;
   });
 }
