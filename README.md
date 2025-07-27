@@ -8,6 +8,7 @@ Les versions du projet sont désormais créées automatiquement lors d'un merge 
 
 Chaque coureur dispose maintenant d'un bouton **Attack** qui le pousse à 120 % d'intensité tant que sa jauge d'attaque n'est pas vide. Celle-ci se vide rapidement lors d'une attaque et se recharge lentement ensuite.
 Les anciens boutons *Early Atk* et *Chase Breakaway* ont été retirés afin de simplifier l'interface.
+Le système de boids, pensé pour gérer la cohésion du peloton, a été retiré car il n'était pas connecté à la physique.
 
 ## Modes des coureurs
 

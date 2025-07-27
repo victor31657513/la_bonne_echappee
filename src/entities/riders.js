@@ -1,17 +1,10 @@
-// Initialise les coureurs et leur logique de regroupement
+// Initialise les coureurs et leurs corps physiques
 
 import { THREE, scene } from '../core/setupScene.js';
 import { RAPIER, world } from '../core/physicsWorld.js';
-import { System as BoidSystem, Boid, behaviors } from 'https://esm.sh/bird-oid@0.2.1';
 import { ROAD_WIDTH, TRACK_WRAP, TRACK_LENGTH, BASE_RADIUS, ROW_SPACING } from './track.js';
 import { RIDER_WIDTH, MIN_LATERAL_GAP } from './riderConstants.js';
 
-const boidBehaviors = [
-  { fn: behaviors.separate, options: { distance: 5, scale: 2.0 } },
-  { fn: behaviors.align, options: { distance: 8, scale: 0.5 } },
-  { fn: behaviors.cohere, options: { distance: 12, scale: 1.0 } }
-];
-const boidSystem = new BoidSystem({ maxSpeed: 1.0, maxForce: 0.4, behaviors: boidBehaviors });
 
 const NUM_TEAMS = 23,
   RIDERS_PER_TEAM = 8;
@@ -84,11 +77,6 @@ for (let team = 0; team < NUM_TEAMS; team++) {
     );
     world.createCollider(colliderDesc, body);
 
-    const boid = new Boid(boidBehaviors);
-    boid.position = [x0, z0];
-    boid.velocity = [0, 0];
-    boidSystem.addBoid(boid);
-
     riders.push({
       team,
       isLeader: i === 0,
@@ -118,14 +106,11 @@ for (let team = 0; team < NUM_TEAMS; team++) {
       isRelayLeader: false,
       protectLeader: false,
       mesh,
-      body,
-      boid
-    });
+      body    });
   }
 }
 
 export {
-  boidSystem,
   riders,
   teamColors,
   riderGeom,

@@ -2,7 +2,7 @@
 
 import { THREE, scene, camera, renderer } from '../core/setupScene.js';
 import { RAPIER } from '../core/physicsWorld.js';
-import { riders, boidSystem } from '../entities/riders.js';
+import { riders } from '../entities/riders.js';
 import { RIDER_WIDTH, MIN_LATERAL_GAP } from '../entities/riderConstants.js';
 import { resolveOverlaps } from './overlapResolver.js';
 import {
@@ -508,7 +508,6 @@ function animate() {
     updateRelays(dt);
     applyForces(dt);
     resolveOverlaps(riders);
-    boidSystem.update(dt);
   }
 
 
