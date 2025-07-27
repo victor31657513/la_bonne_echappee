@@ -502,7 +502,8 @@ function animate() {
     if (distRaw < r.prevDist - TRACK_WRAP / 2) r.lap += 1;
     r.prevDist = distRaw;
     r.trackDist = distRaw + r.lap * TRACK_WRAP;
-    const u = (distRaw % TRACK_WRAP) / TRACK_WRAP;
+    const uRaw = (distRaw % TRACK_WRAP) / TRACK_WRAP;
+    const u = Number.isFinite(uRaw) ? uRaw : 0;
     const posOut = outerSpline.getPointAt(u);
     const posIn = innerSpline.getPointAt(u);
     const t0 = centerSpline.getTangentAt(u);
