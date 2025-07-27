@@ -42,7 +42,8 @@ Dans le navigateur, Rapier peut être chargé depuis un CDN avec :
 
 ```html
 <script type="module">
-  import RAPIER from 'https://cdn.jsdelivr.net/npm/@dimforge/rapier3d@0.18.0/rapier.js';
+  import RAPIER from 'https://cdn.skypack.dev/@dimforge/rapier3d-compat';
+  await RAPIER.init();
 </script>
 ```
 
