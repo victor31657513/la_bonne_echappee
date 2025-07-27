@@ -1,6 +1,10 @@
 import { RIDER_WIDTH, MIN_LATERAL_GAP } from '../entities/riderConstants.js';
+import { devLog } from '../utils/devLog.js';
 
-const OVERLAP_FORCE = 10;
+// Rapier utilise des unités m/s. Un réglage trop élevé expulse
+// violemment les coureurs ; 5 offre une séparation visible sans
+// créer d'instabilités.
+const OVERLAP_FORCE = 5;
 
 /**
  * Resolve rider overlaps gradually by applying velocity adjustments.
@@ -25,6 +29,7 @@ function resolveOverlaps(riders) {
         if (distSq < minDist * minDist && distSq > 1e-6) {
           const dist = Math.sqrt(distSq);
           const overlap = minDist - dist;
+          devLog('Overlap detected', { a: i, b: j, overlap: overlap.toFixed(3) });
           const nx = dx / dist;
           const nz = dz / dist;
           const adjust = (overlap / 2) * OVERLAP_FORCE;
@@ -42,7 +47,7 @@ function resolveOverlaps(riders) {
           const relVZ = av2.z - bv2.z;
           const relVN = relVX * nx + relVZ * nz;
           if (relVN < 0) {
-            const impulse = relVN / 2;
+            const impulse = Math.max(relVN / 2, -overlap * OVERLAP_FORCE);
             a.body.setLinvel(
               { x: av2.x - impulse * nx, y: av2.y, z: av2.z - impulse * nz },
               true
