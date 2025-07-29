@@ -11,6 +11,10 @@ import { camera } from '../core/setupScene.js';
 
 let started = false;
 
+function setStarted(value) {
+  started = value;
+}
+
 const startBtn = document.getElementById('startBtn');
 if (startBtn) {
   startBtn.addEventListener('click', () => {
@@ -52,4 +56,4 @@ if (startBtn) {
   });
 }
 
-export { started };
+export { started, setStarted };

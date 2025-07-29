@@ -17,7 +17,7 @@ import {
 } from '../entities/track.js';
 import { stepPhysics } from '../core/physicsWorld.js';
 import { updateSelectionHelper, selectedIndex } from '../ui/ui.js';
-import { started } from '../ui/startButton.js';
+import { started, setStarted } from '../ui/startButton.js';
 import { aheadDistance, wrapDistance, polarToDist } from '../utils/utils.js';
 import { updateDraftFactors as computeDraftFactors } from './draftLogic.js';
 import { updateBordure } from './bordureLogic.js';
@@ -486,7 +486,12 @@ function animate() {
       });
       loggedStartFrame = true;
     }
-    stepPhysics(dt);
+    try {
+      stepPhysics(dt);
+    } catch (e) {
+      console.error('Crash physics:', e);
+      setStarted(false);
+    }
     riders.forEach(r => {
       const v = r.body.linvel();
       r.speed = Math.hypot(v.x, v.y, v.z) * 3.6;
