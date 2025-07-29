@@ -487,6 +487,10 @@ function animate() {
       loggedStartFrame = true;
     }
     stepPhysics(dt);
+    riders.forEach(r => {
+      const v = r.body.linvel();
+      r.speed = Math.hypot(v.x, v.y, v.z) * 3.6;
+    });
     sanitizeRiders();
     const first = riders[0];
     if (first) {
