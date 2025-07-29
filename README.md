@@ -48,6 +48,14 @@ Dans le navigateur, Rapier peut être chargé depuis un CDN avec :
 </script>
 ```
 
+## Gestion des erreurs Rapier
+
+L'exécution de `stepPhysics` est désormais encapsulée dans un bloc `try/catch`.
+Si Rapier déclenche un *panic*, la simulation s'arrête et un message
+« Crash physics » est affiché dans la console. Ce comportement évite un gel
+complet de la page. Assurez‑vous d'utiliser la dernière version du paquet
+`@dimforge/rapier3d` afin de limiter ce problème.
+
 ## Constantes supplémentaires
 
 Deux nouvelles constantes sont définies dans `src/utils/constants.js` :
