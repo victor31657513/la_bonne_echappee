@@ -2,10 +2,7 @@
 
 import RAPIER from '@dimforge/rapier3d';
 
-await RAPIER.init({
-  locateFile: () =>
-    new URL('@dimforge/rapier3d/rapier_wasm3d_bg.wasm', import.meta.url).href,
-});
+await RAPIER.init();
 
 const world = new RAPIER.World({ gravity: { x: 0, y: 0, z: 0 } });
 // Augmente le nombre d'itérations du solveur pour mieux gérer les collisions dans un peloton dense
