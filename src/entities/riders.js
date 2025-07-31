@@ -63,10 +63,12 @@ for (let team = 0; team < NUM_TEAMS; team++) {
     const mesh = new THREE.Mesh(riderGeom, mat);
     mesh.position.set(x0, 0, z0);
     mesh.rotation.y = angle0 + Math.PI / 2;
+    const { x: qx, y: qy, z: qz, w: qw } = mesh.quaternion;
     scene.add(mesh);
 
     const bodyDesc = RAPIER.RigidBodyDesc.dynamic()
-      .setTranslation(x0, 0, z0)
+      .setTranslation({ x: x0, y: 0, z: z0 })
+      .setRotation({ x: qx, y: qy, z: qz, w: qw })
       .setLinearDamping(0.2)
       .setAngularDamping(0.2);
     const body = world.createRigidBody(bodyDesc);
