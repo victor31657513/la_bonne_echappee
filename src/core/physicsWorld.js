@@ -2,7 +2,9 @@
 
 import RAPIER from '@dimforge/rapier3d';
 
-await RAPIER.init();
+// Pass an empty object to explicitly set options and avoid default path lookups
+// that can trigger bundler warnings
+await RAPIER.init({});
 
 const world = new RAPIER.World({ gravity: { x: 0, y: 0, z: 0 } });
 // Augmente le nombre d'itérations du solveur pour mieux gérer les collisions dans un peloton dense
