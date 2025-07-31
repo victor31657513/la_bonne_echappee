@@ -585,7 +585,6 @@ function animate() {
     const lookAtPoint = new THREE.Vector3(r.mesh.position.x + dx, 0, r.mesh.position.z + dz);
     r.mesh.lookAt(lookAtPoint);
     r.mesh.rotateY(-Math.PI / 2);
-    r.body.setTranslation({ x: bodyPos.x, y: 0, z: bodyPos.z }, false);
     r.body.setRotation(
       {
         x: r.mesh.quaternion.x,
