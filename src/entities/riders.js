@@ -67,7 +67,7 @@ for (let team = 0; team < NUM_TEAMS; team++) {
     scene.add(mesh);
 
     const bodyDesc = RAPIER.RigidBodyDesc.dynamic()
-      .setTranslation({ x: x0, y: 0, z: z0 })
+      .setTranslation(x0, 0, z0)
       .setRotation({ x: qx, y: qy, z: qz, w: qw })
       .setLinearDamping(0.2)
       .setAngularDamping(0.2);
