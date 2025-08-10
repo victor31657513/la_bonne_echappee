@@ -1,6 +1,6 @@
 {
   "name": "la_bonne_echappee",
-  "version": "1.0.92",
+  "version": "1.0.93",
   "description": "",
   "main": "src/core/main.js",
   "scripts": {
