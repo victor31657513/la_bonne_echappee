@@ -471,7 +471,8 @@ function applyForces(dt) {
  * @param {number} dt Intervalle de temps en secondes.
  * @returns {void}
  */
-function stepSimulation(dt) {
+
+function step(dt) {
   if (stepping) return;
   stepping = true;
 
@@ -555,7 +556,9 @@ function loop() {
       loggedStartFrame = true;
     }
     try {
-      stepSimulation(dt);
+
+      step(dt);
+
     } catch (e) {
       console.error('Crash physics:', e);
       setStarted(false);
