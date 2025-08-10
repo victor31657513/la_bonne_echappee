@@ -29,6 +29,10 @@ import { emit } from '../utils/eventBus.js';
 import { updateBreakaway } from './breakawayManager.js';
 import { devLog } from '../utils/devLog.js';
 
+let rafId = null;
+let running = false;
+let stepping = false;
+
 const SPEED_GAIN = 0.3;
 // On mélange moins avec la trajectoire idéale pour que les collisions physiques aient plus d'influence
 const IDEAL_MIX = 0.3;
@@ -469,8 +473,7 @@ function applyForces(dt) {
  *
  * @returns {void}
  */
-function animate() {
-  requestAnimationFrame(animate);
+function loop() {
 
   const now = performance.now();
   const dt = Math.min((now - lastTime) / 1000, 0.1);
@@ -599,6 +602,23 @@ function animate() {
   updateSelectionHelper();
   updateCamera();
   renderer.render(scene, camera);
+
+  if (running || stepping) {
+    rafId = requestAnimationFrame(loop);
+    stepping = false;
+  }
 }
 
-export { animate, updateLaneOffsets };
+export function startSimulation() {
+  if (running) return;
+  running = true;
+  rafId = requestAnimationFrame(loop);
+}
+
+export function stopSimulation() {
+  running = false;
+  if (rafId) cancelAnimationFrame(rafId);
+  rafId = null;
+}
+
+export { updateLaneOffsets };
