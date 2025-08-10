@@ -3,7 +3,7 @@
 // Chaque suiveur vise une ancienne position du leader pour former une file indienne
 
 import * as THREE from 'three';
-import RAPIER from 'https://unpkg.com/@dimforge/rapier3d-compat@0.18.0/rapier.mjs?module';
+import RAPIER from 'https://cdn.jsdelivr.net/npm/@dimforge/rapier3d-compat@0.18.0/rapier.mjs';
 
 // Initialize Rapier
 await RAPIER.init({});

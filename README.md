@@ -43,7 +43,7 @@ Dans le navigateur, Rapier peut être chargé depuis un CDN. La fonction `RAPIER
 
 ```html
 <script type="module">
-  import RAPIER from 'https://unpkg.com/@dimforge/rapier3d-compat@0.18.0/rapier.mjs?module';
+  import RAPIER from 'https://cdn.jsdelivr.net/npm/@dimforge/rapier3d-compat@0.18.0/rapier.mjs';
   await RAPIER.init({});
 </script>
 ```
