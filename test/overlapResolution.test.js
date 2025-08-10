@@ -1,5 +1,8 @@
 import assert from 'node:assert';
-import { resolveOverlaps } from '../src/logic/overlapResolver.js';
+import {
+  computeOverlapCommands,
+  applyOverlapCommands
+} from '../src/logic/overlapResolver.js';
 
 function makeRider(x, z) {
   const body = {
@@ -31,7 +34,8 @@ function testNoTeleport() {
   const r2 = makeRider(0.5, 0); // closer than min distance
   const riders = [r1, r2];
 
-  resolveOverlaps(riders);
+  const cmds = computeOverlapCommands(riders);
+  applyOverlapCommands(cmds);
 
   // positions should remain unchanged after resolution step
   assert.strictEqual(r1.body.position.x, 0);

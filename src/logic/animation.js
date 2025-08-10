@@ -4,7 +4,10 @@ import { THREE, scene, camera, renderer } from '../core/setupScene.js';
 import { RAPIER, world } from '../core/physicsWorld.js';
 import { riders } from '../entities/riders.js';
 import { RIDER_WIDTH, MIN_LATERAL_GAP } from '../entities/riderConstants.js';
-import { resolveOverlaps } from './overlapResolver.js';
+import {
+  computeOverlapCommands,
+  applyOverlapCommands
+} from './overlapResolver.js';
 import {
   outerSpline,
   innerSpline,
@@ -558,6 +561,62 @@ function loop() {
       console.error('Crash physics:', e);
       setStarted(false);
     }
+    riders.forEach(r => {
+      const v = r.body.linvel();
+      r.speed = Math.hypot(v.x, v.y, v.z) * 3.6;
+    });
+    sanitizeRiders();
+    const first = riders[0];
+    if (first) {
+      const pos = first.body.translation();
+      const vel = first.body.linvel();
+      const lane = first.laneOffset;
+      devLog('Physics step', {
+        pos: { x: pos.x, y: pos.y, z: pos.z },
+        vel: { x: vel.x, y: vel.y, z: vel.z },
+        laneOffset: lane
+      });
+      if ([pos.x, pos.y, pos.z, vel.x, vel.y, vel.z, lane].some(v => Number.isNaN(v) || Math.abs(v) > 1e5)) {
+        devLog('Unstable physics values', { pos, vel, laneOffset: lane });
+      }
+    }
+    limitRiderSpeed();
+    limitLateralSpeed();
+    updatePelotonChase();
+    updateBordureStatus();
+    updateBreakaway(riders);
+    updateDraftFactors();
+    updateEnergy(riders, dt);
+
+    riders.forEach(r => {
+      updateRiderIntensity(r, dt);
+    });
+
+    adjustIntensityToLeader();
+
+    riders.forEach(r => {
+      const theta = ((r.trackDist % TRACK_WRAP) / TRACK_WRAP) * 2 * Math.PI;
+      const forward = new RAPIER.Vector3(-Math.sin(theta), 0, Math.cos(theta));
+      const vel = r.body.linvel();
+      const currentSpeed = Math.hypot(vel.x, vel.y, vel.z);
+      let desiredSpeed = BASE_SPEED * (r.intensity / 50) * r.draftFactor;
+      if (r.relayPhase === 'fall_back') desiredSpeed *= PULL_OFF_SPEED_FACTOR;
+      const speedDiff = desiredSpeed - currentSpeed;
+      const accel = speedDiff * SPEED_GAIN;
+      const accelForce = new RAPIER.Vector3(
+        forward.x * r.body.mass() * accel,
+        0,
+        forward.z * r.body.mass() * accel
+      );
+      r.body.addForce(accelForce, true);
+    });
+
+    clampAndRedirect();
+    updateLaneOffsets(dt);
+    updateRelays(dt);
+    applyForces(dt);
+    const overlapCmds = computeOverlapCommands(riders);
+    applyOverlapCommands(overlapCmds);
   }
 
 
