@@ -476,63 +476,65 @@ function simulateStep(dt) {
   if (stepping) return;
   stepping = true;
 
-  // READ phase: snapshot de l'état actuel
-  const snapshot = riders.map(r => ({
-    rider: r,
-    vel: r.body.linvel(),
-    trackDist: r.trackDist
-  }));
-  updatePelotonChase();
-  updateBordureStatus();
-  updateBreakaway(riders);
-  updateDraftFactors();
-  updateEnergy(riders, dt);
-  riders.forEach(r => {
-    updateRiderIntensity(r, dt);
-  });
-  adjustIntensityToLeader();
-
-  const commands = snapshot.map(s => {
-    const r = s.rider;
-    const theta = ((r.trackDist % TRACK_WRAP) / TRACK_WRAP) * 2 * Math.PI;
-    const forward = new RAPIER.Vector3(-Math.sin(theta), 0, Math.cos(theta));
-    const currentSpeed = Math.hypot(s.vel.x, s.vel.y, s.vel.z);
-    let desiredSpeed = BASE_SPEED * (r.intensity / 50) * r.draftFactor;
-    if (r.relayPhase === 'fall_back') desiredSpeed *= PULL_OFF_SPEED_FACTOR;
-    const speedDiff = desiredSpeed - currentSpeed;
-    const accel = speedDiff * SPEED_GAIN;
-    return {
+  try {
+    // READ phase: snapshot de l'état actuel
+    const snapshot = riders.map(r => ({
       rider: r,
-      force: new RAPIER.Vector3(
-        forward.x * r.body.mass() * accel,
-        0,
-        forward.z * r.body.mass() * accel
-      )
-    };
-  });
+      vel: r.body.linvel(),
+      trackDist: r.trackDist
+    }));
+    updatePelotonChase();
+    updateBordureStatus();
+    updateBreakaway(riders);
+    updateDraftFactors();
+    updateEnergy(riders, dt);
+    riders.forEach(r => {
+      updateRiderIntensity(r, dt);
+    });
+    adjustIntensityToLeader();
 
-  // STEP phase
-  world.step(eventQueue);
+    const commands = snapshot.map(s => {
+      const r = s.rider;
+      const theta = ((r.trackDist % TRACK_WRAP) / TRACK_WRAP) * 2 * Math.PI;
+      const forward = new RAPIER.Vector3(-Math.sin(theta), 0, Math.cos(theta));
+      const currentSpeed = Math.hypot(s.vel.x, s.vel.y, s.vel.z);
+      let desiredSpeed = BASE_SPEED * (r.intensity / 50) * r.draftFactor;
+      if (r.relayPhase === 'fall_back') desiredSpeed *= PULL_OFF_SPEED_FACTOR;
+      const speedDiff = desiredSpeed - currentSpeed;
+      const accel = speedDiff * SPEED_GAIN;
+      return {
+        rider: r,
+        force: new RAPIER.Vector3(
+          forward.x * r.body.mass() * accel,
+          0,
+          forward.z * r.body.mass() * accel
+        )
+      };
+    });
 
-  // WRITE phase
-  commands.forEach(cmd => {
-    cmd.rider.body.addForce(cmd.force, true);
-  });
-  sanitizeRiders();
-  limitRiderSpeed();
-  limitLateralSpeed();
-  clampAndRedirect();
-  updateLaneOffsets(dt);
-  updateRelays(dt);
-  applyForces(dt);
-  const overlapCmds = computeOverlapCommands(riders);
-  applyOverlapCommands(overlapCmds);
-  riders.forEach(r => {
-    const v = r.body.linvel();
-    r.speed = Math.hypot(v.x, v.y, v.z) * 3.6;
-  });
 
-  stepping = false;
+    // STEP phase
+    world.step(eventQueue);
+
+    // WRITE phase
+    commands.forEach(cmd => {
+      cmd.rider.body.addForce(cmd.force, true);
+    });
+    sanitizeRiders();
+    limitRiderSpeed();
+    limitLateralSpeed();
+    clampAndRedirect();
+    updateLaneOffsets(dt);
+    updateRelays(dt);
+    applyForces(dt);
+    resolveOverlaps(riders);
+    riders.forEach(r => {
+      const v = r.body.linvel();
+      r.speed = Math.hypot(v.x, v.y, v.z) * 3.6;
+    });
+  } finally {
+    stepping = false;
+  }
 }
 
 /**
@@ -673,9 +675,8 @@ function loop() {
   updateCamera();
   renderer.render(scene, camera);
 
-  if (running || stepping) {
+  if (running) {
     rafId = requestAnimationFrame(loop);
-    stepping = false;
   }
 }
 
