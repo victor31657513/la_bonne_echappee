@@ -5,8 +5,8 @@
 import * as THREE from 'three';
 import RAPIER from 'https://unpkg.com/@dimforge/rapier3d-compat@0.18.0/rapier.mjs?module';
 
-// Compat build expects init without arguments
-await RAPIER.init();
+// Initialize Rapier
+await RAPIER.init({});
 
 // Paramètres principaux
 const NUM_RUNNERS = 5; // leader compris
