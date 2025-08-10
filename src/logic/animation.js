@@ -82,8 +82,9 @@ const eventQueue = new RAPIER.EventQueue(true);
  * @returns {void}
  */
 function limitRiderSpeed() {
-  riders.forEach(r => {
-    const v = r.body.linvel();
+  const velocities = riders.map(r => r.body.linvel());
+  riders.forEach((r, i) => {
+    const v = velocities[i];
     const speed = Math.hypot(v.x, v.y, v.z);
     if (speed > MAX_SPEED) {
       const scale = MAX_SPEED / speed;
@@ -101,10 +102,11 @@ function limitRiderSpeed() {
  * @returns {void}
  */
 function limitLateralSpeed() {
-  riders.forEach(r => {
+  const velocities = riders.map(r => r.body.linvel());
+  riders.forEach((r, i) => {
     const theta = ((r.trackDist % TRACK_WRAP) / TRACK_WRAP) * 2 * Math.PI;
     const right = new RAPIER.Vector3(Math.cos(theta), 0, Math.sin(theta));
-    const v = r.body.linvel();
+    const v = velocities[i];
     const latSpeed = v.x * right.x + v.z * right.z;
     if (Math.abs(latSpeed) > MAX_LATERAL_SPEED) {
       const excess = latSpeed - Math.sign(latSpeed) * MAX_LATERAL_SPEED;
@@ -367,12 +369,12 @@ function adjustIntensityToLeader() {
  */
 function applyForces(dt) {
   // Le peloton ne se resserre plus à haute vitesse, donc on ne calcule plus l'étirement
-  riders.forEach(r => {
+  const positions = riders.map(r => r.body.translation());
+  riders.forEach((r, i) => {
     r.currentBoost =
       r.currentBoost !== undefined
         ? THREE.MathUtils.lerp(r.currentBoost, r.relayIntensity * RELAY_SPEED_BOOST, dt * 2)
         : r.relayIntensity * RELAY_SPEED_BOOST;
-
 
     // Determine if this rider is blocked by another rider directly ahead
     if (r.relayIntensity > 0 && r.relayPhase !== 'fall_back') {
@@ -429,7 +431,7 @@ function applyForces(dt) {
     // Oriente progressivement vers la position latérale souhaitée
     r.laneOffset = THREE.MathUtils.lerp(r.laneOffset, r.laneTarget, dt * 2);
 
-    const bodyPos = r.body.translation();
+    const bodyPos = positions[i];
     const angle = ((r.trackDist % TRACK_WRAP) / TRACK_WRAP) * 2 * Math.PI;
     // Garde les coureurs près de leur voie cible sans les ramener vers le centre
     const targetRadius = BASE_RADIUS + r.laneOffset;
