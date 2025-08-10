@@ -1,7 +1,7 @@
 // Animation du peloton et logique de comportement des coureurs
 
 import { THREE, scene, camera, renderer } from '../core/setupScene.js';
-import { RAPIER } from '../core/physicsWorld.js';
+import { RAPIER, world } from '../core/physicsWorld.js';
 import { riders } from '../entities/riders.js';
 import { RIDER_WIDTH, MIN_LATERAL_GAP } from '../entities/riderConstants.js';
 import { resolveOverlaps } from './overlapResolver.js';
@@ -15,7 +15,6 @@ import {
   BASE_RADIUS,
   ROAD_WIDTH
 } from '../entities/track.js';
-import { stepPhysics } from '../core/physicsWorld.js';
 import { updateSelectionHelper, selectedIndex } from '../ui/ui.js';
 import { started, setStarted } from '../ui/startButton.js';
 import { aheadDistance, wrapDistance, polarToDist } from '../utils/utils.js';
@@ -71,6 +70,8 @@ function setIntensity(rider, value) {
 
 let lastTime = performance.now();
 let loggedStartFrame = false;
+const eventQueue = new RAPIER.EventQueue(true);
+let stepping = false;
 
 /**
  * Limite la vitesse maximale des coureurs pour éviter des accélérations
@@ -463,10 +464,72 @@ function applyForces(dt) {
 }
 
 /**
- * Ajuste la caméra en fonction du coureur sélectionné ou de la moyenne du peloton.
+ * Boucle de simulation READ → STEP → WRITE protégée contre la réentrance.
  *
+ * @param {number} dt Intervalle de temps en secondes.
  * @returns {void}
  */
+function loop(dt) {
+  if (stepping) return;
+  stepping = true;
+
+  // READ phase: snapshot de l'état actuel
+  const snapshot = riders.map(r => ({
+    rider: r,
+    vel: r.body.linvel(),
+    trackDist: r.trackDist
+  }));
+  updatePelotonChase();
+  updateBordureStatus();
+  updateBreakaway(riders);
+  updateDraftFactors();
+  updateEnergy(riders, dt);
+  riders.forEach(r => {
+    updateRiderIntensity(r, dt);
+  });
+  adjustIntensityToLeader();
+
+  const commands = snapshot.map(s => {
+    const r = s.rider;
+    const theta = ((r.trackDist % TRACK_WRAP) / TRACK_WRAP) * 2 * Math.PI;
+    const forward = new RAPIER.Vector3(-Math.sin(theta), 0, Math.cos(theta));
+    const currentSpeed = Math.hypot(s.vel.x, s.vel.y, s.vel.z);
+    let desiredSpeed = BASE_SPEED * (r.intensity / 50) * r.draftFactor;
+    if (r.relayPhase === 'fall_back') desiredSpeed *= PULL_OFF_SPEED_FACTOR;
+    const speedDiff = desiredSpeed - currentSpeed;
+    const accel = speedDiff * SPEED_GAIN;
+    return {
+      rider: r,
+      force: new RAPIER.Vector3(
+        forward.x * r.body.mass() * accel,
+        0,
+        forward.z * r.body.mass() * accel
+      )
+    };
+  });
+
+  // STEP phase
+  world.step(eventQueue);
+
+  // WRITE phase
+  commands.forEach(cmd => {
+    cmd.rider.body.addForce(cmd.force, true);
+  });
+  sanitizeRiders();
+  limitRiderSpeed();
+  limitLateralSpeed();
+  clampAndRedirect();
+  updateLaneOffsets(dt);
+  updateRelays(dt);
+  applyForces(dt);
+  resolveOverlaps(riders);
+  riders.forEach(r => {
+    const v = r.body.linvel();
+    r.speed = Math.hypot(v.x, v.y, v.z) * 3.6;
+  });
+
+  stepping = false;
+}
 
 /**
  * Boucle principale d'animation déclenchée à chaque frame.
@@ -490,66 +553,11 @@ function loop() {
       loggedStartFrame = true;
     }
     try {
-      stepPhysics(dt);
+      loop(dt);
     } catch (e) {
       console.error('Crash physics:', e);
       setStarted(false);
     }
-    riders.forEach(r => {
-      const v = r.body.linvel();
-      r.speed = Math.hypot(v.x, v.y, v.z) * 3.6;
-    });
-    sanitizeRiders();
-    const first = riders[0];
-    if (first) {
-      const pos = first.body.translation();
-      const vel = first.body.linvel();
-      const lane = first.laneOffset;
-      devLog('Physics step', {
-        pos: { x: pos.x, y: pos.y, z: pos.z },
-        vel: { x: vel.x, y: vel.y, z: vel.z },
-        laneOffset: lane
-      });
-      if ([pos.x, pos.y, pos.z, vel.x, vel.y, vel.z, lane].some(v => Number.isNaN(v) || Math.abs(v) > 1e5)) {
-        devLog('Unstable physics values', { pos, vel, laneOffset: lane });
-      }
-    }
-    limitRiderSpeed();
-    limitLateralSpeed();
-    updatePelotonChase();
-    updateBordureStatus();
-    updateBreakaway(riders);
-    updateDraftFactors();
-    updateEnergy(riders, dt);
-
-    riders.forEach(r => {
-      updateRiderIntensity(r, dt);
-    });
-
-    adjustIntensityToLeader();
-
-    riders.forEach(r => {
-      const theta = ((r.trackDist % TRACK_WRAP) / TRACK_WRAP) * 2 * Math.PI;
-      const forward = new RAPIER.Vector3(-Math.sin(theta), 0, Math.cos(theta));
-      const vel = r.body.linvel();
-      const currentSpeed = Math.hypot(vel.x, vel.y, vel.z);
-      let desiredSpeed = BASE_SPEED * (r.intensity / 50) * r.draftFactor;
-      if (r.relayPhase === 'fall_back') desiredSpeed *= PULL_OFF_SPEED_FACTOR;
-      const speedDiff = desiredSpeed - currentSpeed;
-      const accel = speedDiff * SPEED_GAIN;
-      const accelForce = new RAPIER.Vector3(
-        forward.x * r.body.mass() * accel,
-        0,
-        forward.z * r.body.mass() * accel
-      );
-      r.body.addForce(accelForce, true);
-    });
-
-    clampAndRedirect();
-    updateLaneOffsets(dt);
-    updateRelays(dt);
-    applyForces(dt);
-    resolveOverlaps(riders);
   }
 
 
