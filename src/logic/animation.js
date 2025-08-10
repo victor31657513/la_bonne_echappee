@@ -4,7 +4,10 @@ import { THREE, scene, camera, renderer } from '../core/setupScene.js';
 import { RAPIER } from '../core/physicsWorld.js';
 import { riders } from '../entities/riders.js';
 import { RIDER_WIDTH, MIN_LATERAL_GAP } from '../entities/riderConstants.js';
-import { resolveOverlaps } from './overlapResolver.js';
+import {
+  computeOverlapCommands,
+  applyOverlapCommands
+} from './overlapResolver.js';
 import {
   outerSpline,
   innerSpline,
@@ -546,7 +549,8 @@ function animate() {
     updateLaneOffsets(dt);
     updateRelays(dt);
     applyForces(dt);
-    resolveOverlaps(riders);
+    const overlapCmds = computeOverlapCommands(riders);
+    applyOverlapCommands(overlapCmds);
   }
 
 

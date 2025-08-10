@@ -7,14 +7,20 @@ import { devLog } from '../utils/devLog.js';
 const OVERLAP_FORCE = 5;
 
 /**
- * Resolve rider overlaps gradually by applying velocity adjustments.
- * Keeps the multi-pass approach to handle chains of collisions.
+ * Pass 1: calcule les nouvelles vitesses pour corriger les overlaps
+ * sans modifier immédiatement les corps Rapier.
  *
- * @param {Array} riders Array of rider objects with body, position and velocity.
- * @returns {void}
+ * @param {Array} riders Array of rider objects with body.
+ * @returns {Array} commandes à appliquer lors de la phase WRITE.
  */
-function resolveOverlaps(riders) {
+function computeOverlapCommands(riders) {
   const minDist = RIDER_WIDTH + MIN_LATERAL_GAP;
+  // snapshot des vitesses courantes
+  const vel = riders.map(r => {
+    const v = r.body.linvel();
+    return { x: v.x, y: v.y, z: v.z };
+  });
+
   for (let pass = 0; pass < 3; pass++) {
     let moved = false;
     for (let i = 0; i < riders.length; i++) {
@@ -35,33 +41,47 @@ function resolveOverlaps(riders) {
           const adjust = (overlap / 2) * OVERLAP_FORCE;
           const adjX = nx * adjust;
           const adjZ = nz * adjust;
-          const av = a.body.linvel();
-          const bv = b.body.linvel();
-          a.body.setLinvel({ x: av.x + adjX, y: av.y, z: av.z + adjZ }, true);
-          b.body.setLinvel({ x: bv.x - adjX, y: bv.y, z: bv.z - adjZ }, true);
+          const av = vel[i];
+          const bv = vel[j];
+          av.x += adjX;
+          av.z += adjZ;
+          bv.x -= adjX;
+          bv.z -= adjZ;
           moved = true;
 
-          const av2 = a.body.linvel();
-          const bv2 = b.body.linvel();
-          const relVX = av2.x - bv2.x;
-          const relVZ = av2.z - bv2.z;
+          const relVX = av.x - bv.x;
+          const relVZ = av.z - bv.z;
           const relVN = relVX * nx + relVZ * nz;
           if (relVN < 0) {
             const impulse = Math.max(relVN / 2, -overlap * OVERLAP_FORCE);
-            a.body.setLinvel(
-              { x: av2.x - impulse * nx, y: av2.y, z: av2.z - impulse * nz },
-              true
-            );
-            b.body.setLinvel(
-              { x: bv2.x + impulse * nx, y: bv2.y, z: bv2.z + impulse * nz },
-              true
-            );
+            av.x -= impulse * nx;
+            av.z -= impulse * nz;
+            bv.x += impulse * nx;
+            bv.z += impulse * nz;
           }
         }
       }
     }
     if (!moved) break;
   }
+
+  return riders.map((r, idx) => ({ body: r.body, vel: vel[idx] }));
 }
 
-export { resolveOverlaps };
+/**
+ * Pass 2: applique les vitesses calculées sur les corps Rapier.
+ *
+ * @param {Array} commands résultats de computeOverlapCommands.
+ * @returns {void}
+ */
+function applyOverlapCommands(commands) {
+  commands.forEach(cmd => {
+    cmd.body.setLinvel(
+      { x: cmd.vel.x, y: cmd.vel.y, z: cmd.vel.z },
+      true
+    );
+  });
+}
+
+export { computeOverlapCommands, applyOverlapCommands };
+
