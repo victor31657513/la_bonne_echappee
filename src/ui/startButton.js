@@ -28,9 +28,6 @@ if (startBtn) {
       r.intensity = r.baseIntensity;
       emit('intensityChange', { rider: r, value: r.intensity });
       const pos = r.body.translation();
-      // Laisse la physique accélérer progressivement
-      r.body.setLinvel(new RAPIER.Vector3(0, 0, 0), true);
-      r.body.setAngvel({ x: 0, y: 0, z: 0 }, true);
       r.body.resetForces();
       r.mesh.position.copy(pos);
       r.trackDist = polarToDist(pos.x, pos.z);
