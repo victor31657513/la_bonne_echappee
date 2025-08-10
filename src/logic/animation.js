@@ -71,7 +71,6 @@ function setIntensity(rider, value) {
 let lastTime = performance.now();
 let loggedStartFrame = false;
 const eventQueue = new RAPIER.EventQueue(true);
-let stepping = false;
 
 /**
  * Limite la vitesse maximale des coureurs pour éviter des accélérations
@@ -469,7 +468,7 @@ function applyForces(dt) {
  * @param {number} dt Intervalle de temps en secondes.
  * @returns {void}
  */
-function loop(dt) {
+function stepSimulation(dt) {
   if (stepping) return;
   stepping = true;
 
@@ -553,7 +552,7 @@ function loop() {
       loggedStartFrame = true;
     }
     try {
-      loop(dt);
+      stepSimulation(dt);
     } catch (e) {
       console.error('Crash physics:', e);
       setStarted(false);
