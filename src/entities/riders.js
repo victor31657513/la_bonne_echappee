@@ -105,7 +105,7 @@ for (let team = 0; team < NUM_TEAMS; team++) {
       relayPhase: 'line',
       relayTimer: 0,
       relayTime: 0,
-      isRelayLeader: false,
+      inRelayCluster: false,
       protectLeader: false,
       mesh,
       body    });
