@@ -1,7 +1,7 @@
 // Animation du peloton et logique de comportement des coureurs
 
 import { THREE, scene, camera, renderer } from '../core/setupScene.js';
-import { RAPIER } from '../core/physicsWorld.js';
+import { RAPIER, world } from '../core/physicsWorld.js';
 import { riders } from '../entities/riders.js';
 import { RIDER_WIDTH, MIN_LATERAL_GAP } from '../entities/riderConstants.js';
 import {
@@ -18,7 +18,6 @@ import {
   BASE_RADIUS,
   ROAD_WIDTH
 } from '../entities/track.js';
-import { stepPhysics } from '../core/physicsWorld.js';
 import { updateSelectionHelper, selectedIndex } from '../ui/ui.js';
 import { started, setStarted } from '../ui/startButton.js';
 import { aheadDistance, wrapDistance, polarToDist } from '../utils/utils.js';
@@ -31,6 +30,10 @@ import { updateCamera } from './cameraController.js';
 import { emit } from '../utils/eventBus.js';
 import { updateBreakaway } from './breakawayManager.js';
 import { devLog } from '../utils/devLog.js';
+
+let rafId = null;
+let running = false;
+let stepping = false;
 
 const SPEED_GAIN = 0.3;
 // On mélange moins avec la trajectoire idéale pour que les collisions physiques aient plus d'influence
@@ -70,6 +73,8 @@ function setIntensity(rider, value) {
 
 let lastTime = performance.now();
 let loggedStartFrame = false;
+const eventQueue = new RAPIER.EventQueue(true);
+let stepping = false;
 
 /**
  * Limite la vitesse maximale des coureurs pour éviter des accélérations
@@ -462,18 +467,79 @@ function applyForces(dt) {
 }
 
 /**
- * Ajuste la caméra en fonction du coureur sélectionné ou de la moyenne du peloton.
+ * Boucle de simulation READ → STEP → WRITE protégée contre la réentrance.
  *
+ * @param {number} dt Intervalle de temps en secondes.
  * @returns {void}
  */
+function loop(dt) {
+  if (stepping) return;
+  stepping = true;
+
+  // READ phase: snapshot de l'état actuel
+  const snapshot = riders.map(r => ({
+    rider: r,
+    vel: r.body.linvel(),
+    trackDist: r.trackDist
+  }));
+  updatePelotonChase();
+  updateBordureStatus();
+  updateBreakaway(riders);
+  updateDraftFactors();
+  updateEnergy(riders, dt);
+  riders.forEach(r => {
+    updateRiderIntensity(r, dt);
+  });
+  adjustIntensityToLeader();
+
+  const commands = snapshot.map(s => {
+    const r = s.rider;
+    const theta = ((r.trackDist % TRACK_WRAP) / TRACK_WRAP) * 2 * Math.PI;
+    const forward = new RAPIER.Vector3(-Math.sin(theta), 0, Math.cos(theta));
+    const currentSpeed = Math.hypot(s.vel.x, s.vel.y, s.vel.z);
+    let desiredSpeed = BASE_SPEED * (r.intensity / 50) * r.draftFactor;
+    if (r.relayPhase === 'fall_back') desiredSpeed *= PULL_OFF_SPEED_FACTOR;
+    const speedDiff = desiredSpeed - currentSpeed;
+    const accel = speedDiff * SPEED_GAIN;
+    return {
+      rider: r,
+      force: new RAPIER.Vector3(
+        forward.x * r.body.mass() * accel,
+        0,
+        forward.z * r.body.mass() * accel
+      )
+    };
+  });
+
+  // STEP phase
+  world.step(eventQueue);
+
+  // WRITE phase
+  commands.forEach(cmd => {
+    cmd.rider.body.addForce(cmd.force, true);
+  });
+  sanitizeRiders();
+  limitRiderSpeed();
+  limitLateralSpeed();
+  clampAndRedirect();
+  updateLaneOffsets(dt);
+  updateRelays(dt);
+  applyForces(dt);
+  resolveOverlaps(riders);
+  riders.forEach(r => {
+    const v = r.body.linvel();
+    r.speed = Math.hypot(v.x, v.y, v.z) * 3.6;
+  });
+
+  stepping = false;
+}
 
 /**
  * Boucle principale d'animation déclenchée à chaque frame.
  *
  * @returns {void}
  */
-function animate() {
-  requestAnimationFrame(animate);
+function loop() {
 
   const now = performance.now();
   const dt = Math.min((now - lastTime) / 1000, 0.1);
@@ -490,7 +556,7 @@ function animate() {
       loggedStartFrame = true;
     }
     try {
-      stepPhysics(dt);
+      loop(dt);
     } catch (e) {
       console.error('Crash physics:', e);
       setStarted(false);
@@ -603,6 +669,23 @@ function animate() {
   updateSelectionHelper();
   updateCamera();
   renderer.render(scene, camera);
+
+  if (running || stepping) {
+    rafId = requestAnimationFrame(loop);
+    stepping = false;
+  }
 }
 
-export { animate, updateLaneOffsets };
+export function startSimulation() {
+  if (running) return;
+  running = true;
+  rafId = requestAnimationFrame(loop);
+}
+
+export function stopSimulation() {
+  running = false;
+  if (rafId) cancelAnimationFrame(rafId);
+  rafId = null;
+}
+
+export { updateLaneOffsets };
