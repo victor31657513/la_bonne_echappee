@@ -2,8 +2,8 @@
 
 import RAPIER from 'https://unpkg.com/@dimforge/rapier3d-compat@0.18.0/rapier.mjs?module';
 
-// Compat build expects init without arguments
-await RAPIER.init();
+// Rapier requiert désormais un objet (même vide) pour l'initialisation
+await RAPIER.init({});
 
 const world = new RAPIER.World({ gravity: { x: 0, y: 0, z: 0 } });
 // Augmente le nombre d'itérations du solveur pour mieux gérer les collisions dans un peloton dense
