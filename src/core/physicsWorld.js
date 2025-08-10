@@ -1,6 +1,6 @@
 // Initialise le monde physique Rapier et gère le pas de simulation
 
-import RAPIER from 'https://unpkg.com/@dimforge/rapier3d-compat@0.18.0/rapier.mjs?module';
+import RAPIER from 'https://cdn.jsdelivr.net/npm/@dimforge/rapier3d-compat@0.18.0/rapier.mjs';
 
 // Rapier requiert désormais un objet (même vide) pour l'initialisation
 await RAPIER.init({});
