@@ -474,6 +474,7 @@ function applyForces(dt) {
 
 function simulateStep(dt) {
   if (stepping) return;
+  sanitizeRiders();
   stepping = true;
 
   try {
