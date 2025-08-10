@@ -39,12 +39,12 @@ npm run lint
 npm test
 ```
 
-Dans le navigateur, Rapier peut être chargé depuis un CDN avec :
+Dans le navigateur, Rapier peut être chargé depuis un CDN. La fonction `RAPIER.init` requiert désormais un objet de configuration, même vide :
 
 ```html
 <script type="module">
   import RAPIER from 'https://unpkg.com/@dimforge/rapier3d-compat@0.18.0/rapier.mjs?module';
-  await RAPIER.init();
+  await RAPIER.init({});
 </script>
 ```
 
