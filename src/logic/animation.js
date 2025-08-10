@@ -525,7 +525,8 @@ function simulateStep(dt) {
   updateLaneOffsets(dt);
   updateRelays(dt);
   applyForces(dt);
-  resolveOverlaps(riders);
+  const overlapCmds = computeOverlapCommands(riders);
+  applyOverlapCommands(overlapCmds);
   riders.forEach(r => {
     const v = r.body.linvel();
     r.speed = Math.hypot(v.x, v.y, v.z) * 3.6;
