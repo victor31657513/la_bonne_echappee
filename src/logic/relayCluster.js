@@ -24,7 +24,7 @@ function updateRelayCluster(riderList) {
   relayCluster.stdDev = res.stdDev;
   relayCluster.members = res.members;
   riderList.forEach(r => {
-    r.isRelayLeader = relayCluster.members.includes(r);
+    r.inRelayCluster = relayCluster.members.includes(r);
   });
 }
 

@@ -472,7 +472,7 @@ function applyForces(dt) {
  * @returns {void}
  */
 
-function step(dt) {
+function simulateStep(dt) {
   if (stepping) return;
   stepping = true;
 
@@ -511,6 +511,7 @@ function step(dt) {
         )
       };
     });
+
 
     // STEP phase
     world.step(eventQueue);
@@ -559,7 +560,7 @@ function loop() {
     }
     try {
 
-      step(dt);
+      simulateStep(dt);
 
     } catch (e) {
       console.error('Crash physics:', e);
