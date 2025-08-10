@@ -17,6 +17,6 @@
     "jsdom": "^24.0.0"
   },
   "dependencies": {
-    "@dimforge/rapier3d-compat": "^0.18.0"
+    "@dimforge/rapier3d-compat": "^0.18.1"
   }
 }
