@@ -493,7 +493,7 @@ function simulateStep(dt) {
     });
     adjustIntensityToLeader();
 
-    const commands = snapshot.map(s => {
+    const forceCommands = snapshot.map(s => {
       const r = s.rider;
       const theta = ((r.trackDist % TRACK_WRAP) / TRACK_WRAP) * 2 * Math.PI;
       const forward = new RAPIER.Vector3(-Math.sin(theta), 0, Math.cos(theta));
@@ -517,7 +517,7 @@ function simulateStep(dt) {
     world.step(eventQueue);
 
     // WRITE phase
-    commands.forEach(cmd => {
+    forceCommands.forEach(cmd => {
       cmd.rider.body.addForce(cmd.force, true);
     });
     sanitizeRiders();
