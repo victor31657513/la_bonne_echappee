@@ -1,6 +1,6 @@
 {
   "name": "la_bonne_echappee",
-  "version": "1.0.93",
+  "version": "1.0.94",
   "description": "",
   "main": "src/core/main.js",
   "scripts": {
@@ -17,6 +17,6 @@
     "jsdom": "^24.0.0"
   },
   "dependencies": {
-    "@dimforge/rapier3d-compat": "^0.18.0"
+    "@dimforge/rapier3d-compat": "^0.18.1"
   }
 }
