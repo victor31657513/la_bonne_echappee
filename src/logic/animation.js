@@ -569,6 +569,7 @@ function loop() {
     } catch (e) {
       console.error('Crash physics:', e);
       setStarted(false);
+      return;
     }
     riders.forEach(r => {
       const v = r.body.linvel();
