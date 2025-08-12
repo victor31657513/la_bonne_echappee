@@ -75,6 +75,10 @@ let lastTime = performance.now();
 let loggedStartFrame = false;
 const eventQueue = new RAPIER.EventQueue(true);
 
+function cloneVec3(vec) {
+  return { x: vec.x, y: vec.y, z: vec.z };
+}
+
 /**
  * Limite la vitesse maximale des coureurs pour éviter des accélérations
  * trop fortes qui déstabiliseraient la simulation.
@@ -82,7 +86,7 @@ const eventQueue = new RAPIER.EventQueue(true);
  * @returns {void}
  */
 function limitRiderSpeed() {
-  const velocities = riders.map(r => r.body.linvel());
+  const velocities = riders.map(r => cloneVec3(r.body.linvel()));
   riders.forEach((r, i) => {
     const v = velocities[i];
     const speed = Math.hypot(v.x, v.y, v.z);
@@ -102,7 +106,7 @@ function limitRiderSpeed() {
  * @returns {void}
  */
 function limitLateralSpeed() {
-  const velocities = riders.map(r => r.body.linvel());
+  const velocities = riders.map(r => cloneVec3(r.body.linvel()));
   riders.forEach((r, i) => {
     const theta = ((r.trackDist % TRACK_WRAP) / TRACK_WRAP) * 2 * Math.PI;
     const right = new RAPIER.Vector3(Math.cos(theta), 0, Math.sin(theta));
@@ -121,8 +125,8 @@ function limitLateralSpeed() {
 }
 
 function sanitizeRider(r) {
-  const pos = r.body.translation();
-  const vel = r.body.linvel();
+  const pos = cloneVec3(r.body.translation());
+  const vel = cloneVec3(r.body.linvel());
   const invalid = [pos.x, pos.y, pos.z, vel.x, vel.y, vel.z].some(
     v => Number.isNaN(v) || !Number.isFinite(v)
   );
@@ -195,8 +199,8 @@ function clampAndRedirect() {
   const minR = INNER_R + 0.1;
   const maxR = OUTER_R - 0.1;
   riders.forEach(r => {
-    const p = r.body.translation();
-    const v = r.body.linvel();
+    const p = cloneVec3(r.body.translation());
+    const v = cloneVec3(r.body.linvel());
     p.y = 0;
     v.y = 0;
     const radial = Math.hypot(p.x, p.z);
@@ -369,7 +373,7 @@ function adjustIntensityToLeader() {
  */
 function applyForces(dt) {
   // Le peloton ne se resserre plus à haute vitesse, donc on ne calcule plus l'étirement
-  const positions = riders.map(r => r.body.translation());
+  const positions = riders.map(r => cloneVec3(r.body.translation()));
   riders.forEach((r, i) => {
     r.currentBoost =
       r.currentBoost !== undefined
@@ -481,11 +485,11 @@ function simulateStep(dt) {
 
   try {
     // READ phase: snapshot de l'état actuel
-    const snapshot = riders.map(r => ({
-      rider: r,
-      vel: r.body.linvel(),
-      trackDist: r.trackDist
-    }));
+      const snapshot = riders.map(r => ({
+        rider: r,
+        vel: cloneVec3(r.body.linvel()),
+        trackDist: r.trackDist
+      }));
     updatePelotonChase();
     updateBordureStatus();
     updateBreakaway(riders);
@@ -532,10 +536,10 @@ function simulateStep(dt) {
     applyForces(dt);
     const cmds = computeOverlapCommands(riders);
     applyOverlapCommands(cmds);
-    riders.forEach(r => {
-      const v = r.body.linvel();
-      r.speed = Math.hypot(v.x, v.y, v.z) * 3.6;
-    });
+      riders.forEach(r => {
+        const v = cloneVec3(r.body.linvel());
+        r.speed = Math.hypot(v.x, v.y, v.z) * 3.6;
+      });
   } finally {
     stepping = false;
   }
@@ -554,12 +558,13 @@ function loop() {
 
   if (started) {
     if (!loggedStartFrame) {
-      const cam = camera.position;
-      const first = riders[0]?.body.translation();
-      devLog('First animation frame', {
-        cameraPos: { x: cam.x, y: cam.y, z: cam.z },
-        firstRider: first
-      });
+        const cam = camera.position;
+        const firstPos = riders[0]?.body.translation();
+        const first = firstPos ? cloneVec3(firstPos) : undefined;
+        devLog('First animation frame', {
+          cameraPos: { x: cam.x, y: cam.y, z: cam.z },
+          firstRider: first
+        });
       loggedStartFrame = true;
     }
     try {
@@ -570,15 +575,15 @@ function loop() {
       console.error('Crash physics:', e);
       setStarted(false);
     }
-    riders.forEach(r => {
-      const v = r.body.linvel();
-      r.speed = Math.hypot(v.x, v.y, v.z) * 3.6;
-    });
+      riders.forEach(r => {
+        const v = cloneVec3(r.body.linvel());
+        r.speed = Math.hypot(v.x, v.y, v.z) * 3.6;
+      });
     sanitizeRiders();
     const first = riders[0];
     if (first) {
-      const pos = first.body.translation();
-      const vel = first.body.linvel();
+        const pos = cloneVec3(first.body.translation());
+        const vel = cloneVec3(first.body.linvel());
       const lane = first.laneOffset;
       devLog('Physics step', {
         pos: { x: pos.x, y: pos.y, z: pos.z },
@@ -603,11 +608,11 @@ function loop() {
 
     adjustIntensityToLeader();
 
-    riders.forEach(r => {
-      const theta = ((r.trackDist % TRACK_WRAP) / TRACK_WRAP) * 2 * Math.PI;
-      const forward = new RAPIER.Vector3(-Math.sin(theta), 0, Math.cos(theta));
-      const vel = r.body.linvel();
-      const currentSpeed = Math.hypot(vel.x, vel.y, vel.z);
+      riders.forEach(r => {
+        const theta = ((r.trackDist % TRACK_WRAP) / TRACK_WRAP) * 2 * Math.PI;
+        const forward = new RAPIER.Vector3(-Math.sin(theta), 0, Math.cos(theta));
+        const vel = cloneVec3(r.body.linvel());
+        const currentSpeed = Math.hypot(vel.x, vel.y, vel.z);
       let desiredSpeed = BASE_SPEED * (r.intensity / 50) * r.draftFactor;
       if (r.relayPhase === 'fall_back') desiredSpeed *= PULL_OFF_SPEED_FACTOR;
       const speedDiff = desiredSpeed - currentSpeed;
@@ -630,7 +635,8 @@ function loop() {
 
 
   riders.forEach(r => {
-    const bodyPos = new THREE.Vector3().copy(r.body.translation());
+    const t = cloneVec3(r.body.translation());
+    const bodyPos = new THREE.Vector3(t.x, t.y, t.z);
     // Synchroniser le décalage logique de voie avec la position réelle du corps
     // afin que les collisions puissent repousser latéralement les coureurs
     const radial = Math.hypot(bodyPos.x, bodyPos.z);
