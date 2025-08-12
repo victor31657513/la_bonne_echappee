@@ -17,7 +17,7 @@ function setStarted(value) {
 
 const startBtn = document.getElementById('startBtn');
 if (startBtn) {
-  startBtn.addEventListener('click', () => {
+  startBtn.addEventListener('click', async () => {
     devLog('Start button clicked');
     started = true;
     resumeAmbientSound();
@@ -49,6 +49,8 @@ if (startBtn) {
       z: camera.position.z
     };
     devLog('Camera after resize', after);
+    const { startSimulation } = await import('../logic/animation.js');
+    startSimulation();
     startBtn.disabled = true;
   });
 }
