@@ -15,11 +15,15 @@ function setStarted(value) {
   started = value;
 }
 
+function isStarted() {
+  return started;
+}
+
 const startBtn = document.getElementById('startBtn');
 if (startBtn) {
   startBtn.addEventListener('click', () => {
     devLog('Start button clicked');
-    started = true;
+    setStarted(true);
     resumeAmbientSound();
     riders.forEach(r => {
       r.currentBoost = 0;
@@ -53,4 +57,4 @@ if (startBtn) {
   });
 }
 
-export { started, setStarted };
+export { isStarted, setStarted };

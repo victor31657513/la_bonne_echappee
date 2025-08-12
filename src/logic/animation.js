@@ -19,7 +19,7 @@ import {
   ROAD_WIDTH
 } from '../entities/track.js';
 import { updateSelectionHelper, selectedIndex } from '../ui/ui.js';
-import { started, setStarted } from '../ui/startButton.js';
+import { isStarted, setStarted } from '../ui/startButton.js';
 import { aheadDistance, wrapDistance, polarToDist } from '../utils/utils.js';
 import { updateDraftFactors as computeDraftFactors } from './draftLogic.js';
 import { updateBordure } from './bordureLogic.js';
@@ -556,7 +556,7 @@ function loop() {
   const dt = Math.min((now - lastTime) / 1000, 0.1);
   lastTime = now;
 
-  if (started) {
+  if (isStarted()) {
     if (!loggedStartFrame) {
         const cam = camera.position;
         const firstPos = riders[0]?.body.translation();
