@@ -3,10 +3,10 @@
 // Chaque suiveur vise une ancienne position du leader pour former une file indienne
 
 import * as THREE from 'three';
-import initRAPIER, * as RAPIER from 'https://cdn.skypack.dev/@dimforge/rapier3d-compat';
+import RAPIER from 'https://cdn.skypack.dev/@dimforge/rapier3d-compat';
 
 // Initialise Rapier
-await initRAPIER();
+await RAPIER.init();
 
 // Paramètres principaux
 const NUM_RUNNERS = 5; // leader compris

@@ -1,9 +1,9 @@
 // Initialise le monde physique Rapier et gère le pas de simulation
 
-import initRAPIER, * as RAPIER from 'https://cdn.skypack.dev/@dimforge/rapier3d-compat';
+import RAPIER from 'https://cdn.skypack.dev/@dimforge/rapier3d-compat';
 
 // Initialisation de Rapier sans avertissement de paramètres obsolètes
-await initRAPIER();
+await RAPIER.init();
 
 const world = new RAPIER.World({ gravity: { x: 0, y: 0, z: 0 } });
 // Augmente le nombre d'itérations du solveur pour mieux gérer les collisions dans un peloton dense
