@@ -472,7 +472,7 @@ function applyForces(dt) {
 }
 
 /**
- * Boucle de simulation READ → STEP → WRITE protégée contre la réentrance.
+ * Boucle de simulation READ → APPLY → STEP → WRITE protégée contre la réentrance.
  *
  * @param {number} dt Intervalle de temps en secondes.
  * @returns {void}
@@ -519,27 +519,29 @@ function simulateStep(dt) {
       };
     });
 
+    updateLaneOffsets(dt);
+    updateRelays(dt);
+
+    // APPLY phase
+    forceCommands.forEach(cmd => {
+      cmd.rider.body.addForce(cmd.force, true);
+    });
+    applyForces(dt);
 
     // STEP phase
     world.step(eventQueue);
 
     // WRITE phase
-    forceCommands.forEach(cmd => {
-      cmd.rider.body.addForce(cmd.force, true);
-    });
     sanitizeRiders();
     limitRiderSpeed();
     limitLateralSpeed();
     clampAndRedirect();
-    updateLaneOffsets(dt);
-    updateRelays(dt);
-    applyForces(dt);
     const cmds = computeOverlapCommands(riders);
     applyOverlapCommands(cmds);
-      riders.forEach(r => {
-        const v = cloneVec3(r.body.linvel());
-        r.speed = Math.hypot(v.x, v.y, v.z) * 3.6;
-      });
+    riders.forEach(r => {
+      const v = cloneVec3(r.body.linvel());
+      r.speed = Math.hypot(v.x, v.y, v.z) * 3.6;
+    });
   } finally {
     stepping = false;
   }
