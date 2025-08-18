@@ -33,6 +33,7 @@ if (startBtn) {
       emit('intensityChange', { rider: r, value: r.intensity });
       const pos = r.body.translation();
       r.body.resetForces();
+      r.body.setLinvel({ x: 0, y: 0, z: 0 }, true);
       r.mesh.position.copy(pos);
       r.trackDist = polarToDist(pos.x, pos.z);
       r.prevDist = r.trackDist;
