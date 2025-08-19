@@ -8,6 +8,7 @@ import { resumeAmbientSound } from '../logic/ambientSound.js';
 import { RAPIER } from '../core/physicsWorld.js';
 import { devLog } from '../utils/devLog.js';
 import { camera } from '../core/setupScene.js';
+import { startSimulation } from '../logic/animation.js';
 
 let started = false;
 
@@ -54,6 +55,7 @@ if (startBtn) {
       z: camera.position.z
     };
     devLog('Camera after resize', after);
+    startSimulation();
     startBtn.disabled = true;
   });
 }
