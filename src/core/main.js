@@ -8,9 +8,8 @@ import '../ui/ui.js';
 import '../ui/startButton.js';
 import '../ui/soundToggle.js';
 import initVersion from '../utils/version.js';
-import { startSimulation } from '../logic/animation.js';
 import { initCameraControls } from '../logic/cameraController.js';
 
 initCameraControls();
-startSimulation();
+// La simulation est désormais démarrée par startButton.js après interaction utilisateur
 initVersion();
