@@ -1,11 +1,9 @@
 // Gère le bouton de démarrage pour lancer la simulation
 
 import { riders } from '../entities/riders.js';
-import { polarToDist } from '../utils/utils.js';
 import { BASE_LINEAR_DAMPING } from '../utils/constants.js';
 import { emit } from '../utils/eventBus.js';
 import { resumeAmbientSound } from '../logic/ambientSound.js';
-import { RAPIER } from '../core/physicsWorld.js';
 import { devLog } from '../utils/devLog.js';
 import { camera } from '../core/setupScene.js';
 import { startSimulation, stopSimulation } from '../logic/animation.js';
@@ -43,15 +41,19 @@ function resetRiders() {
     r.inRelayCluster = false;
     r.protectLeader = false;
     emit('intensityChange', { rider: r, value: r.intensity });
-    const pos = r.body.translation();
     r.body.resetForces();
     r.body.linearDamping = BASE_LINEAR_DAMPING;
     // Wake up and synchronise the physics body with its visual mesh
     r.body.setLinvel({ x: 0, y: 0, z: 0 }, true);
-    r.body.setTranslation({ x: pos.x, y: pos.y, z: pos.z }, true);
-    r.mesh.position.set(pos.x, pos.y, pos.z);
+    r.body.setAngvel({ x: 0, y: 0, z: 0 }, true);
+    const { x, y, z } = r.initialPosition;
+    const { x: qx, y: qy, z: qz, w: qw } = r.initialQuaternion;
+    r.body.setTranslation({ x, y, z }, true);
+    r.body.setRotation({ x: qx, y: qy, z: qz, w: qw }, true);
+    r.mesh.position.set(x, y, z);
+    r.mesh.quaternion.set(qx, qy, qz, qw);
     r.speed = 0;
-    r.trackDist = polarToDist(pos.x, pos.z);
+    r.trackDist = r.initialTrackDist;
     r.prevDist = r.trackDist;
     r.lap = 0;
   });
