@@ -1,7 +1,7 @@
 // Animation du peloton et logique de comportement des coureurs
 
 import { THREE, scene, camera, renderer } from '../core/setupScene.js';
-import { RAPIER, world } from '../core/physicsWorld.js';
+import { RAPIER, stepPhysics } from '../core/physicsWorld.js';
 import { riders } from '../entities/riders.js';
 import { RIDER_WIDTH, MIN_LATERAL_GAP } from '../entities/riderConstants.js';
 import {
@@ -73,7 +73,6 @@ function setIntensity(rider, value) {
 
 let lastTime = performance.now();
 let loggedStartFrame = false;
-const eventQueue = new RAPIER.EventQueue(true);
 
 function cloneVec3(vec) {
   return { x: vec.x, y: vec.y, z: vec.z };
@@ -528,8 +527,8 @@ function simulateStep(dt) {
     });
     applyForces(dt);
 
-    // STEP phase
-    world.step(eventQueue);
+    // STEP phase – use fixed timestep stepping
+    stepPhysics(dt);
 
     // WRITE phase
     sanitizeRiders();
