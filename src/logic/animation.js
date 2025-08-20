@@ -645,7 +645,17 @@ function loop() {
 }
 
 export function startSimulation() {
-  if (running) return;
+  if (running) {
+    if (rafId === null) {
+      devLog('startSimulation: running but rafId null, restarting');
+      rafId = requestAnimationFrame(loop);
+    }
+    return;
+  }
+  if (rafId !== null) {
+    devLog('startSimulation: rafId not null while not running', { rafId });
+    cancelAnimationFrame(rafId);
+  }
   running = true;
   rafId = requestAnimationFrame(loop);
 }
