@@ -30,8 +30,11 @@ function resetRiders() {
     emit('intensityChange', { rider: r, value: r.intensity });
     const pos = r.body.translation();
     r.body.resetForces();
+    // Wake up and synchronise the physics body with its visual mesh
     r.body.setLinvel({ x: 0, y: 0, z: 0 }, true);
-    r.mesh.position.copy(pos);
+    r.body.setTranslation({ x: pos.x, y: pos.y, z: pos.z }, true);
+    r.mesh.position.set(pos.x, pos.y, pos.z);
+    r.speed = 0;
     r.trackDist = polarToDist(pos.x, pos.z);
     r.prevDist = r.trackDist;
     r.lap = 0;
