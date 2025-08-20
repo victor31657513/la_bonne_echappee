@@ -594,7 +594,14 @@ function loop() {
     );
     const angleRaw = Math.atan2(bodyPos.z, bodyPos.x);
     const distRaw = ((angleRaw < 0 ? angleRaw + 2 * Math.PI : angleRaw) / (2 * Math.PI)) * TRACK_WRAP;
-    if (distRaw < r.prevDist - TRACK_WRAP / 2) r.lap += 1;
+    if (distRaw < r.prevDist - TRACK_WRAP / 2) {
+      r.lap += 1;
+      if (r.lap >= 3 && isStarted()) {
+        console.log('Course terminée – coureur', r.team, r.intensity, 'tours:', r.lap);
+        setStarted(false);
+        stopSimulation();
+      }
+    }
     r.prevDist = distRaw;
     r.trackDist = distRaw + r.lap * TRACK_WRAP;
     const uRaw = (distRaw % TRACK_WRAP) / TRACK_WRAP;
