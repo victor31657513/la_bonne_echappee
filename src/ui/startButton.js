@@ -58,11 +58,16 @@ function resetRiders() {
   devLog('Riders repositioned', riders.map(r => r.body.translation()));
 }
 
-const startBtn = document.getElementById('startBtn');
-const resetBtn = document.getElementById('resetBtn');
-const pauseBtn = document.getElementById('pauseBtn');
+document.addEventListener('DOMContentLoaded', () => {
+  const startBtn = document.getElementById('startBtn');
+  const resetBtn = document.getElementById('resetBtn');
+  const pauseBtn = document.getElementById('pauseBtn');
 
-if (startBtn) {
+  if (!startBtn) {
+    console.error('Start button with id "startBtn" not found');
+    return;
+  }
+
   startBtn.addEventListener('click', () => {
     devLog('Start button clicked');
     setStarted(true);
@@ -87,35 +92,35 @@ if (startBtn) {
     if (pauseBtn) pauseBtn.textContent = 'Pause';
     startBtn.disabled = true;
   });
-}
 
-if (resetBtn) {
-  resetBtn.addEventListener('click', () => {
-    devLog('Reset button clicked');
-    stopSimulation();
-    setStarted(false);
-    resetRiders();
-    running = false;
-    if (startBtn) startBtn.disabled = false;
-    if (pauseBtn) pauseBtn.textContent = 'Pause';
-  });
-}
-
-if (pauseBtn) {
-  pauseBtn.addEventListener('click', () => {
-    if (!isStarted()) return;
-    if (running) {
+  if (resetBtn) {
+    resetBtn.addEventListener('click', () => {
+      devLog('Reset button clicked');
       stopSimulation();
+      setStarted(false);
+      resetRiders();
       running = false;
-      pauseBtn.textContent = 'Resume';
       if (startBtn) startBtn.disabled = false;
-    } else {
-      startSimulation();
-      running = true;
-      pauseBtn.textContent = 'Pause';
-      if (startBtn) startBtn.disabled = true;
-    }
-  });
-}
+      if (pauseBtn) pauseBtn.textContent = 'Pause';
+    });
+  }
+
+  if (pauseBtn) {
+    pauseBtn.addEventListener('click', () => {
+      if (!isStarted()) return;
+      if (running) {
+        stopSimulation();
+        running = false;
+        pauseBtn.textContent = 'Resume';
+        if (startBtn) startBtn.disabled = false;
+      } else {
+        startSimulation();
+        running = true;
+        pauseBtn.textContent = 'Pause';
+        if (startBtn) startBtn.disabled = true;
+      }
+    });
+  }
+});
 
 export { isStarted, setStarted };
