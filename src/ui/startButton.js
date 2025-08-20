@@ -92,10 +92,12 @@ if (pauseBtn) {
       stopSimulation();
       running = false;
       pauseBtn.textContent = 'Resume';
+      if (startBtn) startBtn.disabled = false;
     } else {
       startSimulation();
       running = true;
       pauseBtn.textContent = 'Pause';
+      if (startBtn) startBtn.disabled = true;
     }
   });
 }
